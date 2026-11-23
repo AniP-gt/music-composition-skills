@@ -1,6 +1,6 @@
 # music-composition-skills
 
-English · [中文版](README_ZH.md) · [日本語](README_JA.md) · [한국어](README_KO.md)
+English · [日本語](README_JA.md) · [한국어](README_KO.md)
 
 29 agent skills (for [Claude Code](https://docs.anthropic.com/en/docs/claude-code/skills) and [OpenAI Codex](https://developers.openai.com/codex/)) for composing and arranging popular music, distilled from 50 books on orchestration, harmony, form, counterpoint, mixing and style practice, plus 62 arrangements measured from multitrack recordings.
 
@@ -8,7 +8,7 @@ Both agents share the same files: install once and it works in both.
 
 **The output is a spec sheet.** Ask for a song and the agent fills in an ARR-SPEC (arrangement spec sheet): key, tempo, bar-accurate section map, chord letters and roman numerals, who enters and leaves when, the energy curve, vocal delivery, mix intent. It then compiles that one document into a Suno prompt, a score for YuE2, or a note file that loads into music software. The same document is what you check the result against. The whole design comes down to **one artifact, four uses**: handoff, controlled A/B, compile source, acceptance baseline.
 
-**Ask in your own language.** The skill bodies are written in Chinese, because most of the sources are Chinese originals or Chinese translations. The agent answers in whatever language you ask in.
+**Ask in your own language.** The skill bodies are written in Japanese. The agent answers in whatever language you ask in.
 
 **These skills trade time for quality.** A full pass through a professional music workflow often takes twenty minutes or more for a single song (the agent reads the criteria, fills in the spec, runs the checklists). What you get in return is a professional-grade spec.
 
@@ -192,20 +192,12 @@ The plugin is text only, with nothing extra to run. Every check in the library e
 
 ## Multilingual support
 
-**One source tree, every language at runtime.** The skills are written once, in Chinese, and the agent answers in whatever language you asked in. No flag, no separate install, no per-language plugin.
-
-The skill bodies will not be forked into other languages, and that is a decision. The sister project [screenwriting-skills](https://github.com/jtydhr88/screenwriting-skills) built a full English edition, merged it, then removed it, and the argument that killed it applies here unchanged: if a reader who cannot read Chinese deserves a translated tree, so does a reader who cannot read English, and the next request is Japanese, then Korean, then French. This pack is 52 files. Four languages makes 208 of them, drifting apart independently, with nothing to tell you which one is stale. Translating is the cheap part. The real cost is that forking once removes any principled ground for refusing the second fork.
-
-How the runtime covers it instead:
+**One Japanese source tree, answers in your language.** The agent follows the language of your request. The same installation works for all supported languages.
 
 - **Output language follows your question.** Ask in Japanese, get Japanese. The chart, the section names and the reasoning all come back in that language.
 - **Terminology is anchored to the original term.** This field's vocabulary is a mix of English, Italian, German and Japanese in the original: *tension*, *avoid note*, *comping*, *build*, *drop*, 落ちサビ, 打ち込み. The Chinese in the source books is itself a translation, and different translators chose differently, so the original term travels with the concept.
 - **Terms with no equivalent keep their original form plus a gloss.** 落ちサビ, 符割り, 類音階 and 十三辙 come through as the original plus a short explanation.
 - **Your score and your lyrics stay in their own language.** Discussing a Chinese song in English is normal. What switches is the language of the conversation.
-
-What this trades away is auditability. Unless you read Chinese, what you can read is the agent's account of the instruction file. The file itself stays out of your reach. That is a real cost, and it is the one thing a translated tree would genuinely buy. It is not worth a permanent four-way maintenance burden on a library whose value lies in every rule carrying a verifiable source and page.
-
-**READMEs are a different matter** and are translated, because they are short, stable, and the first thing a newcomer meets.
 
 ## How the skills are organised
 
@@ -314,8 +306,8 @@ Text only: 29 skills, the reference files that hold the long tables, and six spe
 
 ## Conventions
 
-- Each skill opens with a long English description of when to use it, with Chinese keywords appended so routing works in both languages.
-- Skill bodies are Chinese; numbered principles, tables and checklists. Output language follows the user's question.
+- Each skill opens with a long English description of when to use it, with Japanese keywords appended so routing works in both languages.
+- Skill bodies are Japanese; numbered principles, tables and checklists. Output language follows the user's question.
 - **Every rule carries a failure condition or a self-check action.** A rule you cannot test is an opinion.
 - Where the sources disagree, both positions are kept side by side with a note on when each applies: Levine's chord-scale judgement against the Japanese pop practice, the Drummer's Bible tempo bands against Groove Essentials' refusal to print numbers.
 - Chords are always written twice: letter symbols **and** roman numerals, default key C.
@@ -329,7 +321,7 @@ Text only: 29 skills, the reference files that hold the long tables, and six spe
 - **Spec files.** An ARR-SPEC is a YAML file (`ARR-SPEC.yaml`); the lyric side's is `LYR-SPEC.yaml`. The six specification files sit in `mc-workflow/`: the definition `ARR-SPEC.schema.md`, the empty template `ARR-SPEC.template.yaml`, the backend capability declarations `backends.yaml`, the examples `example-01-citypop.yaml` and `example-02-fusion.yaml`, and the counter-example `example-00-ai-default.yaml`.
 - **Fields mentioned above.** The mix intent is the `mix_intent` field. The two items mc-development fills in are `material` (motif material) and `form[].development` (per-section development).
 - **Backends and export formats.** What you paste into Suno is packed in `suno-pack.md` (title, style description, section-tagged lyrics, exclusions). The score for YuE2 is ABC, with the vocal line in the lowercase note register and the lyrics on `w:` lines. mc-symbolic-score writes ABC, MusicXML and MIDI from one emitter; the note file that loads into music software is the MIDI. In `backends.yaml` each backend declares `honors: exact / hint / none` for every field, and a field declared none is left out of that backend's score.
-- **Per-skill files.** `SKILL.md` frontmatter holds `name` (kebab-case, matches the folder) and a long English `description` ending in "Use when …", with Chinese keywords appended. `reference.md` holds long tables and worked examples so `SKILL.md` stays under 40 KB.
+- **Per-skill files.** `SKILL.md` frontmatter holds `name` (kebab-case, matches the folder) and a long English `description` ending in "Use when …", with Japanese keywords appended. `reference.md` holds extended tables and worked examples to keep `SKILL.md` focused.
 
 ## License
 

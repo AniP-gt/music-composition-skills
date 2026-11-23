@@ -1,10 +1,10 @@
-# ARR-SPEC 示例 ⓪：反例 —— "无 skill 引导时模型会写成什么样"
+# ARR-SPEC の例 ⓪ 反例「スキルの指示なしでモデルに書かせるとどうなるか」
 #
-# 用途：反面样本（17 条自查里应当有 8 条不过）；AB 实验的 A 组素材。
-# 这份规格不是瞎编的：它把 Suno 的每一个默认值都照抄了一遍——
-# 段落全是 8 的倍数、能量一路向上、编制从头到尾不变、一个循环到底、
-# fill 每 4 小节一个、全对齐网格、宽度恒定、时长永远 3:30。
-# 每一条都"看起来没毛病"，合起来就是一耳朵的 AI 味。
+# 悪い例。セルフチェック 17 項目のうち 8 項目は不合格になる想定。AB 実験の A グループ用素材。
+# この仕様は Suno のデフォルト値を一つ残らず写したもの。
+# 全セクションの小節数が 8 の倍数で、エネルギーは上がり続ける。編成は最初から最後まで固定し、同じループを繰り返す。
+# フィルは 4 小節ごとに 1 回、タイミングはすべてグリッドにそろい、ステレオ幅は一定、曲の長さはいつも 3:30。
+# 一つずつ見ると問題なさそうでも、全部そろうと一聴して AI らしさが出る。
 
 spec_version: "1.0"
 
@@ -15,21 +15,21 @@ meta:
   mode: "ionian"
   meter: "4/4"
   tempo: 120
-  target_duration: "3:30"        # ← 与 96 小节推算的 3:12 有偏差，但在 10% 内，第 14 条会过
+  target_duration: "3:30"        # ← 96 小節から算出した 3:12 とは差があるが、10% 以内なので第 14 項目は通る
   deliverable: [full_mix]
 
 intent:
-  one_thing: "一首关于爱与失去、同时也关于希望与梦想的歌。"   # ← 两件事拼的，人工项不过
+  one_thing: "愛と喪失、そして希望と夢を歌った曲。"   # ← 二つのテーマをつなげただけなので、目視チェックは不合格
   reference_pair:
-    - {track: "The Weeknd - Blinding Lights", borrow: ""}      # ← 只写歌名，不写借哪一点
+    - {track: "The Weeknd - Blinding Lights", borrow: ""}      # ← 曲名だけで、どの要素を取り入れるかが書かれていない
     - {track: "", borrow: ""}
   listener_situation: ""
   emotional_arc:
-    - {section: A1, mood: "伤感", value: 3}
-    - {section: C1, mood: "爆发", value: 8}
+    - {section: A1, mood: "切なさ", value: 3}
+    - {section: C1, mood: "感情が爆発する", value: 8}
 
 material:
-  motif: "没有可辨认的动机：每段旋律各写各的，听众记住的只有副歌的歌词"
+  motif: "聴き取れるモチーフがない。セクションごとに別々のメロディを書いていて、聴き手の記憶に残るのはサビの歌詞だけ"
   character: ""
   stated_in: []
 
@@ -44,42 +44,43 @@ form:
   - {id: C3, name: "Chorus",     bars: 8,  start_bar: 89, harmony: "|I |V |VIm |IV |", harmony_letters: "|C |G |Am |F |", melody_register: "中", development: new, energy: 10, events: [], note: ""}
 
 arrangement:
+  # この反例の band は原値を維持。全频＝全帯域、中频＝中域、中高频＝中高域。
   roster:
-    - {id: drums,   instrument: "鼓",     role: "律动",     band: "全频", entry: I, exit: end, note: ""}
-    - {id: bass,    instrument: "贝斯",   role: "低频",     band: "低频", entry: I, exit: end, note: ""}
-    - {id: piano,   instrument: "钢琴",   role: "和声铺底", band: "中频", entry: I, exit: end, note: ""}
-    - {id: pad,     instrument: "合成器", role: "色彩",     band: "中高频", entry: I, exit: end, note: ""}
-    - {id: vocal,   instrument: "人声",   role: "旋律",     band: "中频", entry: I, exit: end, note: ""}
+    - {id: drums,   instrument: "ドラム",     role: "律动",     band: "全频", entry: I, exit: end, note: ""}
+    - {id: bass,    instrument: "ベース",   role: "低频",     band: "低频", entry: I, exit: end, note: ""}
+    - {id: piano,   instrument: "ピアノ",   role: "和声铺底", band: "中频", entry: I, exit: end, note: ""}
+    - {id: pad,     instrument: "シンセサイザー", role: "色彩",     band: "中高频", entry: I, exit: end, note: ""}
+    - {id: vocal,   instrument: "ボーカル",   role: "旋律",     band: "中频", entry: I, exit: end, note: ""}
 
   spectrum_budget: []
 
-  energy_curve: {I: 2, A1: 3, B1: 5, C1: 6, A2: 7, C2: 8, D: 9, C3: 10}   # ← 严格单调递增
+  energy_curve: {I: 2, A1: 3, B1: 5, C1: 6, A2: 7, C2: 8, D: 9, C3: 10}   # ← 単調増加で、必ず前のセクションより高い
 
-  subtraction_events: []          # ← 一个都没有
+  subtraction_events: []          # ← 一つもない
 
   hooks:
-    vocal_hook: {where: "副歌", shape: "朗朗上口"}
-    arrangement_hook: {what: "", first_at: "", recurs_at: []}   # ← 空
+    vocal_hook: {where: "サビ", shape: "口ずさみやすい"}
+    arrangement_hook: {what: "", first_at: "", recurs_at: []}   # ← 空欄
 
   groove:
     feel: "straight"
     push_pull:
       - {part: drums, offset_ms: 0, note: ""}
-      - {part: bass,  offset_ms: 0, note: ""}                   # ← 全对齐网格
+      - {part: bass,  offset_ms: 0, note: ""}                   # ← すべてグリッドにそろっている
     fill_policy:
-      bars: [8, 12, 16, 20, 24, 28]                             # ← 每 4 小节一个
-      rationale: "标准过门"
+      bars: [8, 12, 16, 20, 24, 28]                             # ← 4 小節ごとに 1 回
+      rationale: "定型のつなぎ"
 
 mix_intent:
   ducking_map: []
   dynamics: {target_DR_dB: 6, notes: []}
-  width_map: {I: wide, A1: wide, B1: wide, C1: wide, A2: wide, C2: wide, D: wide, C3: wide}  # ← 恒定
+  width_map: {I: wide, A1: wide, B1: wide, C1: wide, A2: wide, C2: wide, D: wide, C3: wide}  # ← 一定
   loudness_target: "-8 LUFS integrated"
 
 render:
   suno:
-    style_prompt: "emotional pop ballad, beautiful melody, epic chorus, high quality"   # ← 全是无信息词
-    section_tags: ["[Intro]", "[Verse]", "[Chorus]", "[Bridge]", "[Outro]"]             # ← 5 项 ≠ 8 段
+    style_prompt: "emotional pop ballad, beautiful melody, epic chorus, high quality"   # ← 具体的な情報を含まない語ばかり
+    section_tags: ["[Intro]", "[Verse]", "[Chorus]", "[Bridge]", "[Outro]"]             # ← 5 項目 ≠ 8 セクション
     exclude: []
     knobs: {}
   yue:
@@ -91,9 +92,9 @@ render:
 
 checks:
   self_audit:
-    - "[ ] one_thing 念出来是一句话，不是两件事拼的"
-    - "[ ] 两个参照各借的点不重叠"
-    - "[ ] arrangement_hook 不看谱能哼出来"
-    - "[ ] 至少一段的 melody_register 与相邻段落明显不同"
-    - "[ ] 全曲有一处该说的地方没说（留白），写明在哪："
+    - "[ ] one_thing を声に出すと、一つの主題を表す一文になっている"
+    - "[ ] 2 曲のリファレンスから取り入れる要素がそれぞれ異なる"
+    - "[ ] arrangement_hook は譜面を見ずに口ずさめる"
+    - "[ ] 少なくとも 1 セクションの melody_register が隣接するセクションと明確に異なる"
+    - "[ ] 曲中に、言葉が続きそうなところであえて歌わない箇所（余白）が 1 か所あり、その位置を明記している："
   exemptions: []

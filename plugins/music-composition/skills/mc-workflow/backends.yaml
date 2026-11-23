@@ -1,22 +1,22 @@
-# 生成后端能力档案 —— 数据，不是 skill
+# 生成バックエンドの機能一覧（スキルとは別に管理するデータ）
 #
-# 加一个新模型 = 在这里加一个块，**不动任何 skill**。
-# `mc-render-compile` 读这份档案决定怎么编译 ARR-SPEC；
-# 算照做率时读 honors 决定哪些项计分。
+# 新しいモデルを追加するには、ここにブロックを一つ追加する。**スキルの変更は不要**。
+# `mc-render-compile` はこのファイルを参照して ARR-SPEC のコンパイル方法を決める。
+# 仕様への準拠率を算出する際は、honors を参照して採点対象を決める。
 #
-# ★ honors 的三个取值，决定照做率怎么算：
-#     exact —— 后端能精确执行这个字段 → 计分，不达标就是它没做到
-#     hint  —— 只能作为提示影响生成    → 计分，但权重打折
-#     none  —— 后端根本不接受这个字段  → **排除计分**，标注"本后端不支持"
-#   把 none 的项算成 0 分是错的：Suno 从来没被告知精确和弦，
-#   拿"和弦没跟上"扣它的分等于惩罚它做不到的事。
+# ★ honors の3つの値によって準拠率の算出方法が決まる。
+#     exact —— フィールドの指定を正確に実行できる。採点対象とし、指定を満たさなければ未達とする。
+#     hint  —— ヒントとして生成に影響を与えられる。採点対象とするが、重みは下げる。
+#     none  —— バックエンドがフィールドを受け付けない。**採点対象から外し**、「このバックエンドでは未対応」と記す。
+#   none の項目を0点にしてはいけない。たとえば Suno には正確なコード進行を渡していないため、
+#   「指定どおりのコード進行になっていない」と減点すると、実行できない項目まで評価することになる。
 #
-# ★ transport 记录"这个后端通常跑在哪"，是数据，不是前提。
-#   本库的读者是 agent：mc-render-compile 产出的是各后端的输入值（prompt / ABC / 参数），
-#   用户用命令行、Python API 还是 ComfyUI 这类节点式载体去执行，由用户环境决定。
-#   取值：hosted（托管服务）/ local（本地权重）。known_carriers 列出已知能跑它的载体，仅供参考。
+# ★ transport は、バックエンドが通常どこで動くかを記録する参考情報。実行の前提条件にはしない。
+#   このライブラリを参照するのはエージェント。mc-render-compile は各バックエンドに渡す入力値（prompt / ABC / パラメーター）を生成する。
+#   コマンドライン、Python API、ComfyUI のようなノードベースの実行環境のどれを使うかは、ユーザーの環境による。
+#   値は hosted（ホスティング型サービス）または local（ローカルのモデル重み）。known_carriers には動作が知られている実行環境を参考として記載する。
 #
-# 调研日期：2026-09-15
+# 調査日 2026-09-15
 
 version: 2
 
@@ -27,24 +27,24 @@ backends:
     name: "YuE2 (3B)"
     transport: local
     known_carriers:
-      comfyui: [audio_yue2_text2music, audio_yue2_music_cover]   # 参考：该载体的模板名
+      comfyui: [audio_yue2_text2music, audio_yue2_music_cover]   # 参考として、この実行環境でのテンプレート名を記載
     note: >
-      ★ 唯一能让 ARR-SPEC 被「执行」而不是「提示」的后端。
-      它分两步：符号规划（模型自己写 ABC）→ 从 ABC 合成音频。
-      **把第一步旁路掉**，把我们从 ARR-SPEC 编译出来的 ABC 直接送进第二步。
-      凡支持 YuE2 的载体都能这样接（官方脚本；ComfyUI 有原生节点）。
-      这是 mc-symbolic-score 的第一落点。
-      ★ 实测（2026-09-17）：注入的 ABC 用 L:1/32、人声线写在小写音名区、带 w: 行；L:1/16 会提前停一半，大写音区词会唱成含混元音。whisper 识别率：直出 76%、编译谱 56%，差距在旋律密度；细则见 mc-symbolic-score §6b。
+      ★ ARR-SPEC の指定をヒントにとどめず、そのとおりに実行できる唯一のバックエンド。
+      まずモデル自身が ABC 楽譜を書き（記号表現による作曲プランの作成）、次に ABC から音声を合成する。
+      **最初の工程を迂回し**、ARR-SPEC からコンパイルした ABC を音声合成の工程に直接渡す。
+      YuE2 対応の実行環境ならこの方法を使える（公式スクリプトのほか、ComfyUI にはネイティブノードがある）。
+      mc-symbolic-score の最初の出力先となる。
+      ★ 実測（2026-09-17）。外部から渡す ABC では L:1/32 を使い、ボーカルの旋律は小文字の音名の音域に置き、w: 行を付ける。L:1/16 では曲の半ばで止まり、大文字の音名の音域では歌詞の母音が曖昧になる。whisper の認識率は直接生成で76%、コンパイルした楽譜で56%。差は旋律の密度による。詳細は mc-symbolic-score §6b を参照。
     license:
       code: Apache-2.0
       weights: CC-BY-NC-4.0
-      commercial_ok: false        # ★ 权重非商用，出街前必须确认
+      commercial_ok: false        # ★ モデル重みは非商用。公開前に必ず確認する
     model_file: yue2_3b_int8_convrot.safetensors
     accepts:
       style_prompt: prose
       lyrics: text
-      symbolic_score: abc               # ★ 别的后端都没有
-      reference_audio: "cover 模板支持（保留原旋律换风格）"
+      symbolic_score: abc               # ★ 他の生成モデルにはない機能
+      reference_audio: "cover テンプレートが対応（元のメロディーを保ってスタイルを変更）"
       seed: true
     honors:
       meta.key: exact
@@ -58,26 +58,26 @@ backends:
       vocal: hint
       mix_intent: none
     upstream_skill: >
-      官方仓库自带 skills/yue2-music/（SKILL.md 格式，含"检查音乐不变量"）。
-      ★ 不要重写——我们写 ARR-SPEC→ABC 的适配器，模型操作的知识引用它们的。
+      公式リポジトリに skills/yue2-music/ が付属する（SKILL.md 形式で「音楽上の不変条件のチェック」を含む）。
+      ★ 公式スキルを書き直さず、ここでは ARR-SPEC→ABC のアダプターを実装する。モデルの操作方法は公式スキルを参照する。
 
   # ═══════════════════════════════════════════════════════════
   - id: minimax-music-3
     name: "MiniMax Music 3"
     transport: local
     known_carriers:
-      comfyui: [audio_minimax_music_3]   # 参考：该载体的模板名
+      comfyui: [audio_minimax_music_3]   # 参考として、この実行環境でのテンプレート名を記載
     note: >
-      托管 API 已对新用户关闭，但存在本地权重版
-      （ComfyUI 等载体原生支持），准入限制对本地版不适用。
-      官方描述：从文本 prompt 生成完整 5 分钟歌曲，结构稳定。
+      ホスティング型 API は新規ユーザーの受け付けを終了している。ローカルで使えるモデル重みは提供されており、
+      ComfyUI などがネイティブ対応している。API の利用制限はローカル版には適用されない。
+      公式の説明では、テキストプロンプトから構成の安定した5分間の楽曲を丸ごと生成できる。
     license:
-      commercial_ok: "权重许可待核"
+      commercial_ok: "モデル重みのライセンスは要確認"
     accepts:
       style_prompt: prose
       lyrics: text
       symbolic_score: false
-      reference_audio: "托管版支持 cover；本地版待核"
+      reference_audio: "ホスティング版は cover に対応。ローカル版は要確認"
     honors:
       meta.tempo: hint
       meta.key: hint
@@ -94,19 +94,19 @@ backends:
     transport: local
     templates:
       - audio_ace_step1_5_xl_base
-      - audio_ace_step1_5_xl_turbo      # 蒸馏版，快
-      - audio_ace_step1_5_xl_sft        # 可调 CFG，提示词贴合度最可控
-      - audio_ace_step_1_5_split_4b     # 4B LLM 版，音乐理解更强
+      - audio_ace_step1_5_xl_turbo      # 蒸留版。生成が速い
+      - audio_ace_step1_5_xl_sft        # CFG を調整でき、プロンプトへの準拠度を最も細かく制御できる
+      - audio_ace_step_1_5_split_4b     # 4B LLM 版。音楽の理解力が高い
       - audio_ace_step_1_5_checkpoint   # AIO
     note: >
-      ★ 容易漏掉的一族。一个模型五个变体，**变体本身就是可调的旋钮**：
-      Turbo 用来快速试规格、SFT 用 CFG 调提示词贴合度、4B-LLM 版理解力最强。
-      做 AB 时这比换模型更好控——同族内变量少。
+      ★ 見落としやすいモデル群。1つのモデルに5つのバリエーションがあり、**どの版を選ぶか自体が調整手段になる**。
+      Turbo は仕様を手早く試すのに使い、SFT では CFG でプロンプトへの準拠度を調整する。4B-LLM 版は理解力が最も高い。
+      同じモデル群の中では変動要因が少ないため、AB 比較ではモデルそのものを替える場合より条件をそろえやすい。
     accepts:
-      style_prompt: "风格标签 ＋ 散文"
+      style_prompt: "スタイルタグ ＋ 自然文"
       lyrics: text
       symbolic_score: false
-      cfg: true                         # ★ SFT 版可调，直接影响"听不听话"
+      cfg: true                         # ★ SFT 版で調整できる。指示への準拠度に直接影響する
       seed: true
     honors:
       meta.tempo: hint
@@ -123,33 +123,33 @@ backends:
     name: "Stable Audio 3.0 Medium"
     transport: local
     known_carriers:
-      comfyui: [audio_stable_audio_3_medium, audio_stable_audio_3_medium_base]   # 参考：该载体的模板名
+      comfyui: [audio_stable_audio_3_medium, audio_stable_audio_3_medium_base]   # 参考として、この実行環境でのテンプレート名を記載
     note: >
-      偏音效与器乐，不是整歌后端。用途：单独生成 arrangement_hook 用的
-      标志性音色、riser／impact 这类音响事件，再回填进别的后端的编制里。
-      有的载体模板会先用一个 LLM 扩写 prompt。
+      効果音と器楽向けで、楽曲全体の生成には向かない。arrangement_hook を担う特徴的な音色や、
+      riser／impact などの効果音を単独で生成し、別のバックエンドで作る編曲に組み込む。
+      実行環境によっては、テンプレートが生成前に LLM でプロンプトを詳しく書き足す。
     accepts:
       style_prompt: prose
-      lyrics: false                     # ★ 没有人声
+      lyrics: false                     # ★ ボーカルなし
       duration: true
       seed: true
       category: true
     honors:
       meta.tempo: hint
       form: none
-      arrangement.hooks: hint           # 只对单个音响事件有意义
+      arrangement.hooks: hint           # 単発の音響イベントに限って有効
       vocal: none
       mix_intent: none
 
   # ═══════════════════════════════════════════════════════════
   - id: suno
     name: "Suno"
-    transport: hosted                   # 托管服务，没有本地权重
+    transport: hosted                   # ホスティング型サービス。ローカルのモデル重みなし
     note: >
-      控制力最弱、成品最润。只能给散文式风格描述加段落标签；
-      调性、和声、小节数全部只能"提示"，模型爱听不听。
+      細かい制御は最も難しいが、生成結果の仕上がりは最もよい。指定できるのは自然文によるスタイルの説明とセクションタグ。
+      調性、ハーモニー、小節数はヒントとして示せるだけで、モデルが従うとは限らない。
     license:
-      commercial_ok: "看订阅档位，出街前自行确认"
+      commercial_ok: "契約プランによる。公開前に各自で確認する"
     accepts:
       style_prompt: prose
       lyrics: text
@@ -160,7 +160,7 @@ backends:
       meta.tempo: hint
       meta.key: hint
       meta.meter: none
-      form.bars: none                   # ★ 说不动它，别拿这个扣分
+      form.bars: none                   # ★ 制御できないため採点対象から外す
       form.harmony: none                # ★ 同上
       form.name: hint
       arrangement.roster: hint
@@ -168,20 +168,20 @@ backends:
       vocal: hint
       mix_intent: none
     strategy: >
-      控制不了就别硬控：把精力放在风格描述的信息密度和段落标签序列上，
-      然后靠 best-of-N ＋ 照做率排序来挑，而不是指望一次说服它。
+      細かく制御できない項目に手間をかけず、スタイルの説明に具体的な情報を盛り込み、セクションタグの並びを詰める。
+      一度の生成で指定を満たすことを期待せず、best-of-N で候補を出し、準拠率順に並べて選ぶ。
 
   # ═══════════════════════════════════════════════════════════
   - id: symbolic
-    name: "符号路径：ABC / MIDI / MusicXML → 音源渲染"
+    name: "記号楽譜による生成：ABC / MIDI / MusicXML → 音源レンダリング"
     transport: local
     note: >
-      LLM 直出符号乐谱，交给音源渲染。**完全确定、完全可控**，
-      代价是没有人声、音色取决于音源。两个用途：
-      ①日式 MIDI 打ち込み 工作流本来就是这个形态；
-      ②AB 的**控制变量基准**——同一份规格渲染出来永远一样。
-      ABC ↔ MusicXML ↔ MIDI 可互转，所以 mc-symbolic-score 一个发射器
-      同时服务 YuE2 的 ABC 输入和这条路。
+      LLM が記号楽譜を直接生成し、音源でレンダリングする。**出力は完全に決定的で、細部まで制御できる**。
+      ボーカルは入らず、音色は使用する音源で決まる。用途は2つある。
+      ①日本式の MIDI 打ち込みはもともとこの手順で行う。
+      ②AB 比較で**変数を固定するための基準**にする。同じ仕様からは常に同じ結果が得られる。
+      ABC ↔ MusicXML ↔ MIDI は相互変換できるため、mc-symbolic-score の同じ書き出し処理で
+      YuE2 への ABC 入力と、この音源レンダリングの両方に対応できる。
     license: {commercial_ok: true}
     accepts:
       symbolic_score: [abc, midi, musicxml]
@@ -192,17 +192,17 @@ backends:
       form.bars: exact
       form.harmony: exact
       arrangement.roster: exact
-      arrangement.energy_curve: exact   # velocity / CC 可精确写
+      arrangement.energy_curve: exact   # velocity / CC で正確に指定できる
       vocal: none
       mix_intent: none
 
 # ═══════════════════════════════════════════════════════════
-# 配套工具（不是生成后端，但属于同一条链路）
+# 補助ツール（同じ制作工程で使うツール。生成バックエンドには含めない）
 tools:
   - id: audio-separation
     transport: any
     known_carriers: {demucs: cli, comfyui: utility-audioseparation}
     note: >
-      ★ 分轨：人声／贝斯／鼓／其余。
-      人声审计的四条 AI 味判据（力度是否全程一致、副歌三遍是否雷同、换气、ad-lib）
-      都要先把人声轨分出来。用哪个分轨工具由用户环境决定。
+      ★ ステム分離。ボーカル／ベース／ドラム／その他。
+      ボーカルの AI らしさを判定する4項目（曲全体の強弱が一定か、3回のサビが似通っているか、ブレス、ad-lib）を確認するには、
+      まずボーカルトラックを分離する。どの分離ツールを使うかはユーザーの環境による。

@@ -1,458 +1,455 @@
-# ARR-SPEC v1.0 —《编曲规格单》规范
+# ARR-SPEC v1.0 —「編曲仕様書」の規格
 
-> 本库唯一的交接物。一物四用：对外交接（对外接口见 §5）、AB 测试对象、编译源（→Suno／YuE／MusicXML／MIDI／ChordPro）、生成后校验基准。
-> 配套文件：`ARR-SPEC.template.yaml`（空模板）、`example-*.yaml`（填好的示例）、20 条自查见 `mc-workflow` §3.0
+> このリポジトリで引き渡す成果物はこの仕様書に一本化する。用途は、外部への引き渡し（外部インターフェースは §5）、A/B テストの対象、コンパイル元（→Suno／YuE／MusicXML／MIDI／ChordPro）、生成後の検証基準の四つ。
+> 関連ファイルは `ARR-SPEC.template.yaml`（空のテンプレート）と `example-*.yaml`（記入例）。20 項目の自己チェックは `mc-workflow` §3.0 を参照。
 >
-> **每个字段都有去向**（可执行／桥接／仅意图，见 §4），可执行字段的取值用行业格式能直接读的写法：和弦拼写全 ASCII、时间位置结构化、音色带 GM 号、段落名封闭集合。原因只有一个：规格单写完要能不经人手变成 MusicXML 领奏谱、MIDI 骨架、ChordPro 和 ABC，交给乐手、DAW、吉他手和模型。
+> **すべてのフィールドに用途がある**（実行可能／橋渡し／意図のみ。§4 参照）。実行可能なフィールドには、業界標準の形式で直接読み取れる値を記入する。コード表記はすべて ASCII、時間位置は構造化し、音色には GM 番号を付け、セクション名は定義済みの候補から選ぶ。記入した仕様書を手作業なしで MusicXML のリードシート、MIDI の骨格、ChordPro、ABC に変換し、演奏者、DAW、ギタリスト、モデルに渡せるようにするためだ。
 
-## 0. 使用纪律
+## 0. 運用ルール
 
-1. **`intent` 四项不填齐，不许往下写 `form`。** 这是动笔前必填表，作用相当于剧作动笔前先问的"这场戏的价值转折是什么"。
-2. 写完**逐条过 20 条自查**（§2），不过的条目改掉或写明理由再编译。这些是判据不是铁律——写了理由的偏离是合法选择。
-3. 生成回来**先逐字段对照规格**看照做率（参考线见 §3）。照做率明显低 → 改规格重生成，**不靠听觉返工**。
-4. 耳朵只在最后一小步介入：照做率过关后，A/B 打乱、成对比较、同一对听两遍看结论稳不稳。
-5. ★ **后端做不到的项不算它的分。** 每个后端在 `backends.yaml` 里声明 `honors: exact|hint|none`，算照做率时把 `none` 的项**排除计分**，不是给 0 分。
-6. ★ **可执行字段只用 ASCII。** `△ ♭ ♯ ° ø ×` 这些符号人看着舒服，但 MusicXML、ChordPro、ABC 全都不认。规格单存 `maj7 b # dim m7b5 x2`，人看的美观版由渲染层生成。
+1. **`intent` の四項目をすべて埋めてから `form` に進む。** 着手前の必須項目で、脚本を書く前に「この場面で何がどう変わるか」を問うのと同じ役割を持つ。
+2. 書き終えたら**自己チェックの 20 項目を一つずつ確認する**（§2）。基準を満たさない箇所は修正するか、理由を明記してからコンパイルする。各項目は判断の基準であり、理由を記せば意図的に外れてもよい。
+3. 生成結果が返ってきたら、**まず仕様書とフィールドごとに照合**し、仕様遵守率を確認する（目安は §3）。明らかに低い場合は仕様書を修正して再生成する。**耳で聴いた印象に頼って手直ししない。**
+4. 試聴は最後に行う。仕様遵守率が基準を満たしたら、A/B の順をランダムにしてペアで比較する。同じペアを二度聴き、判断がぶれないか確かめる。
+5. ★ **バックエンドが対応できない項目は採点対象から外す。** 各バックエンドは `backends.yaml` で `honors: exact|hint|none` を宣言する。仕様遵守率の算出では `none` の項目を 0 点扱いせず、**採点から除外する**。
+6. ★ **実行可能なフィールドには ASCII のみを使う。** `△ ♭ ♯ ° ø ×` は人には読みやすいが、MusicXML、ChordPro、ABC はこの表記を受け付けない。仕様書には `maj7 b # dim m7b5 x2` と記録し、読みやすい表示はレンダリング時に生成する。
 
 ---
 
-## 1. 字段规范
+## 1. フィールド仕様
 
 ### 1.1 `meta`
 
-| 字段 | 类型 | 必填 | 说明 |
+| フィールド | 型 | 必須 | 説明 |
 |---|---|---|---|
 | `spec_version` | str | ✅ | `"1.0"` |
-| `title` | str | ✅ | 导出为 MusicXML work-title、MIDI 轨名、ChordPro `{title}`、ABC `T:` |
-| `style_layer` | str | ✅ | **基底风格**的 L3 skill id（如 `mc-style-citypop-rnb`）；L3 未建时写 `none` |
-| `style_layers` | list | ○ | **风格混合时**填，见 §1.1.1。单风格不填 |
-| `key` | str | ✅ | 语法固定：`<主音> <major|minor>`，主音用 ASCII 升降号：`F# minor`、`Bb major`、`D major`。**所有和声记号以此为准**。导出为 MusicXML 的 fifths+mode、MIDI 调号、ChordPro `{key}`、ABC `K:` |
-| `mode` | str | ○ | 非自然大小调时填，枚举锁定为 MusicXML 的取值：`major` `minor` `ionian` `dorian` `phrygian` `lydian` `mixolydian` `aeolian` `locrian`。填了 `mode`，`key` 的主音仍是调中心（`D major` + `mode: mixolydian` = D 混合利底亚） |
-| `meter` | str | ✅ | 如 `4/4`。变拍写在 `meter_map`，不写在 `form[].note` 的句子里 |
-| `meter_map` | list | ○ | `[{bar: 1, meter: "4/4"}, {bar: 33, meter: "3/4"}, …]`，与 `tempo_map` 同形，有则 `meter` 取首项。导出为逐小节拍号 |
+| `title` | str | ✅ | MusicXML の work-title、MIDI のトラック名、ChordPro の `{title}`、ABC の `T:` に出力する |
+| `style_layer` | str | ✅ | **土台となるスタイル**の L3 skill id（例 `mc-style-citypop-rnb`）。L3 が未作成なら `none` |
+| `style_layers` | list | ○ | **複数のスタイルを組み合わせる場合**に記入する。§1.1.1 参照。単一スタイルの場合は省略する |
+| `key` | str | ✅ | 書式は `<主音> <major|minor>`。主音のシャープとフラットは ASCII で書く（`F# minor`、`Bb major`、`D major`）。**すべての和声表記はこの調を基準にする**。MusicXML の fifths+mode、MIDI の調号、ChordPro の `{key}`、ABC の `K:` に出力する |
+| `mode` | str | ○ | 自然長音階・自然短音階以外の場合に記入する。指定できる値は MusicXML に合わせて `major` `minor` `ionian` `dorian` `phrygian` `lydian` `mixolydian` `aeolian` `locrian` に限る。`mode` を指定しても、`key` の主音が調の中心となる（`D major` + `mode: mixolydian` = D ミクソリディアン） |
+| `meter` | str | ✅ | 例 `4/4`。拍子の変更は `meter_map` に記録し、`form[].note` に文章で書かない |
+| `meter_map` | list | ○ | `[{bar: 1, meter: "4/4"}, {bar: 33, meter: "3/4"}, …]`。`tempo_map` と同じ構造。記入した場合は先頭の値を `meter` に設定する。小節ごとの拍子として出力する |
 | `tempo` | int | ✅ | BPM |
-| `tempo_map` | list | ○ | `[{bar: 1, bpm: 96}, …]`，有则 `tempo` 取首项。导出为 MIDI set_tempo 事件与 MusicXML 速度记号 |
-| `target_duration` | str | ✅ | `mm:ss`。**受 lint 第 14 条约束**：必须与小节数×拍速推算一致（±10%） |
-| `deliverable` | list | ✅ | `full_mix` / `stems` / `midi` / `musicxml` / `chordpro` / `abc`，后四个对应 §4 的四个导出目标 |
-| `upstream` | obj | ○ | 有就读的上游：`brief`（需求出处）、`lyrics`（同一首歌的歌词）、`picture`（要配合的画面）。字段与用法见 §5.2；没有就按本包自己的分析走 |
+| `tempo_map` | list | ○ | `[{bar: 1, bpm: 96}, …]`。記入した場合は先頭の値を `tempo` に設定する。MIDI の set_tempo イベントと MusicXML のテンポ記号に出力する |
+| `target_duration` | str | ✅ | `mm:ss`。**lint 第 14 項の対象**。小節数と拍の速さから求めた長さと一致すること（±10%） |
+| `deliverable` | list | ✅ | `full_mix` / `stems` / `midi` / `musicxml` / `chordpro` / `abc`。後ろの四つは §4 の四つの出力先に対応する |
+| `upstream` | obj | ○ | 上流から提供された場合に読み込む。`brief`（依頼の出典）、`lyrics`（同じ曲の歌詞）、`picture`（音楽を合わせる映像）。フィールドと使い方は §5.2 を参照。提供がなければ本パッケージ内で分析して進める |
 
-#### 1.1.1 `style_layers` —— 风格混合的分工表 ✦
+#### 1.1.1 `style_layers` —— スタイルを組み合わせる際の担当表 ✦
 
-**混合不是把两种风格调匀，是把每个维度分给一种风格。**
+**スタイルを組み合わせるときは、要素ごとに担当するスタイルを一つ決める。**
 
-`owns` 的取值是一个**封闭集合**，只能从下面十四个里选：
+`owns` は**定義済みの集合**で、以下の 14 項目から選ぶ。
 
 `harmony`　`melody`　`groove`　`low_end`　`fill_policy`　`instrumentation`　`color_instruments`
-`timbre`　`arrangement_hook`　`vocal_delivery`（或拆成 `vocal_delivery_verse` / `vocal_delivery_chorus`）　`form`　`mix`
+`timbre`　`arrangement_hook`　`vocal_delivery`（または `vocal_delivery_verse` / `vocal_delivery_chorus` に分ける）　`form`　`mix`
 
-需要分配的东西不在表里时，归到最接近的那一个，并在 `fusion_note` 里写一句说明；不要自造名字。
-污染与混合的区别只有一条：**混合是写下来的选择，污染是没人选**。
+当てはまる項目がなければ、最も近い項目に割り当て、`fusion_note` に一文で説明する。新しい名前は作らない。
+**どのスタイルから何を採用するかを書き残せば意図的な融合になる。担当を決めずに混ぜると、スタイルが曖昧になる。**
 
 ```yaml
 meta:
-  style_layer: mc-style-chinese-pop        # 基底
+  style_layer: mc-style-chinese-pop        # 土台となるスタイル
   style_layers:
     - {skill: mc-style-chinese-pop, role: base,    owns: [harmony, melody, color_instruments]}
     - {skill: mc-style-hiphop,      role: overlay, owns: [groove, low_end, vocal_delivery_verse]}
-  fusion_note: "副歌唱、主歌 rap；民乐采样只做色彩层不做律动"
+  fusion_note: "サビは歌い、Aメロはラップ。民族楽器のサンプルは音色のアクセントにだけ使い、グルーヴは担わせない"
 ```
 
-| 字段 | 说明 |
+| フィールド | 説明 |
 |---|---|
 | `skill` | L3 skill id |
-| `role` | `base`（恰好一个）／`overlay`（一个或多个） |
-| `owns` | 该风格拥有的维度，取值固定：`harmony` `melody` `groove` `low_end` `instrumentation` `color_instruments` `timbre` `vocal_delivery` `vocal_delivery_verse` `vocal_delivery_chorus` `form` `mix` |
-| `fusion_note` | 一句话说这个组合为什么成立 |
+| `role` | `base`（ちょうど一つ）／`overlay`（一つ以上） |
+| `owns` | そのスタイルが担当する要素。指定できる値は `harmony` `melody` `groove` `low_end` `instrumentation` `color_instruments` `timbre` `vocal_delivery` `vocal_delivery_verse` `vocal_delivery_chorus` `form` `mix` |
+| `fusion_note` | この組み合わせが成り立つ理由を一文で書く |
 
-**受 lint 第 17 条约束**：多于一层时，`base` 恰好一个；**每个维度只有一个 owner**（两层都声称 `groove` = 没做选择）；
-每层至少拥有一个维度（否则它只是被读了，没起作用）。
+**lint 第 17 項の対象**。複数レイヤーでは `base` はちょうど一つ。**各要素を担当するスタイルは一つだけ**（二つのレイヤーがともに `groove` を担当していれば、担当を決めたことにならない）。
+各レイヤーは少なくとも一つの要素を担当する（担当がなければ、読み込まれるだけで曲には反映されない）。
 
-**怎么用各 L3 的移植表**：overlay 风格搬进来的正是它移植表里标"❌ 不可搬／会被认出来"的那些项——
-**那就是你要的辨识度**。但每搬一项，都要在 `owns` 里签字，并检查 base 风格的移植表是否允许让出那个维度。
+**各 L3 の移植表の使い方**。overlay から取り入れるのは、その移植表で「❌ 移植不可／移すと元のスタイルだと分かる」とされている項目だ。
+**その要素が、取り入れたいスタイルらしさを生む**。取り入れる項目は一つずつ `owns` に明記し、その要素を譲ってよいか base 側の移植表で確認する。
 
-### 1.2 `intent` —— 动笔前必填表（★ 门禁）
+### 1.2 `intent` —— 着手前の必須項目（★ 記入後に次へ進む）
 
-| 字段 | 类型 | 必填 | 说明 |
+| フィールド | 型 | 必須 | 説明 |
 |---|---|---|---|
-| `one_thing` | str | ✅ | **这首歌只干一件事**。一句话，不许两句，不许用"既…又…"。写不出来说明还没想清楚 |
-| `reference_pair` | list | ✅ | **恰好 2 项**，每项 `{track, borrow}`。`borrow` 必须写清"借哪一点"（如"只借前奏的空"），**只写歌名视为未填** |
-| `listener_situation` | str | ✅ | 在哪听、听第几遍、注意力有多少。决定 hook 出现的早晚和信息密度 |
-| `emotional_arc` | list | ✅ | `[{section, mood, value}]`。**必须有转折**，一路向上等于没写 |
+| `one_thing` | str | ✅ | **この曲でやることは一つだけ**。二文に分けず一文で書き、「〜も〜も」のように目的を並べない。書けなければ、まだ考えがまとまっていない |
+| `reference_pair` | list | ✅ | **ちょうど 2 項目**。各項目は `{track, borrow}`。`borrow` には取り入れる要素を具体的に書く（例「イントロの余白だけ取り入れる」）。**曲名だけなら未記入扱い** |
+| `listener_situation` | str | ✅ | どこで、何度目に、どの程度集中して聴くか。フックを出すタイミングと情報密度を決める |
+| `emotional_arc` | list | ✅ | `[{section, mood, value}]`。**必ず転機を設ける**。上昇し続けるだけなら未記入と同じ |
 
-> 为什么设门禁：Suno 的 AI 味不是音色问题，是**没有人做过选择**。这四项就是强迫做选择的地方。
-> 这一块整体是**仅意图**：行业里没有任何格式存它，导出时整块作为文本随文件走（MusicXML 的 miscellaneous、MIDI 第一小节的 text 事件），不丢"为什么"。
+> この四項目は、作り手が選択を下すためにある。Suno で AI らしさが出る原因は、音色よりも**誰も選択を下していないこと**にある。
+> ここは全体が**意図のみ**に該当する。対応する業界標準の専用フィールドがないため、出力時には記入した理由も含め、全体をテキストとして添える（MusicXML の miscellaneous、MIDI 第 1 小節の text イベント）。
 
-### 1.2b `material` —— 主题材料（★ `mc-development` 拥有）
+### 1.2b `material` —— 主題素材（★ `mc-development` が担当）
 
-| 字段 | 类型 | 必填 | 说明 |
+| フィールド | 型 | 必須 | 説明 |
 |---|---|---|---|
-| `motif` | str | ✅ | 主题动机的文字描述：音程轮廓、节奏型、长度。写到能让另一个人认出来 |
-| `motif_abc` | str | ○ | 同一个动机用一到两小节 ABC 写出来（只要 `L:` 和音符，不要头部）。有了它，MusicXML 和 MIDI 能把动机当实际音符导出，符号路径拿它当种子 |
-| `character` | str | ○ | 一句话性格（"急促、往上顶"） |
-| `stated_in` | list | ✅ | 原始陈述所在的段落 id，至少一个 |
-| `development_mode` | str | ○ | 这首歌靠什么推进：`加工处理`／`展衍`／`对比`（`mc-development` §5.1，李吉提的三路） |
+| `motif` | str | ✅ | 主題のモチーフを文章で記述する。音程の輪郭、リズム型、長さを、他の人が聴いて識別できる程度まで具体化する |
+| `motif_abc` | str | ○ | 同じモチーフを 1〜2 小節の ABC で書く（`L:` と音符のみ。ヘッダーは省略）。記入すると実際の音符として MusicXML と MIDI に出力でき、記譜ベースの生成でも出発点として使える |
+| `character` | str | ○ | 性格を一文で書く（「せわしなく、上へ突き上げる」） |
+| `stated_in` | list | ✅ | モチーフを原形で提示するセクションの id。少なくとも一つ |
+| `development_mode` | str | ○ | 曲を展開する方針を `加工处理`（加工）／`展衍`（展開）／`对比`（対比）から選ぶ（`mc-development` §5.1、李吉提の三分類） |
 
-### 1.3 `form` —— 曲式表，一段一行
+### 1.3 `form` —— 曲形式の一覧、1 セクションにつき 1 行
 
-| 字段 | 类型 | 必填 | 说明 |
+| フィールド | 型 | 必須 | 説明 |
 |---|---|---|---|
-| `id` | str | ✅ | 全局唯一，如 `I`/`A1`/`B1`/`C1`/`D`/`O`。导出为 MusicXML 排练记号、MIDI marker、ChordPro 段落 label |
-| `name` | str | ✅ | 封闭集合：`Intro` `Verse` `Pre-Chorus` `Chorus` `Post-Chorus` `Bridge` `Instrumental` `Solo` `Breakdown` `Drop` `Outro`。Suno 段落标签、ChordPro 的 `{start_of_verse}`/`{start_of_chorus}`/`{start_of_bridge}` 都由它派生，不另存。术语的准确定义见 `mc-arrangement-arch/reference.md` §1 |
-| `bars` | int | ✅ | 小节数。**受 lint 第 3 条约束**：全曲不许全是 8 的倍数 |
-| `start_bar` | int | ✅ | 起始小节。**受 lint 第 2 条约束**：必须首尾相接，不许有缝或重叠 |
-| `harmony` | str | ✅ | 罗马数字级数，ASCII：`"|VIm7 |IVmaj7 |I |V |"`。变化音前缀 `b`/`#`（`bVI`、`#IVm7b5`），副属 `V/V`。分析与教学用；MusicXML 4.0 的 numeral 能存，软件几乎不读 |
-| `harmony_letters` | str | ✅ | 同一进行的字母记号：`"|F#m7 |Dmaj7 |A |E |"`。**双记是本库硬约定**。拼写见 §1.3.1，**受 lint 第 19 条约束**。导出为 MusicXML harmony、ChordPro `[F#m7]`、ABC `"F#m7"`、MIDI 和弦轨 |
-| `melody_register` | str | ○ | `低`/`中低`/`中`/`中高`/`高`。段落间要有对比。可加实际音域 `melody_range: "A3-E5"`（ASCII 音名加八度），有则导出为分谱音域提示 |
-| `development` | str | ✅ | ★ 这一段拿主题材料做了什么，封闭集合：`repeat`（原样或换尾重复）/`sequence`（模进）/`extend`（扩充）/`contract`（减缩）/`fragment`（裁截）/`vary`（变奏）/`augment`（宽放紧收）/`counterpoint`（对位式）/`new`（新材料）/`recap`（再现）。可写 `"vary+extend"` 表示主次两种。**受 lint 第 18 条约束**。手法定义见 `mc-development` |
-| `energy` | int | ✅ | 0–10。与 `arrangement.energy_curve` 同源，此处冗余便于阅读 |
-| `events` | list | ○ | 该段发生的编制事件，取值固定为 `<roster_id>_in` / `<roster_id>_out`，如 `[drums_in, bass_in, gtr_out]`。与 `roster[].entry/exit` 互为交叉校验 |
-| `note` | str | ○ | **非对称设计写在这里**，如"第二句 6 小节，打破 8 的整数"。变拍不写这里，写 `meter_map` |
+| `id` | str | ✅ | 全体で一意。例 `I`/`A1`/`B1`/`C1`/`D`/`O`。MusicXML のリハーサルマーク、MIDI marker、ChordPro のセクションラベルに出力する |
+| `name` | str | ✅ | 指定できる値は `Intro` `Verse` `Pre-Chorus` `Chorus` `Post-Chorus` `Bridge` `Instrumental` `Solo` `Breakdown` `Drop` `Outro`。Suno のセクションタグと ChordPro の `{start_of_verse}`/`{start_of_chorus}`/`{start_of_bridge}` はこの値から生成する。用語の厳密な定義は `mc-arrangement-arch/reference.md` §1 を参照 |
+| `bars` | int | ✅ | 小節数。**lint 第 3 項の対象**。全セクションの小節数が 8 の倍数にならないようにする |
+| `start_bar` | int | ✅ | 開始小節。**lint 第 2 項の対象**。各セクションを隙間や重複なくつなぐ |
+| `harmony` | str | ✅ | ASCII のローマ数字によるディグリー表記。例 `"|VIm7 |IVmaj7 |I |V |"`。変化音には `b`/`#` を前置する（`bVI`、`#IVm7b5`）。セカンダリー・ドミナントは `V/V`。分析と教育に使う。MusicXML 4.0 の numeral に格納できるが、読み取るソフトはほとんどない |
+| `harmony_letters` | str | ✅ | 同じコード進行を音名で表記する。例 `"|F#m7 |Dmaj7 |A |E |"`。**このリポジトリでは両方の表記を必須とする**。書式は §1.3.1 を参照。**lint 第 19 項の対象**。MusicXML harmony、ChordPro の `[F#m7]`、ABC の `"F#m7"`、MIDI のコードトラックに出力する |
+| `melody_register` | str | ○ | `低`/`中低`/`中`/`中高`/`高`。セクション間で音域に対比をつける。`melody_range: "A3-E5"` のように実際の音域（ASCII の音名とオクターブ番号）も指定でき、指定した場合はパート譜に音域の目安として出力する |
+| `development` | str | ✅ | ★ このセクションでの主題素材の扱い。指定できる値は `repeat`（そのまま、または結尾を変えて反復）/`sequence`（ゼクエンツ）/`extend`（拡張）/`contract`（短縮）/`fragment`（断片化）/`vary`（変奏）/`augment`（引き伸ばしと引き締め）/`counterpoint`（対位法）/`new`（新素材）/`recap`（再現）。`"vary+extend"` のように主となる手法と副次的な手法を併記できる。**lint 第 18 項の対象**。手法の定義は `mc-development` を参照 |
+| `energy` | int | ✅ | 0–10。`arrangement.energy_curve` と同じ値を読みやすさのために併記する |
+| `events` | list | ○ | セクション内で楽器の編成が変わるイベント。指定できる値は `<roster_id>_in` / `<roster_id>_out`。例 `[drums_in, bass_in, gtr_out]`。`roster[].entry/exit` と相互に照合する |
+| `note` | str | ○ | **非対称な構成はここに記す**（例「第 2 フレーズを 6 小節にして、8 小節単位を崩す」）。拍子の変更は `meter_map` に記録する |
 
-#### 1.3.1 和弦拼写（★ lint 第 19 条）
+#### 1.3.1 コードの表記（★ lint 第 19 項）
 
-一对竖线一小节。一小节里多个和弦用空格分隔、按拍等分；不等分时在和弦后写拍数：`|Em7(3) A(1) |`。`%` 重复上一小节。整段反复在串尾写 `x2`。
+縦線の間が 1 小節。1 小節に複数のコードがある場合は空白で区切り、拍を均等に割り振る。均等でない場合はコードの後に拍数を書く。例 `|Em7(3) A(1) |`。`%` は前の小節の反復。セクション全体を反復する場合は文字列の末尾に `x2` と書く。
 
-根音：`A`–`G` 加 `#` 或 `b`。斜线低音：`/E`。种类后缀是封闭集合，右列是导出到 MusicXML 时的 kind：
+ルートは `A`–`G` に `#` または `b` を付けて指定する。分数コードのベース音は `/E` のように書く。コードの種類を表す接尾辞は表の候補に限る。右列は MusicXML 出力時の kind。
 
-| 写法 | 含义 | MusicXML kind |
+| 表記 | 意味 | MusicXML kind |
 |---|---|---|
-| （空） | 大三 | major |
-| `m` | 小三 | minor |
-| `5` | 强力 | power |
-| `dim` | 减三 | diminished |
-| `aug` | 增三 | augmented |
-| `sus2` `sus4` | 挂二／挂四 | suspended-second / suspended-fourth |
-| `6` `m6` | 大六／小六 | major-sixth / minor-sixth |
-| `69` | 六九 | major-sixth + degree 9 |
-| `7` | 属七 | dominant |
-| `maj7` | 大七 | major-seventh |
-| `m7` | 小七 | minor-seventh |
-| `mMaj7` | 小大七 | major-minor |
-| `m7b5` | 半减 | half-diminished |
-| `dim7` | 减七 | diminished-seventh |
-| `aug7` | 增属七 | augmented-seventh |
-| `7sus4` | 属七挂四 | suspended-fourth + degree 7 |
-| `9` `maj9` `m9` | 九和弦 | dominant-ninth / major-ninth / minor-ninth |
-| `11` `13` | 十一、十三 | dominant-11th / dominant-13th |
-| `add9` `madd9` | 加九 | major / minor + degree add 9 |
-| `7b9` `7#9` `7#11` `7b13` | 变化属七 | dominant + degree alter |
+| （空欄） | メジャー・トライアド | major |
+| `m` | マイナー・トライアド | minor |
+| `5` | パワーコード | power |
+| `dim` | 減三和音 | diminished |
+| `aug` | 増三和音 | augmented |
+| `sus2` `sus4` | サス2／サス4 | suspended-second / suspended-fourth |
+| `6` `m6` | メジャー・シックスス／マイナー・シックスス | major-sixth / minor-sixth |
+| `69` | シックス・ナインス | major-sixth + degree 9 |
+| `7` | ドミナント・セブンス | dominant |
+| `maj7` | メジャー・セブンス | major-seventh |
+| `m7` | マイナー・セブンス | minor-seventh |
+| `mMaj7` | マイナー・メジャー・セブンス | major-minor |
+| `m7b5` | ハーフ・ディミニッシュ | half-diminished |
+| `dim7` | ディミニッシュ・セブンス | diminished-seventh |
+| `aug7` | オーギュメント・セブンス | augmented-seventh |
+| `7sus4` | ドミナント・セブンス・サス4 | suspended-fourth + degree 7 |
+| `9` `maj9` `m9` | ナインス・コード | dominant-ninth / major-ninth / minor-ninth |
+| `11` `13` | イレブンス、サーティーンス | dominant-11th / dominant-13th |
+| `add9` `madd9` | アドナインス | major / minor + degree add 9 |
+| `7b9` `7#9` `7#11` `7b13` | オルタード・ドミナント・セブンス | dominant + degree alter |
 
-不在表里的写法（`△`、`ø`、`°`、`M7`、`-7`、`Δ`）一律视为拼错。想用的音响表里没有时，选最近的一个并在 `note` 里说明。
-
+表にない書き方（`△`、`ø`、`°`、`M7`、`-7`、`Δ`）はすべて表記エラーとする。欲しい響きが表にない場合は、最も近いものを選び、`note` に説明を書く。
 ### 1.4 `arrangement`
 
-#### `roster` —— 全曲乐器清单
+#### `roster` —— 曲全体の楽器一覧
 
-每件乐器都要说得出：占哪个频段、什么时候进、什么时候退。**说不出"什么时候退"的乐器，通常就是让编曲变平的那一件。**
+各楽器について、主に使う周波数帯域、演奏を始める箇所、演奏を終える箇所を決める。**どこで抜けるかを説明できない楽器は、編曲を平坦にしがちだ。**
 
-| 字段 | 必填 | 说明 |
+| フィールド | 必須 | 説明 |
 |---|---|---|
-| `id` | ✅ | 唯一，`mix_intent`、`form[].events`、`render.midi` 都按此 id 引用。导出为 MusicXML part-name、MIDI 轨名、ABC `V:` 名 |
-| `instrument` | ✅ | 具体乐器／音色，不许写"合成器"这种类别词。人读的名字 |
-| `midi` | ✅（`deliverable` 含 `midi`/`musicxml` 时） | `{program: 0-127, bank: 0, channel: 1-16}`，GM 音色号。鼓组 `channel: 10`。这是导出用的一处为准，`render.midi.instrument_map` 只放 VST 名等备注 |
-| `role` | ✅ | `律动`/`低频`/`和声铺底`/`织体`/`旋律`/`色彩`/`记忆点` |
-| `band` | ✅ | 主要占据的频段。**填四段之一**（`低频`/`中低`/`中高`/`高`，分割点 250 Hz / 2 kHz / 6 kHz）或具体区间如 `"1-3 kHz"`。与 `spectrum_budget` 交叉校验 |
-| `entry` | ✅ | 进场段落 id |
-| `exit` | ✅ | 退场段落 id，或 `end`。**受 lint 第 7 条约束**：至少一件乐器的 `exit` 不是 `end` |
-| `timbre` | ○ | **给文本后端看的**音色描述：材质、年代、参照乐器。不写旋钮数值 |
-| `synth_params` | ○ | **给参数后端看的**同一音色。★ 必须与 `timbre` **同源**（都从"音色四问"的答案生成），不同源会导致文本后端和 MIDI 后端听起来是两首歌。能映到 MIDI 控制器的四项按 GM2 编号写：截止 `cc74`、共鸣 `cc71`、起音 `cc73`、释放 `cc72`，取值 0–127 |
+| `id` | ✅ | 一意。`mix_intent`、`form[].events`、`render.midi` はこの id で参照する。MusicXML の part-name、MIDI のトラック名、ABC の `V:` の名前に出力する |
+| `instrument` | ✅ | 具体的な楽器名や音色名を人が読める形で書く。「シンセサイザー」のような分類名だけでは不可 |
+| `midi` | ✅（`deliverable` に `midi`/`musicxml` を含む場合） | `{program: 0-127, bank: 0, channel: 1-16}`。GM 音色番号。ドラムセットは `channel: 10`。出力時はこのフィールドを正とし、`render.midi.instrument_map` には VST 名などの補足だけを書く |
+| `role` | ✅ | `律动`（グルーヴ）／`低频`（低域）／`和声铺底`（和声の土台）／`织体`（テクスチャ）／`旋律`（メロディ）／`色彩`（音色のアクセント）／`记忆点`（印象に残る要素） |
+| `band` | ✅ | 主に使う周波数帯域。**四つの帯域のいずれか**（`低频`〈低域〉／`中低`〈中低域〉／`中高`〈中高域〉／`高`〈高域〉、境界は 250 Hz / 2 kHz / 6 kHz）、または `"1-3 kHz"` のような具体的な範囲を書く。`spectrum_budget` と照合する |
+| `entry` | ✅ | 演奏を始めるセクションの id |
+| `exit` | ✅ | 演奏を終えるセクションの id、または `end`。**lint 第 7 項の対象**。少なくとも一つの楽器では、`exit` に `end` 以外を指定する |
+| `timbre` | ○ | **テキストを受け取るバックエンド向け**の音色の説明。質感、時代感、参考にする楽器を書く。ノブの数値は書かない |
+| `synth_params` | ○ | **パラメーターを受け取るバックエンド向け**に同じ音色を指定する。★ `timbre` と**同じ「音色に関する四つの問い」への回答**から作る。別々に作ると、テキスト用と MIDI 用のバックエンドで別の曲のように聞こえる。MIDI コントローラーに対応する四項目は GM2 の番号で書く。カットオフは `cc74`、レゾナンスは `cc71`、アタックは `cc73`、リリースは `cc72`。値は 0–127 |
 | `note` | ○ | |
 
-#### `depth_map` —— 深度三层 ✦
+#### `depth_map` —— 奥行きの三層 ✦
 
-`{roster_id: 前景|中景|背景}`。听众凭「高／响／快／变化率快」四条线索判断谁是前景，
-**其中只有"响"是混音能调的**——所以深度必须在编曲阶段规划。
-详见 `mc-texture-layering` §2–§3。导出时粗略映到 MIDI 混响发送 cc91（前景低、背景高）。
+`{roster_id: 前景|中景|背景}`。聴き手は音の高さ、大きさ、速さ、変化の速さを手がかりに、何が前景にあるかを判断する。
+**ミックスで調整できるのは、このうち音の大きさだけ**なので、奥行きは編曲の段階で設計する。
+詳しくは `mc-texture-layering` §2–§3 を参照。出力時は MIDI のリバーブセンド cc91 におおまかに割り当てる（前景は低く、背景は高く）。
 
-#### `spectrum_budget` —— 频段预算
+#### `spectrum_budget` —— 周波数帯域の割り当て
 
-`[{band, owner, competitors, resolution}]`。写清哪两件抢频段、怎么分工：**让频**／**错开音区**／**交替出现**。
-**`resolution` 必须是这三者之一**——这是"编曲＝频谱预算"这个观念的落点，也是 `mix_intent` 之所以能只写意图的前提。
+`[{band, owner, competitors, resolution}]`。どの二つの楽器が同じ帯域を取り合うかと、その解消方法を明記する。**帯域を譲る（`让频`）**／**音域をずらす（`错开音区`）**／**交互に出す（`交替出现`）**。
+**`resolution` はこの三つのいずれかとする。** 編曲の段階で帯域の使い方を決めておけば、`mix_intent` には意図だけを書けばよい。
 
-> 验收标准：画出来的频段归属应当**既不交叠、又连续**（Izhaki 图 6.2 的 b 图）。
-> 只做到不交叠会留下空洞，只做到连续会糊。
+> 確認基準は、帯域の割り当てを図にしたときに**重なりも隙間もないこと**（Izhaki の図 6.2 b）。
+> 重なりを避けるだけでは帯域に穴が空き、隙間を埋めるだけでは音が濁る。
 
-#### `bass_kick_relation` —— 贝司与底鼓的关系 ✦
+#### `bass_kick_relation` —— ベースとキックの関係 ✦
 
-`{mode: 结合式|互答式|交织式, detail}`。三选一，必须写明是哪一种。
+`{mode: 结合式|互答式|交织式, detail}`。三つから一つを選び、どの型か明記する。
 
-- **结合式**：贝司节奏随底鼓走、完全重合 → 音头强、结实
-- **互答式**：贝司避开底鼓的节奏点 → 适合底鼓覆盖低频的电子舞曲
-- **交织式**：需要时重合、不需要时拆开 → **默认推荐**，但要求逐小节说得出哪里合哪里分；说不出就退回结合式
+- **同時に鳴らす型（`结合式`）**。ベースのリズムをキックと完全に重ね、アタックを強くして、芯のある音にする
+- **掛け合う型（`互答式`）**。ベースはキックが鳴るタイミングを避ける。キックが低域を埋めるエレクトロニック・ダンス・ミュージックに向く
+- **重ねる箇所とずらす箇所を織り交ぜる型（`交织式`）**。必要な箇所だけ重ね、それ以外はずらす。**既定の推奨**だが、どこで重ね、どこでずらすかを小節ごとに説明する。説明できなければ同時に鳴らす型を選ぶ
 
 #### `energy_curve`
 
-`{段落 id: 0–10}`，key 集合必须等于 `form` 的 id 集合（lint 第 4 条）。
-**受 lint 第 5 条约束：必须至少有一次下降。** 单调递增是 Suno 最强的默认值。
-（实测：62/62 首真实编曲都有下降，**强规则**。）参考渲染时折成力度缩放或 cc11。
+`{セクション id: 0–10}`。キーの集合は `form` の id の集合と一致させる（lint 第 4 項）。
+**lint 第 5 項の対象。少なくとも一度はエネルギーを下げる。** 単調に上昇する展開は Suno で最も出やすい既定の傾向。
+（実測では実際の編曲 62/62 曲で下降があったため、**強いルール**とする。）リファレンスレンダリングではベロシティのスケーリングまたは cc11 に変換する。
 
-#### `subtraction_events` —— 减法事件（★ 至少 1 个）
+#### `subtraction_events` —— 音を抜くイベント（★ 最低 1 件）
 
-`[{at, what, why}]`。典型：第二段副歌前撤掉鼓、只剩人声＋一件乐器、断掉低频一小节。
-**受 lint 第 6 条约束。** 真唱片靠减法制造冲击，AI 只会加。
+`[{at, what, why}]`。典型例は、2 回目のサビの前でドラムを抜く、ボーカルと楽器 1 本だけを残す、低域を 1 小節だけ抜くなど。
+**lint 第 6 項の対象。** 実際のレコードでは音を抜いてインパクトを作るが、AI は音を足しがちだ。
 
-`at` 是结构化的时间位置（§1.9），不是句子：`at: {section: C2, bar_offset: -1, beat: 4}` 表示 C2 前一小节第四拍；`at: {section: D}` 表示整段。"进入前最后半拍"这种描述放 `what`，位置放 `at`。
+`at` には構造化した時間位置を書く（§1.9）。`at: {section: C2, bar_offset: -1, beat: 4}` は C2 の前の小節の第 4 拍、`at: {section: D}` は D セクション全体を指す。「入る直前の最後の半拍」のような説明は `what` に、位置は `at` に書く。
 
 #### `hooks`
 
-| 字段 | 必填 | 说明 |
+| フィールド | 必須 | 説明 |
 |---|---|---|
 | `vocal_hook` | ○ | `{where, shape}` |
-| `arrangement_hook` | ✅ | `{what, first_at, recurs_at, abc}`。**非人声的记忆点**——riff／标志性音色／反复出现的音响事件。**受 lint 第 8 条约束**。缺这一项是"听着还行但记不住"的主因。`abc` 可选，同 `motif_abc`，有则能导出成谱 |
+| `arrangement_hook` | ✅ | `{what, first_at, recurs_at, abc}`。**ボーカル以外で耳に残る要素**。リフ、特徴的な音色、繰り返し現れる音響イベントなど。**lint 第 8 項の対象**。これが欠けると「聴いたときは悪くないが、あとで思い出せない」曲になりやすい。`abc` は省略可。`motif_abc` と同様に、記入すれば楽譜に出力できる |
 
 #### `groove`
 
-| 字段 | 必填 | 说明 |
+| フィールド | 必須 | 説明 |
 |---|---|---|
-| `feel` | ✅ | `straight`/`swing16`/`shuffle`/`halftime`/`2:1`/`3:1`。MusicXML 4.0 的 swing 元素能存前三种；MIDI 无标准，靠参考渲染的时值实现 |
-| `quantize_policy` | ○ | `{part: 百分比}`。★ **量化是逐乐器的决策，不是全局开关**——至少一件守网格、至少一件不守 |
-| `push_pull` | ✅ | `[{part, offset_ms, note}]`。**受 lint 第 11 条约束**：至少一项且 `offset_ms ≠ 0`。全部对齐网格＝机器感的根源（实测 62/62，**强规则**）。参考渲染时按速度折成 tick 偏移 |
-| `fill_policy` | ✅ | `{bars: [int], rationale}`。**受 lint 第 10 条约束**：`bars` 不许是公差为 4 的等差数列 |
+| `feel` | ✅ | `straight`/`swing16`/`shuffle`/`halftime`/`2:1`/`3:1`。MusicXML 4.0 の swing 要素には先頭の三つを格納できる。MIDI には標準の指定方法がないため、リファレンスレンダリング時の音価で表現する |
+| `quantize_policy` | ○ | `{part: パーセント}`。★ **クオンタイズは楽器ごとに決める。** 少なくとも一つはグリッドに合わせ、少なくとも一つはグリッドからずらす |
+| `push_pull` | ✅ | `[{part, offset_ms, note}]`。**lint 第 11 項の対象**。少なくとも一項目を記入し、`offset_ms ≠ 0` とする。すべてをグリッドに合わせると機械的に聞こえる（実測 62/62、**強いルール**）。リファレンスレンダリングではテンポに応じて tick のオフセットに換算する |
+| `fill_policy` | ✅ | `{bars: [int], rationale}`。**lint 第 10 項の対象**。`bars` を公差 4 の等差数列にしない |
 
-### 1.5 `vocal` —— 演唱设计
+### 1.5 `vocal` —— 歌唱設計
 
-对应 `mc-vocal-direction`。**AI 人声最稳定的破绽是"完美"**：音准全中、力度平直、
-每遍副歌一模一样。这一段有一半是在**要求"不完美"**。
+`mc-vocal-direction` に対応する。**AI ボーカルだと最も分かりやすいのは、歌唱が「完璧」すぎるときだ**。音程がすべて正確で、強弱が平坦で、サビは何度聴いても同じ。このセクションの半分は、そうした**均一さを崩すための指定**に充てる。
 
-| 字段 | 必填 | 说明 |
+| フィールド | 必須 | 説明 |
 |---|---|---|
-| `persona` | ✅ | **这是谁在唱**：性别、音区、质感、年代感。写"女声"视为未填 |
-| `delivery` | ✅ | 气声／实声／半声；咬字松紧。**可以是单串，也可以 `{段落 id: 描述}` 逐段写**。用可执行的词：`亮`/`气声`/`辅音用力`——★ **不许写"大声点"**（音量是推子的事，不是演唱的事） |
-| `dynamics_by_section` | ✅ | `{段落 id: 0–10}`。**受 lint 第 15 条约束**：不许全程同一力度。导出到 MusicXML 力度记号按此映射：0–1 `ppp`、2 `pp`、3 `p`、4 `mp`、5–6 `mf`、7 `f`、8 `ff`、9–10 `fff`；MIDI 参考渲染按 `40 + 8×值` 取力度 |
-| `phrasing` | ○ | `[{line, timing, why}]` 哪几句往后拖（laid back）、哪句抢在拍前。★ 判断抢／拖看的是**元音**的位置，不是音节起点 |
-| `breath_points` | ○ | `[{section, line, after_syllable, note}]`：段落 id、第几行（1 起）、在该行第几个音节之后换气。换气也是留白，位置要和歌词的断句对上。导出为 MusicXML 的 breath-mark |
-| `ad_libs` | ○ | `[{at, what}]`，`at` 用 §1.9 的时间位置；★ 禁止均匀撒 |
-| `chorus_variation` | ✅ | ★ 副歌每一遍怎么各不相同。**受 lint 第 16 条约束**。（词可以一样，编曲不能一样） |
-| `stacking` | ○ | 和声／加倍：堆几层、在哪几句进、用**四型**中的哪型（全声上方／贴唱上方／内敛下方／合いの手）。做 double 要求的是**二次演唱**，不是复制一轨。写了实际音高的层导出为 MusicXML 额外声部 |
-| `pitch_policy` | ○ | ★ 写**哪些位置保留音准偏移**，而不是"修准"。唱低的人声推子推到天上也出不来；**略偏高的穿透力更好**。失效条件：编曲极密的段落该修，判据是**伴奏密度**不是段落名 |
-| `register_arc` | ○ | 音区走向，与 `form[].melody_register` 一致 |
+| `persona` | ✅ | **誰が歌うか**。性別、音域、声の質感、時代感を書く。「女性ボーカル」だけでは未記入扱い |
+| `delivery` | ✅ | 息を混ぜた声、芯のある声、抑えた発声、発音を明瞭にするか緩めるかなど。**文字列一つでも、`{セクション id: 説明}` でセクションごとに指定してもよい**。「明るい声で」「息を混ぜる」「子音を強めに」のように、歌い手が実践できる言葉を使う。★ **「もっと大きく」は不可**。音量の調整はフェーダーで行う |
+| `dynamics_by_section` | ✅ | `{セクション id: 0–10}`。**lint 第 15 項の対象**。曲を通じて強弱を一定にしない。MusicXML の強弱記号への対応は 0–1 `ppp`、2 `pp`、3 `p`、4 `mp`、5–6 `mf`、7 `f`、8 `ff`、9–10 `fff`。MIDI のリファレンスレンダリングでは `40 + 8×値` をベロシティとする |
+| `phrasing` | ○ | `[{line, timing, why}]`。どのフレーズを後ろにずらすか（laid back）、どのフレーズを拍より前に出すかを指定する。★ 前後の判断には**母音**の位置を使う。音節の開始位置は基準にしない |
+| `breath_points` | ○ | `[{section, line, after_syllable, note}]`。セクション id、行番号（1 始まり）、その行の何番目の音節の後で息継ぎするかを指定する。息継ぎも余白なので、歌詞の区切りに合わせる。MusicXML の breath-mark に出力する |
+| `ad_libs` | ○ | `[{at, what}]`。`at` は §1.9 の時間位置。★ 均等に散らさない |
+| `chorus_variation` | ✅ | ★ サビを繰り返すたびに何を変えるか。**lint 第 16 項の対象**。歌詞は同じでもよいが、編曲は毎回変える |
+| `stacking` | ○ | ハモリやダブリング。重ねる声の数、加えるフレーズ、使う**四つの型**（芯のある声で上ハモリ、主旋律に寄り添う上ハモリ、控えめな下ハモリ、合いの手）を指定する。ダブリングはトラックをコピーせず、**もう一度歌って**重ねる。実際の音高を書いたレイヤーは MusicXML の追加声部として出力する |
+| `pitch_policy` | ○ | ★ **ピッチのずれを残す箇所**を書く。低めに歌った声はフェーダーをいくら上げても前に出にくく、**わずかに高めの声は通りやすい**。伴奏がきわめて密なセクションでは補正する。判断基準は**伴奏の密度**であり、セクション名ではない |
+| `register_arc` | ○ | 曲中で音域がどう移り変わるか。`form[].melody_register` と一致させる |
 
 ### 1.6 `mix_intent`
 
-只写**意图**，不写 EQ 频点／压缩比／母带链（那些是混音的事）。
-**参数之间互相牵动**（提人声高频 → 混响音尾变长 → 推子要调 → 压缩参数要调），
-在规格单里钉死一个数值等于替混音师锁死后面四步。这一块除 `sound_stage` 外全是仅意图。
+**意図**だけを書く。EQ の周波数、コンプレッサーのレシオ、マスタリングチェーンはミックスの工程で決める。
+**各パラメーターは互いに影響する**（ボーカルの高域を上げる → リバーブの残響が長くなる → フェーダーを調整する → コンプレッサーの設定を調整する）。
+仕様書で一つの数値を固定すると、ミックス担当者が後続の四段階で調整できる範囲まで縛ることになる。ここでは `sound_stage` 以外のすべてが「意図のみ」に当たる。
 
-| 字段 | 必填 | 说明 |
+| フィールド | 必須 | 説明 |
 |---|---|---|
-| `mood` | ✅ | ★ 一句话说这首混音要传达什么。**对其余所有决定有否决权**，且**在生成提示词里要靠前**（生成模型也是"只擅长某种风格的混音师"，会把输入往它见得最多的平衡上拉） |
-| `sound_stage` | ○ | `[{id, pan, depth}]` 逐乐器的左右＋前后。`pan` 取 `-100..100`（负左正右，0 居中），导出线性折到 MIDI cc10 的 0–127 和 MusicXML pan 的 -180..180；`depth` 取 `前景/中景/背景`，与 `depth_map` 同一枚举。★ **同组乐器的深度必须一致**（深度要"一致"不要"平衡"）；鼓组**内部**的方位归 `mc-rhythm-section`，这里只定鼓组整体坐在哪 |
-| `focus_by_section` | ○ | `{段落 id: roster_id}` 每段谁必须是最清楚的元素。★ **先写最密的那一段**，其余相对它定义 |
-| `ducking_map` | ○ | `[{section, who_yields, band, to}]` 哪一段谁让出哪个频段给谁 |
-| `deliberate_imbalance` | ○ | `[{from_bar, to_bar, what, why}]`。★ **必须带起止小节**——不平衡是**事件**不是状态，没写小节范围的一律当失误 |
-| `reference_tracks` | ○ | `[{track, aspect}]`。★ `aspect` **必须写明参考它哪一方面**，只写歌名视为未填。注意母带影响：参考曲的动态值会系统性偏紧 |
-| `dynamics` | ✅ | `{target_DR_dB, notes}`。`notes` 里写"哪一段必须比副歌小 x dB" |
-| `width_map` | ✅ | `{段落 id: narrow/medium/wide}`。**受 lint 第 12 条约束**：至少两个不同值 |
-| `loudness_target` | ✅ | 如 `"-9 LUFS integrated"` |
+| `mood` | ✅ | ★ このミックスで何を伝えるかを一文で書く。**ほかのすべての判断に優先する**。**生成プロンプトの前の方に置く**。生成モデルも特定のスタイルを得意とするミックス担当者のように、入力を見慣れたバランスへ寄せるため |
+| `sound_stage` | ○ | `[{id, pan, depth}]`。各楽器の左右と前後の位置。`pan` は `-100..100`（負は左、正は右、0 は中央）。出力時は MIDI cc10 の 0–127 と MusicXML pan の -180..180 にそれぞれ線形変換する。`depth` は `前景/中景/背景` で、`depth_map` と同じ列挙値。★ **同じグループの楽器は奥行きをそろえる**。ここで指定するのはドラムセット全体の位置。**セット内部**の定位は `mc-rhythm-section` が担当する |
+| `focus_by_section` | ○ | `{セクション id: roster_id}`。セクションごとに最も明瞭に聴かせる要素。★ **最も音が密なセクションから書き**、残りはそこを基準に決める |
+| `ducking_map` | ○ | `[{section, who_yields, band, to}]`。どのセクションで、どの楽器がどの帯域をどの楽器に譲るか |
+| `deliberate_imbalance` | ○ | `[{from_bar, to_bar, what, why}]`。★ **開始小節と終了小節を必ず指定する**。バランスの崩れを区間の限られた**イベント**として扱い、小節範囲の記載がなければミスとみなす |
+| `reference_tracks` | ○ | `[{track, aspect}]`。★ `aspect` には**何を参考にするかを明記する**。曲名だけなら未記入扱い。マスタリングの影響で、参考曲のダイナミクスの測定値は一貫して狭めに出る |
+| `dynamics` | ✅ | `{target_DR_dB, notes}`。`notes` には「どのセクションをサビより x dB 小さくするか」を書く |
+| `width_map` | ✅ | `{セクション id: narrow/medium/wide}`。**lint 第 12 項の対象**。異なる値を少なくとも二つ使う |
+| `loudness_target` | ✅ | 例 `"-9 LUFS integrated"` |
 
 ### 1.7 `render`
 
 #### `render.suno`
 
-| 字段 | 必填 | 说明 |
+| フィールド | 必須 | 説明 |
 |---|---|---|
-| `style_prompt` | ✅ | 风格描述串。**不许出现 `epic`/`emotional`/`beautiful` 这类无信息形容词**（lint 第 13 条软警告） |
-| `section_tags` | ○ | 由 `form[].name` 派生（`[Intro]` `[Verse]` …），编译时生成，不必手填。手填了则**数量与顺序必须与 `form` 一致**（lint 第 13 条） |
-| `exclude` | ○ | 负面提示 |
+| `style_prompt` | ✅ | スタイルを記述する文字列。**`epic`/`emotional`/`beautiful` のように具体性のない形容詞は使わない**（lint 第 13 項の警告） |
+| `section_tags` | ○ | `form[].name` から派生する（`[Intro]` `[Verse]` …）。コンパイル時に生成するので、手入力は不要。手入力する場合は**個数と順序を `form` にそろえる**（lint 第 13 項） |
+| `exclude` | ○ | ネガティブプロンプト |
 | `knobs` | ○ | `{model, weirdness, style_influence}` |
 
 #### `render.yue`
 
-`{genre_tags, structure, ref_audio, abc}`。YuE2 吃 genre tag 串 ＋ 结构化段落，
-**并且可以直接吃 ABC 乐谱**（`abc=` 参数）——这是唯一能让规格被"执行"而不是"提示"的路径。
-`form[].harmony_letters` / `key` / `meter` / `tempo` 直接编译成 ABC。编译规则见 `mc-symbolic-score`。
+`{genre_tags, structure, ref_audio, abc}`。YuE2 はジャンルタグの文字列と構造化されたセクションを入力に取る。
+**ABC 楽譜も直接渡せる**（`abc=` パラメーター）。仕様をプロンプトとして伝えるだけでなく、**実行させられる唯一の経路**だ。
+`form[].harmony_letters` / `key` / `meter` / `tempo` は直接 ABC にコンパイルする。コンパイル規則は `mc-symbolic-score` を参照。
 
 #### `render.midi`
 
-`{instrument_map: {roster_id: {name, program, bank, channel}}}`。`program/bank/channel` 与 `roster[].midi` 同源，以 roster 为准；`name` 放 VST 或采样库名这类 GM 表达不了的备注。只有 VST 名时也要给 `program` 作回退，否则参考渲染没有声音。
+`{instrument_map: {roster_id: {name, program, bank, channel}}}`。`program/bank/channel` は `roster[].midi` と同じ値を使い、roster 側を正とする。`name` には VST やサンプルライブラリの名前など、GM で表せない情報を書く。VST 名しかない場合も、代替音色の `program` を指定する。指定がなければリファレンスレンダリングで音が出ない。
 
 #### `render.musicxml`
 
-`{lead_sheet: true, parts: [roster_id, …]}`。不填默认只出人声领奏谱：旋律、和弦标记、歌词音节、段落记号、速度、调号拍号、力度、换气。`parts` 列了哪些 roster id，就多出哪些分谱（需要该声部有实际音符，来自符号路径）。
+`{lead_sheet: true, parts: [roster_id, …]}`。省略時はボーカルのリードシートだけを出力する。内容はメロディ、コードネーム、歌詞の音節、セクションマーク、テンポ、調号と拍子、強弱、息継ぎ。`parts` に指定した roster id のパート譜も追加で出力する。その声部に、記譜ベースの生成で得た実際の音符が必要となる。
 
 #### `render.chordpro`
 
-`{transpose: 0}`。段落由 `form[].name` 派生，和弦由 `harmony_letters` 派生，歌词来自 `meta.upstream.lyrics.sections`（§5.2）。
+`{transpose: 0}`。セクションは `form[].name`、コードは `harmony_letters` から生成する。歌詞は `meta.upstream.lyrics.sections` から取得する（§5.2）。
 
 ### 1.8 `checks`
 
-`self_audit: [ … ]` —— 作者逐条打勾的人工项（自动项由 lint 跑）。人工项固定这几条：
+`self_audit: [ … ]` —— 作成者自身が一つずつ確認してチェックを付ける項目（自動チェックは lint が実行）。手動で確認する項目は以下のとおり。
 
-- [ ] `one_thing` 念出来是一句话，不是两件事拼的
-- [ ] 两个参照各借的点不重叠
-- [ ] `arrangement_hook` 在不看谱的情况下能哼出来
-- [ ] 至少一段的 `melody_register` 与相邻段落明显不同
-- [ ] 全曲有一处"该说的地方没说"（留白），写明在哪
-- [ ] 每段的"最高、最响、最快、变化最剧烈"分别是谁，列得出来；**主角至少占两条**
-- [ ] 低频主体若是正弦波／极暗音色，补了泛音并**在手机外放验证过**（差音问题）
+- [ ] `one_thing` は読み上げると一文になり、二つの目的をつなげたものになっていない
+- [ ] 二つの参考曲から取り入れる要素が重複していない
+- [ ] 楽譜を見ずに `arrangement_hook` を口ずさめる
+- [ ] 少なくとも一つのセクションの `melody_register` が、隣接するセクションと明らかに異なる
+- [ ] 曲のどこか一か所に、音が入ると予想されるところであえて音を入れない余白を作り、場所を明記した
+- [ ] 各セクションで「最も高い、最も大きい、最も速い、変化が最も激しい」要素をそれぞれ挙げられる。**主役は少なくとも二つに当てはまる**
+- [ ] 低域の主役がサイン波や極端に暗い音色の場合、倍音を補い、**スマートフォンの内蔵スピーカーで確認した**（差音の問題）
 
-`exemptions: [{rule, why}]` —— 豁免项。**豁免必须写理由，不许静默跳过。**
+`exemptions: [{rule, why}]` —— 適用除外の項目。**省略する場合は必ず理由を書く。**
 
-### 1.9 时间位置的写法
+### 1.9 時間位置の書き方
 
-所有"在哪发生"的字段（`subtraction_events[].at`、`ad_libs[].at`、`deliberate_imbalance`、`phrasing[].line` 若指位置）只认两种形式：
+位置を表すすべてのフィールド（`subtraction_events[].at`、`ad_libs[].at`、`deliberate_imbalance`、位置を指す場合の `phrasing[].line`）は、次の二つの形式に限る。
 
-- 绝对：`{bar: 40}` 或 `{bar: 40, beat: 3}`
-- 相对段落：`{section: C2}`（整段）、`{section: C2, bar_offset: -1}`（C2 前一小节）、`{section: C2, bar_offset: 0, beat: 4.5}`（C2 第一小节第四拍半）
+- 絶対位置。 `{bar: 40}` または `{bar: 40, beat: 3}`
+- セクションからの相対位置。 `{section: C2}`（セクション全体）、`{section: C2, bar_offset: -1}`（C2 の前の小節）、`{section: C2, bar_offset: 0, beat: 4.5}`（C2 の最初の小節の第 4 拍の半拍後）
 
-`beat` 从 1 起，可带小数。这两种形式都能无损换算成 MIDI tick 和 MusicXML 小节号，句子换算不了。
-
----
-
-## 2. 20 条自查（SPEC-LINT）
-
-人工逐条过。**不过 = 改或写理由**，不是禁止编译。
-
-| # | 检查 | 对抗的默认值 |
-|---|---|---|
-| 1 | `intent` 四项非空；`reference_pair` 恰好 2 项且 `borrow` 非空 | 没做过选择 |
-| 2 | `form` 的 `start_bar` 首尾相接无缝无叠 | 规格自相矛盾 |
-| 3 | 至少一个段落的 `bars` 不是 8 的倍数 | 段落全是 8 的整数倍 |
-| 4 | `energy_curve` 的 key 集合 == `form` 的 id 集合 | 规格不完整 |
-| 5 | `energy_curve` 至少有一次下降 | 能量单调递增 |
-| 6 | `subtraction_events` ≥ 1 | 只会加不会减 |
-| 7 | `roster` 每项有 `entry`；至少一项 `exit != end` | 编制从头到尾不变 |
-| 8 | `arrangement_hook.what` 非空 | 没有非人声记忆点 |
-| 9 | 至少一个非 Intro/Outro 段落的 `harmony` 含调外和弦或转调标记（小调里 `bIII`／`bVI`／`bVII` 是自然小调的本调和弦，不算调外） | 一个循环到底 |
-| 10 | `fill_policy.bars` 不是公差为 4 的等差数列 | fill 刻板 |
-| 11 | `groove.push_pull` 至少一项且 `offset_ms != 0` | 网格化 |
-| 12 | `mix_intent.width_map` 至少两个不同值 | 立体声宽度恒定 |
-| 13 | `render.suno.style_prompt` 非空；`section_tags` 若手填则与 `form` 段数、顺序一致 | 编译不完整 |
-| 14 | `target_duration` 与 `Σbars × meter ÷ tempo` 偏差 ≤ 10% | 时长永远 3:30 |
-| **15** | `vocal.dynamics_by_section` 至少两个不同值 | 人声全程一个力度 |
-| **16** | `vocal.chorus_variation` 非空且说得出每遍改了什么 | 副歌逐遍原样复制 |
-| **17** | `style_layers` 多于一层时：恰好一个 base；每个维度只有一个 owner；每层至少一个维度 | 风格"调匀"——两种默认值叠在一起，谁也没选 |
-| **18** | `material.motif` 与 `stated_in` 非空；`form[].development` 全部填了；填 `new` 的段数不过半；全曲至少一段 `repeat` 或 `recap`；副歌各遍不全是 `new` | 每段都写新东西，不发展只堆 |
-| **19** | `harmony_letters` 每个和弦的根音、后缀、斜线低音都在 §1.3.1 的封闭集合里，全 ASCII；`harmony` 同样 ASCII | 拼写各写各的，导不出去 |
-| **20** | `key` 合 `<主音> <major|minor>` 语法；`mode` 在枚举内；`meter` 与 `meter_map`/`tempo_map` 的小节号落在曲内；`form[].name` 在封闭集合内；`subtraction_events[].at` 是 §1.9 的结构 | 可执行字段写成了句子 |
-
-**失效条件（必须写进 `checks.exemptions`）**：
-
-- 第 9 条：极简主义作品（ambient／drone／单和弦 vamp）可豁免
-- 第 11 条：`feel: straight` 的硬网格电子舞曲可把量级写为 0，说明"网格化是本风格的语言"
-  （注意这与 62/62 那条强规则不矛盾——强规则说的是**不许全曲每一件都在网格上**，
-  鼓组绝对量化是允许的，见 `mc-rhythm-section` §2.0）
-- 第 15／16 条：**无人声的纯器乐作品整段 `vocal` 可缺省**，此时两条自动跳过
-- 第 18 条：**通篇即兴或 ambient／drone 这类没有主题材料的作品**，`material.motif` 写"无主题材料"并在这里说明，`development` 可全填 `new` 或留空
-- 第 19／20 条：没有失效条件。这两条查的是语法，不是判断
+`beat` は 1 始まりで、小数も指定できる。この二つの形式なら MIDI tick と MusicXML の小節番号に情報を失わず変換できる。文章で書いた位置は変換できない。
 
 ---
 
-## 3. 与实测量的对应（照做率怎么来）
+## 2. 20 項目の自己チェック（SPEC-LINT）
 
-| ARR-SPEC 字段 | 生成音频侧的实测量 | 判定 |
+一つずつ目で確認する。**基準を満たさなければ修正するか、理由を書く。** 理由を明記すればコンパイルできる。
+
+| # | チェック項目 | 防ぎたい既定の傾向 |
 |---|---|---|
-| `form[].start_bar` | 段落边界检测（秒 → 小节） | 边界命中率，容差 ±1.5 小节 |
-| `form[].harmony` | 每小节 chroma → 和弦模板匹配 | 和弦序列编辑距离 |
-| `meta.tempo` | beat tracking | 相对误差（容差 4%） |
-| `groove.push_pull` | onset 相对网格偏移的均值 | 符号与量级是否一致 |
-| `energy_curve` | 分段 RMS | 与规格曲线的 Spearman 相关 |
-| `roster[].entry/exit` | 分轨 onset 密度 | 事件命中率 |
-| `dynamics.target_DR_dB` | crest factor / LRA | 绝对差 |
-| （AI 味通用项） | 频谱质心时序方差 | 低于阈值即判"全程一个样" |
-| `width_map` | 分段 M/S 比与相关系数 | 是否随段落变化 |
-| `target_duration` | 实际时长 | 相对误差 |
+| 1 | `intent` の四項目がすべて記入済み。`reference_pair` はちょうど 2 項目で、各 `borrow` が記入済み | 作り手の選択がない |
+| 2 | `form` の `start_bar` に従い、セクションが隙間や重複なくつながる | 仕様内の矛盾 |
+| 3 | 少なくとも一つのセクションの `bars` が 8 の倍数以外 | 全セクションが 8 小節の整数倍 |
+| 4 | `energy_curve` のキーの集合 == `form` の id の集合 | 仕様の記入漏れ |
+| 5 | `energy_curve` が少なくとも一度下降する | エネルギーが単調に上昇する |
+| 6 | `subtraction_events` ≥ 1 | 音を足す一方で、抜く箇所がない |
+| 7 | `roster` の各項目に `entry` があり、少なくとも一項目で `exit != end` | 曲の最初から最後まで編成が同じ |
+| 8 | `arrangement_hook.what` が記入済み | ボーカル以外に耳に残る要素がない |
+| 9 | Intro/Outro 以外の少なくとも一つのセクションの `harmony` に、調外コードまたは転調の表記がある（短調の `bIII`／`bVI`／`bVII` は自然短音階のダイアトニックコードなので、調外コードには数えない） | 一つのコードループを最後まで繰り返す |
+| 10 | `fill_policy.bars` が公差 4 の等差数列になっていない | フィルが画一的 |
+| 11 | `groove.push_pull` が少なくとも一項目あり、`offset_ms != 0` | グリッドにそろいすぎている |
+| 12 | `mix_intent.width_map` に異なる値が少なくとも二つある | ステレオ幅が一定 |
+| 13 | `render.suno.style_prompt` が記入済み。`section_tags` を手入力した場合は個数と順序が `form` と一致する | コンパイルに必要な情報の不足 |
+| 14 | `target_duration` と `Σbars × meter ÷ tempo` のずれが ≤ 10% | 曲の長さが毎回 3:30 |
+| **15** | `vocal.dynamics_by_section` に異なる値が少なくとも二つある | 曲を通じてボーカルの強弱が一定 |
+| **16** | `vocal.chorus_variation` が記入済みで、サビを繰り返すたびに何を変えたか説明できる | サビを毎回そのまま繰り返す |
+| **17** | `style_layers` が複数あるとき、base がちょうど一つ、各要素の owner は一つだけで、各レイヤーが少なくとも一つの要素を担当する | どちらのスタイルから何を採るか決めずに、二つの既定の傾向を重ねる |
+| **18** | `material.motif` と `stated_in` が記入済み。`form[].development` をすべて記入し、`new` のセクションが半数以下で、全曲で `repeat` または `recap` が少なくとも一つある。サビの各回がすべて `new` にはなっていない | 各セクションで新素材を足し続け、既出の素材を展開しない |
+| **19** | `harmony_letters` の各コードのルート、接尾辞、分数コードのベース音が §1.3.1 の定義に従い、すべて ASCII である。`harmony` も ASCII である | 表記が統一されず出力できない |
+| **20** | `key` が `<主音> <major|minor>` の書式に従う。`mode` は定義済みの値のいずれか。`meter` および `meter_map`/`tempo_map` の小節番号が曲の範囲に収まる。`form[].name` は定義済みの値のいずれか。`subtraction_events[].at` は §1.9 の構造に従う | 実行可能なフィールドを文章で書く |
 
-加权得出 **0–100 照做率**（按同一张表逐字段对照即可，不必算成数）。
+**適用除外の条件（必ず `checks.exemptions` に記録する）**
 
-> ★ **零点校准**：一份 City Pop 规格（112 BPM、10 段、114 小节）比三首与它无关、制作精良的华语成品，对本表打分落在 **63–66**。
-> 所以我们把 **82／70** 当参考线，不是 60——这是理解量级的参考值，不是交付门槛。
-> 这个校准值必须随权重改动一起重测——**改权重后没重测零点 = 数据不可比**。
+- 第 9 項は、ミニマルな作品（ambient／drone／単一コードの vamp）で免除できる
+- 第 11 項は、`feel: straight` で厳密なグリッドを使うエレクトロニック・ダンス・ミュージックなら、ずれの量を 0 とし、「グリッドにそろえることがこのスタイルの表現手法」と記載できる
+  （62/62 の強いルールは**曲を通じて全楽器をグリッドに乗せること**を禁じている。ドラムセットを完全にクオンタイズすること自体は許容される。`mc-rhythm-section` §2.0 を参照）
+- 第 15／16 項は、**ボーカルのない純器楽曲なら `vocal` 全体を省略できる**ため、両項目を自動的にスキップする
+- 第 18 項は、**全編が即興、または ambient／drone など主題素材のない曲**の場合、`material.motif` に「主題素材なし」と書き、ここに理由を記す。`development` はすべて `new` にするか空欄にできる
+- 第 19／20 項は、書式を確認する項目なので適用除外はない
+
+---
+
+## 3. 実測値との対応（仕様遵守率の求め方）
+
+| ARR-SPEC フィールド | 生成音声での測定項目 | 判定 |
+|---|---|---|
+| `form[].start_bar` | セクション境界の検出（秒 → 小節） | 境界の一致率。許容差は ±1.5 小節 |
+| `form[].harmony` | 小節ごとの chroma → コードテンプレートとの照合 | コード列の編集距離 |
+| `meta.tempo` | beat tracking | 相対誤差（許容差 4%） |
+| `groove.push_pull` | グリッドに対する onset のずれの平均 | 符号とずれの大きさが一致するか |
+| `energy_curve` | セクションごとの RMS | 仕様上の曲線との Spearman 相関 |
+| `roster[].entry/exit` | トラックごとの onset 密度 | イベントの一致率 |
+| `dynamics.target_DR_dB` | crest factor / LRA | 差の絶対値 |
+| （AI らしさの共通指標） | スペクトル重心の時系列分散 | しきい値を下回れば「曲を通じて変化がない」と判定 |
+| `width_map` | セクションごとの M/S 比と相関係数 | セクションによって変化するか |
+| `target_duration` | 実際の長さ | 相対誤差 |
+
+重み付けして **0–100 の仕様遵守率**を求める（同じ表でフィールドごとに照合するだけでもよく、数値化は必須ではない）。
+
+> ★ **基準点の校正**。City Pop の仕様書 1 件（112 BPM、10 セクション、114 小節）を、無関係で制作の質が高い中国語楽曲の完成音源 3 曲と照合すると、この表による得点は **63–66** だった。
+> そこで、60 ではなく **82／70** を目安にする。この値は得点の水準を把握するためのもので、納品の合否には使わない。
+> 重みを変えたら、この基準点も測り直す。**測り直さなければ、変更前後のデータは比較できない。**
 >
-> ★ 一个踩过的坑：把权重从**有区分度**的项（`boundaries`）挪到**没区分度**的项
-> （`energy_shape`，不相关曲目也能拿 0.8）会**抬高所有人的分**，包括零点基线。
-> 加权重要加在能区分的项上。
+> ★ 過去にあった失敗として、**曲を識別しやすい**項目（`boundaries`）の重みを、**識別しにくい**項目
+> （`energy_shape`。関係のない曲でも 0.8 を取れる）に移すと、基準点も含めて**すべての得点が上がる**。
+> 識別しやすい項目に重みを置く。
 
-> ★ **后端能力**：`honors: none` 的项**排除计分**，不是给 0 分。
-> 否则一个诚实声明"我做不到声像"的后端，会比一个假装做得到的后端得分更低。
+> ★ **バックエンドの対応範囲**。`honors: none` の項目は 0 点扱いせず、**採点から除外する**。
+> そうしなければ「定位には対応できない」と正直に申告したバックエンドが、対応できるふりをするものより低く採点されてしまう。
 
 ---
 
-## 4. 字段去向：哪些能导出，导到哪
+## 4. フィールドの扱いと出力先
 
-规格单不是 MusicXML 也不是 MIDI，它们存结果不存原因。但每个字段都要说得出去向，三选一：
+MusicXML や MIDI が記録するのは制作結果で、判断の理由は仕様書に残す。各フィールドの扱いは次の三つのいずれかとする。
 
-- **可执行**：无损导出到至少一种行业格式，取值语法按目标格式写。
-- **桥接**：行业格式没有对应字段，用它现有的机制近似（力度、控制器、静音、文字标记），有损，规格单仍是权威。
-- **仅意图**：行业里没有格式存它。导出时整块作为文本随文件走，不丢"为什么"。
+- **実行可能**。少なくとも一つの業界標準形式に情報を失わず出力できる。値は出力先の書式に合わせる。
+- **橋渡し**。業界標準形式に対応するフィールドがないため、既存の仕組み（ベロシティ、コントローラー、ミュート、テキストマーカー）で近似する。情報の一部が失われるので、仕様書を正とする。
+- **意図のみ**。格納できる業界標準形式がないため、理由も残るよう、出力時にまとまりごとテキストとして添える。
 
-| 去向 | 字段 |
+| 扱い | フィールド |
 |---|---|
-| 可执行 | `title` `key` `mode` `meter` `meter_map` `tempo` `tempo_map` `form[].id/name/bars/start_bar/harmony_letters` `melody_range` `motif_abc` `arrangement_hook.abc` `roster[].id/instrument/midi` `breath_points` `stacking`（写了音高时） `render.midi/musicxml/chordpro/yue.abc` |
-| 桥接 | `form[].energy/events` `roster[].entry/exit/synth_params` `depth_map` `energy_curve` `subtraction_events` `groove.*` `dynamics_by_section` `phrasing` `sound_stage` |
-| 仅意图 | `style_layer(s)` `fusion_note` `intent.*` `material.motif/character/stated_in/development_mode` `form[].harmony/melody_register/development/note` `roster[].role/band/timbre` `spectrum_budget` `bass_kick_relation` `hooks.*.what` `fill_policy` `vocal` 其余各项 `mix_intent` 其余各项 `render.suno.*` |
+| 実行可能 | `title` `key` `mode` `meter` `meter_map` `tempo` `tempo_map` `form[].id/name/bars/start_bar/harmony_letters` `melody_range` `motif_abc` `arrangement_hook.abc` `roster[].id/instrument/midi` `breath_points` `stacking`（音高を指定した場合） `render.midi/musicxml/chordpro/yue.abc` |
+| 橋渡し | `form[].energy/events` `roster[].entry/exit/synth_params` `depth_map` `energy_curve` `subtraction_events` `groove.*` `dynamics_by_section` `phrasing` `sound_stage` |
+| 意図のみ | `style_layer(s)` `fusion_note` `intent.*` `material.motif/character/stated_in/development_mode` `form[].harmony/melody_register/development/note` `roster[].role/band/timbre` `spectrum_budget` `bass_kick_relation` `hooks.*.what` `fill_policy` `vocal` の残りの項目、`mix_intent` の残りの項目、`render.suno.*` |
 
-四个导出目标与各自的受众：
+四つの出力形式とそれぞれの利用者を示す。
 
-| 目标 | 给谁 | 带什么 |
+| 出力形式 | 利用者・用途 | 内容 |
 |---|---|---|
-| MusicXML 领奏谱 | 乐手、记谱软件 | 旋律、和弦标记、歌词音节、段落记号、速度、调号拍号、力度、换气 |
-| MIDI 骨架 | DAW | 速度表、拍号、段落 marker、各轨音色号、进退场、声像、参考渲染 |
-| ChordPro | 吉他手、排练 | 段落、和弦、歌词 |
-| ABC | 大模型、YuE2 | 旋律、和弦、歌词行，见 `mc-symbolic-score` |
+| MusicXML リードシート | 演奏者、楽譜作成ソフト | メロディ、コードネーム、歌詞の音節、セクションマーク、テンポ、調号と拍子、強弱、息継ぎ |
+| MIDI の骨格 | DAW | テンポマップ、拍子、セクション marker、各トラックの音色番号、楽器が入る箇所と抜ける箇所、定位、リファレンスレンダリング |
+| ChordPro | ギタリスト、リハーサル | セクション、コード、歌詞 |
+| ABC | 大規模モデル、YuE2 | メロディ、コード、歌詞の各行。`mc-symbolic-score` 参照 |
 
-DAW 私有工程格式与 DAWproject 不对接。`mix_intent` 不找格式，混音意图在行业里就是文字。
+DAW 固有のプロジェクト形式と DAWproject には対応しない。`mix_intent` に対応する専用形式は設けず、業界での扱いに沿ってミックスの意図を文章にする。
 
-`meta.upstream.lyrics.sections[].lines`（歌词行）按可执行导出：MusicXML 的 lyric、ChordPro 的歌词行、ABC 的 `w:` 行。`meta.upstream` 的其余项与 `messages` 不导出，只随规格单走。
+`meta.upstream.lyrics.sections[].lines`（歌詞の各行）は「実行可能」として出力する。MusicXML では lyric、ChordPro では歌詞の各行、ABC では `w:` 行にする。`meta.upstream` の残りの項目と `messages` は出力せず、仕様書に添えて渡す。
 
 ---
 
-## 5. 对外接口
+## 5. 外部インターフェース
 
-这份规格单记的是**一首歌的作曲与编曲决定**。本节写给规格单之外的读者（另一个部门、另一套工具、另一个 agent 都一样），不假设谁在读，只约定数据：交出去的字段（§5.1）、有就读的上游字段（§5.2）、消息通道 `messages`（§5.3）、和歌词那一侧共享的六个字段（§5.4）。本包的 skill 之间也只经这些字段交换。
+この仕様書には**一曲分の作曲・編曲上の決定事項**を記録する。別の部署、ツール、エージェントのいずれも利用できるよう、読み手を限定せず、やり取りするデータを定める。対象は引き渡すフィールド（§5.1）、提供があれば読み込む上流フィールド（§5.2）、連絡用の `messages`（§5.3）、作詞側と共有する六つのフィールド（§5.4）。本パッケージ内の skill 同士もこれらのフィールドを使って情報をやり取りする。
 
-### 5.1 交出去的字段（按职能）
+### 5.1 引き渡すフィールド（担当別）
 
-**先读这几条约定**，下表每一行都照它们理解：
+**以下の取り決めを前提に**、表の各行を読む。
 
-- **决定与意图，不是处方。** 规格单里没有 EQ 频点、压缩比、母带链，没有词，没有画面的剪辑点，这些由各职能自己定；`intent`、`vocal` 与 `mix_intent` 的大部分是仅意图（§4）。
-- **时间位置按小节与拍**（§1.9），都从 1 起。换算成秒：逐小节按 `tempo_map`（没有就用 `tempo`）与 `meter_map`（没有就用 `meter`）累加，一小节＝每小节拍数 × 60 ÷ BPM（四分音符为一拍）；`form[].start_bar` 首尾相接，每段起止秒数都能算出。
-- **id**：`form[].id` 全局唯一，逐段的字段与歌词都按它对齐；`form[].name` 是封闭集合，可以重复（C1、C2 都是 `Chorus`）。`roster[].id` 是 MIDI 轨名、分谱名，也是 `depth_map`、`spectrum_budget`、`sound_stage` 里的名字。
-- **计划与实测**：规格单是计划，音频回来按 §3 逐字段对照；`checks.exemptions` 里写了理由的偏离是有意的选择；`honors: none` 的字段是那个后端做不到的。
+- **制作上の決定と意図を渡す。** EQ の周波数、コンプレッサーのレシオ、マスタリングチェーン、歌詞、映像の編集点は各担当が決めるため、ここでは指定しない。`intent`、`vocal`、`mix_intent` の大部分は「意図のみ」に当たる（§4）。
+- **時間位置は小節と拍で表し**（§1.9）、どちらも 1 始まりとする。秒に換算するには、`tempo_map`（なければ `tempo`）と `meter_map`（なければ `meter`）を使って各小節の長さを足し合わせる。1 小節＝1 小節あたりの拍数 × 60 ÷ BPM（四分音符を 1 拍とする）。`form[].start_bar` に従って各セクションが連続するため、それぞれの開始・終了秒数を計算できる。
+- **id**。`form[].id` は全体で一意。セクション別のフィールドと歌詞はこの id で対応付ける。`form[].name` は定義済みの候補から選び、同じ値を繰り返し使える（C1 と C2 がともに `Chorus` など）。`roster[].id` は MIDI のトラック名とパート譜名になり、`depth_map`、`spectrum_budget`、`sound_stage` でも同じ名前を使う。
+- **計画と実測**。仕様書に計画を記録し、音源が返ったら §3 に従ってフィールドごとに照合する。`checks.exemptions` に理由を書いた逸脱は意図的な選択とする。`honors: none` はそのバックエンドが対応できないフィールドを示す。
 
-| 职能 | 读哪些字段 | 字段怎么理解 |
+| 担当 | 読み込むフィールド | フィールドの読み方 |
 |---|---|---|
-| **作词** | 共享六字段（§5.4）；`form[].start_bar／melody_register／melody_range`；`vocal.phrasing／breath_points／chorus_variation`、`hooks.vocal_hook`；`intent.emotional_arc`；符号路径出的旋律 | **段落 id 是词与曲咬合的那一列**：歌词按 `form[].id` 分段，一行一个乐句，中文一字一音节。`breath_points` 是换气位置（段落、行、第几个音节之后），词的断句要和它对上；`melody_register／melody_range` 标出哪段唱得高，高音上的字要经得起唱。`chorus_variation` 是编曲这一侧副歌逐遍的变化（词可以一样，编曲不能一样）；`emotional_arc` 是逐段情绪与转折 |
-| **声音**（混音、母带） | `mix_intent`；`roster`、`depth_map`、`spectrum_budget`、`bass_kick_relation`、`energy_curve`、`subtraction_events`；`vocal.stacking／pitch_policy`；`meta.deliverable` | **`mix_intent` 是意图，不是参数**，EQ、压缩、混响、总线、母带由混音定。`mood` 对其余决定有否决权；`deliberate_imbalance` 带起止小节，是有意的事件；`dynamics.notes` 的段落落差要在母带后还留得住。`spectrum_budget[].resolution` 说明频段冲突已在编曲里解掉；`depth_map` 同组乐器深度一致。`subtraction_events` 是有意留的空处，别被动态处理填上；`pitch_policy` 列的位置有意保留音准偏移，不修准 |
-| **配乐**（为画面写音乐：spotting、cue） | `meta.tempo／tempo_map／meter_map／target_duration`；`form[]`、`energy_curve`；`material`、`hooks.arrangement_hook`；`roster`、`meta.deliverable` | 本包的音乐**结构由曲式定**，时长自己定。用到画面上，段落起止秒数从小节算；`material.motif`、`arrangement_hook` 是可以再用的主题与记忆点。段落边界要跟画面走的，结构归配乐；本包只在 `meta.upstream.picture` 给了时长与卡点时，按它定时长、速度与小节数 |
-| **剪辑环节**（切在哪、剪短、接缝） | 上一行的时间字段；`form[].events`、`roster[].entry／exit`、`subtraction_events`、`groove.fill_policy.bars` | 段落边界是天然的接缝，`fill_policy.bars` 是过门所在小节；`subtraction_events` 是编曲的冲击来源（§1.4），剪短时留着它。`deliverable` 含 `stems` 时交分轨 |
+| **作詞** | 共有する六つのフィールド（§5.4）、`form[].start_bar／melody_register／melody_range`、`vocal.phrasing／breath_points／chorus_variation`、`hooks.vocal_hook`、`intent.emotional_arc`、記譜ベースの生成で得たメロディ | **セクション id で歌詞と曲を対応付ける**。歌詞は `form[].id` ごとに分け、1 行につき 1 フレーズとする。中国語では 1 字を 1 音節とする。`breath_points` は息継ぎの位置（セクション、行、何番目の音節の後か）で、歌詞の区切りをそこに合わせる。`melody_register／melody_range` は高い音で歌うセクションを示す。高音には歌いやすい字を置く。`chorus_variation` はサビを繰り返すごとの編曲の変化（歌詞は同じでもよいが、編曲は毎回変える）。`emotional_arc` はセクションごとの感情とその転機 |
+| **音響**（ミックス、マスタリング） | `mix_intent`、`roster`、`depth_map`、`spectrum_budget`、`bass_kick_relation`、`energy_curve`、`subtraction_events`、`vocal.stacking／pitch_policy`、`meta.deliverable` | **`mix_intent` は意図を示す**。EQ、コンプレッション、リバーブ、バス、マスタリングは音響担当が決める。`mood` はほかの判断すべてに優先する。`deliberate_imbalance` は開始・終了小節を持つ意図的なイベント。`dynamics.notes` に記したセクション間の落差はマスタリング後も保つ。`spectrum_budget[].resolution` は編曲段階で帯域の競合を解消した方法を示す。`depth_map` では同じグループ内の楽器の奥行きをそろえる。`subtraction_events` は意図的に空けた箇所なので、ダイナミクス処理で埋めない。`pitch_policy` に挙げた箇所は意図的にピッチのずれを残すため、補正しない |
+| **劇伴**（映像に曲を付ける作業。spotting、cue） | `meta.tempo／tempo_map／meter_map／target_duration`、`form[]`、`energy_curve`、`material`、`hooks.arrangement_hook`、`roster`、`meta.deliverable` | 本パッケージで作る曲は、**曲形式で構成を決め**、長さも自分で決める。映像で使う際は、セクションの開始・終了秒数を小節から求める。`material.motif` は再利用できる主題、`arrangement_hook` は再利用できるフック。セクション境界を映像に合わせる場合、曲の構成は劇伴担当が決める。本パッケージで映像に合わせて曲の長さ、テンポ、小節数を決めるのは、`meta.upstream.picture` に尺と音を合わせる時点が指定されている場合に限る |
+| **編集**（カット位置、尺詰め、つなぎ目） | 上の行の時間フィールド、`form[].events`、`roster[].entry／exit`、`subtraction_events`、`groove.fill_policy.bars` | セクションの境界は自然なつなぎ目になる。`fill_policy.bars` はフィルのある小節。`subtraction_events` は編曲にインパクトを作る箇所（§1.4）なので、尺を詰めても残す。`deliverable` に `stems` があれば、ステムを渡す |
 
-镜头设计按放音拍时读 `meta.tempo／tempo_map`、`form[].start_bar／bars`：交出去以后再改，拍好的素材就对不上，改前先写消息（`to: shot-design`）。商用前，制片与现场看 `backends.yaml` 里所用后端的 `license`。
+音源を再生しながら撮影する場合、ショット設計では `meta.tempo／tempo_map` と `form[].start_bar／bars` を参照する。引き渡した後に変更すると撮影済みの素材が合わなくなるため、変更前に `to: shot-design` 宛てにメッセージを送る。商用利用の前に、制作・撮影現場の担当者は `backends.yaml` で使用するバックエンドの `license` を確認する。
 
-### 5.2 有就读的上游字段
+### 5.2 提供があれば読み込む上流フィールド
 
-| 字段 | 装什么 | 本包怎么用 |
+| フィールド | 内容 | 本パッケージでの使い方 |
 |---|---|---|
-| `meta.upstream.brief` | 需求出处与原话（一句 brief、剧本的一场、cue 表的一条）；没有写 `none` | S0 从这里读起；`intent` 四项仍由本包自己想 |
-| `meta.upstream.lyrics` | 同一首歌的歌词 `{source, flow, shared, sections}`：`source` 是歌词规格单的路径或写明用户给的词；`flow` 取 `先曲后词`／`先词后曲`；`shared` 是先词后曲时读进来的六项 `{form: [{id, name, bars}], tempo, key, persona}`；`sections: [{id, lines}]`，`id` 等于 `form[].id` | **先词后曲时 `shared` 是锁死项**（§5.4），本包照抄；词的字数与句式约束 `form[].bars` 与旋律。`sections[].lines` 是编译用的歌词：领奏谱、ChordPro、ABC `w:` 行、后端的歌词分块都从这里取（`mc-render-compile` §5.3） |
-| `meta.upstream.picture` | 要配合的画面 `{source, sec, hits: [{at_sec, what}], note}`：总时长（秒）、要卡的时刻；按放音拍的写进 `note` | `target_duration`、速度、`form[].bars` 按 `sec` 定；`hits` 落在哪一小节哪一拍，写进 `form[].note` 或 `subtraction_events`。段落边界仍按曲式定 |
+| `meta.upstream.brief` | 依頼の出典と原文（短い brief、脚本の一場面、cue 表の一項目）。なければ `none` | S0 で最初に読む。`intent` の四項目は本パッケージで検討する |
+| `meta.upstream.lyrics` | 同じ曲の歌詞 `{source, flow, shared, sections}`。`source` は歌詞仕様書のパス、またはユーザー提供の歌詞である旨。`flow` は `先曲后词`（曲先）／`先词后曲`（詞先）。`shared` は詞先の場合に読み込む六項目 `{form: [{id, name, bars}], tempo, key, persona}`。`sections: [{id, lines}]` の `id` は `form[].id` と一致させる | **詞先の場合は `shared` を固定する**（§5.4）。本パッケージでは値をそのまま転記する。歌詞の字数と文型が `form[].bars` とメロディを制約する。`sections[].lines` はコンパイル用の歌詞。リードシート、ChordPro、ABC の `w:` 行、バックエンド用に分割した歌詞はすべてここから取得する（`mc-render-compile` §5.3） |
+| `meta.upstream.picture` | 音楽を合わせる映像 `{source, sec, hits: [{at_sec, what}], note}`。総尺（秒）と、映像に音を合わせる時点を入れる。音源を再生しながら撮影する場合は `note` に書く | `target_duration`、テンポ、`form[].bars` は `sec` に合わせる。`hits` がどの小節のどの拍に当たるかを `form[].note` または `subtraction_events` に書く。セクション境界は引き続き曲形式に従う |
 
-- **来自谁不重要**，有就读，没有就按本包自己的分析走：没有 `lyrics`，六项由本包定，出不出词按 `mc-workflow` §2.3；没有 `picture`，时长自己定。
-- 已填的上游字段不改写。冲突时在本包字段里照实写，再给来源的职能写 `messages`；共享六项例外，先词后曲时不改，只发消息。
+- **提供元を問わず**、入力があれば読み込み、なければ本パッケージで分析して進める。`lyrics` がなければ、六項目は本パッケージで決め、歌詞を出力するかどうかは `mc-workflow` §2.3 に従う。`picture` がなければ、曲の長さも本パッケージで決める。
+- 記入済みの上流フィールドは書き換えない。内容が食い違う場合は本パッケージ側のフィールドに実態を記入し、提供元の担当者に `messages` で連絡する。ただし共有する六項目は例外で、詞先の場合は値を変えずにメッセージだけ送る。
 
-### 5.3 消息通道 `messages`
+### 5.3 連絡用の `messages`
 
-顶层列表，每条一件事；和 `checks.exemptions` 一样是公共区，**任何一方都可以写**。
+トップレベルのリストで、1 件につき用件は一つ。`checks.exemptions` と同様に共用欄で、**どの担当者も書き込める**。
 
-| 字段 | 类型 | 必填 | 说明 |
+| フィールド | 型 | 必須 | 説明 |
 |---|---|---|---|
-| `messages` | list | ○ | 每条 `{from, to, about, says, status, reply}`；空列表＝没有消息 |
-| `from`／`to` | enum | ✅ | 职能封闭集合：`music`（本包）`lyrics`（作词）`sound`（声音）`editing`（剪辑环节）`shot-design`（镜头设计）`writing`（剧作）`production`（制片与现场）；两者不同 |
-| `about` | str 或 list | ✅ | 说的是哪里：字段路径（`form[B2].bars`、`mix_intent.dynamics`）、段落 id 或小节 |
-| `says` | str | ✅ | 要对方做什么、为什么；一件事一条 |
-| `status` | enum | ✅ | 发的一方写 `open`；收的一方改成 `answered`（回了话，字段没改）、`accepted`（已照它改了字段）或 `rejected`（不接受） |
-| `reply` | str | ○ | 收的一方写：`accepted` 写改了哪个字段，`rejected` 写理由 |
+| `messages` | list | ○ | 各項目は `{from, to, about, says, status, reply}`。空リストはメッセージなし |
+| `from`／`to` | enum | ✅ | 担当は `music`（本パッケージ）`lyrics`（作詞）`sound`（音響）`editing`（編集）`shot-design`（ショット設計）`writing`（脚本）`production`（制作・撮影現場）のいずれか。送信元と宛先には別の値を指定する |
+| `about` | str または list | ✅ | 対象のフィールドパス（`form[B2].bars`、`mix_intent.dynamics`）、セクション id、または小節 |
+| `says` | str | ✅ | 相手に依頼する作業とその理由を、用件ごとに 1 件ずつ書く |
+| `status` | enum | ✅ | 送信側が `open` と書く。受信側は `answered`（返信済み、フィールドは未変更）、`accepted`（依頼どおりにフィールドを変更済み）、`rejected`（依頼を却下）のいずれかに更新する |
+| `reply` | str | ○ | 受信側が記入する。`accepted` の場合は変更したフィールド、`rejected` の場合は理由を書く |
 
-1. **发**：新加一条，`status: open`，如"D 段比 C2 低 6 dB 是唯一的大落差，母带请留住"（`from: music, to: sound, about: mix_intent.dynamics`）。先词后曲时想改共享六项也走这里（`to: lyrics`）。
-2. **回**：只改写给自己那条的 `status` 与 `reply`，不删别人的条目、不改 `says`。消息本身不改字段：要改的字段仍由它的 owner skill 改（`mc-workflow` §2.1），改完标 `accepted`。
-3. **不等待**：读不到回话就当没有；`open` 不挡自查、不停阶段，交付时原样交出去。数据写在字段里，消息只说哪里、为什么。
-4. 写给本包的（`to: music`）在 S0 开工与每次改规格前读。
+1. **送信**。新しい項目を追加し、`status: open` とする。例「D セクションは C2 より 6 dB 小さく、ここが唯一の大きな落差です。マスタリング後もこの差を残してください」（`from: music, to: sound, about: mix_intent.dynamics`）。詞先のときに共有する六項目の変更を依頼する場合も、この方法で `to: lyrics` に送る。
+2. **返信**。自分宛ての項目の `status` と `reply` だけを更新する。他の人の項目は削除せず、`says` も書き換えない。対象フィールドは担当する owner skill が変更し（`mc-workflow` §2.1）、変更後に `accepted` とする。
+3. **返信を待たずに進む**。返信が読めなければ、返信なしとして扱う。`open` のままでも自己チェックと次の工程に進み、引き渡し時はそのまま渡す。データはフィールドに書き、メッセージには対象箇所と理由を書く。
+4. 本パッケージ宛て（`to: music`）のメッセージは、S0 の着手時と仕様書を変更する前に毎回読む。
 
-### 5.4 与歌曲另一侧共享的六个字段
+### 5.4 作詞側と共有する六つのフィールド
 
-> **与歌曲另一侧共享的六个字段**：`form[].id`、`form[].bars`、`form[].name`、`meta.tempo`、`meta.key`、`vocal.persona`。两边用同一套段落 id。
-> - **先做的一方定这六项**，后做的一方原样读进来，当锁死项用（`meta.upstream`）。先曲后词：作曲编曲定、作词读；先词后曲：作词定、作曲编曲读，这时词的字数和句式会反过来约束 `form[].bars`。
-> - **后做的一方不改这六项。** 真要改（比如词放不进这几小节），就写一条 `messages` 给先做的一方，说清改哪一项、为什么。对方接受后改自己的规格单，后做的一方再重新读。
-> - 只有一侧、另一侧的规格单不存在时，这六项由本包自己定。
+> **作詞側と共有する六つのフィールド**は `form[].id`、`form[].bars`、`form[].name`、`meta.tempo`、`meta.key`、`vocal.persona`。両者で同じセクション id を使う。
+> - **先に作業する側が六項目を決める**。後から作業する側は `meta.upstream` を通じてそのまま読み込み、固定値として使う。曲先なら作曲・編曲側が決め、作詞側が読む。詞先なら作詞側が決め、作曲・編曲側が読む。この場合は歌詞の字数や文型によって `form[].bars` が制約される。
+> - **後から作業する側は六項目を直接変更しない。** どうしても変更が必要な場合（例として、歌詞が指定の小節数に収まらない場合）は、先に作業した側に `messages` を 1 件送り、変更したい項目と理由を伝える。相手が承諾して自分の仕様書を更新したら、後から作業する側が読み込み直す。
+> - 一方だけで制作し、もう一方の仕様書が存在しない場合は、本パッケージで六項目を決める。
 
-在本规格单里：先词后曲时读进来的六项记在 `meta.upstream.lyrics.shared`；读进来的 `tempo`、`key` 是 `null`（词那边定不出）时由本包定，再发消息告诉 `lyrics`。本包在消息里是 `music`，歌词一侧是 `lyrics`。
+詞先の場合、読み込んだ六項目はこの仕様書の `meta.upstream.lyrics.shared` に記録する。作詞側で決められず、読み込んだ `tempo` や `key` が `null` の場合は本パッケージで決め、`lyrics` にメッセージで伝える。メッセージでは本パッケージを `music`、作詞側を `lyrics` とする。

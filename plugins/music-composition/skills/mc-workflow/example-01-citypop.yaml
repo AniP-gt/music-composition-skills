@@ -1,48 +1,48 @@
-# ARR-SPEC 示例 ①：City Pop《末班电车》
-# 用途：正面样本，20 条自查全过；AB 实验的 B 组素材。
-# 这份规格刻意在每一条自查上都做出了明确选择，可当作"该写到多细"的标尺。
+# ARR-SPEC の例 ① City Pop「終電」
+# 良い例。セルフチェック 20 項目すべてに合格。AB 実験の B グループ用素材。
+# この仕様では、セルフチェックの各項目に対応する判断を一つずつ明記している。どこまで具体的に書くかの目安にできる。
 
 spec_version: "1.0"
 
 meta:
-  title: "末班电车"
+  title: "終電"
   style_layer: "mc-style-citypop-rnb"
   key: "D major"
   mode: "ionian"
   meter: "4/4"
   tempo: 112
-  target_duration: "4:04"        # 114 小节 × 4 拍 ÷ 112 BPM = 244 s
+  target_duration: "4:04"        # 114 小節 × 4 拍 ÷ 112 BPM = 244 s
   deliverable: [full_mix, stems, midi, musicxml]
 
 intent:
-  one_thing: "一个人坐末班车回家时，忽然不想到站。"
+  one_thing: "一人で終電に乗って帰る途中、ふと駅に着いてほしくないと思う。"
   reference_pair:
     - track: "山下達郎 - Sparkle"
-      borrow: "只借前奏那把 16 分音符干净吉他的持续织体，不借它的明亮情绪"
+      borrow: "イントロでクリーンギターが 16 分音符を刻み続けるテクスチャーだけを取り入れる。曲調の明るさは持ち込まない"
     - track: "竹内まりや - Plastic Love"
-      borrow: "只借副歌人声与和声之间那层距离感（人声不贴脸），不借它的和声走向"
-  listener_situation: "夜里戴耳机通勤，听第一遍；注意力被窗外分走一半，所以记忆点必须在 20 秒内出现一次。"
+      borrow: "サビのボーカルと伴奏の和声との距離感だけを取り入れる。ボーカルを前に出しすぎず、コード進行は引き継がない"
+  listener_situation: "夜の通勤中にイヤホンで初めて聴く。注意の半分は窓の外に向いているので、耳に残るフレーズを 20 秒以内に一度聴かせる。"
   emotional_arc:
-    - {section: I,  mood: "悬空、未定",         value: 2}
-    - {section: A1, mood: "克制的日常叙述",     value: 3}
-    - {section: B1, mood: "开始不安分",         value: 5}
-    - {section: C1, mood: "放任",               value: 8}
-    - {section: A2, mood: "退回日常，但回不去", value: 4}
-    - {section: B2, mood: "更急",               value: 6}
-    - {section: C2, mood: "彻底放任",           value: 9}
-    - {section: D,  mood: "空掉，后悔的一瞬",   value: 3}   # ← 转折在这里
-    - {section: C3, mood: "不后悔了",           value: 10}
-    - {section: O,  mood: "车门关上",           value: 4}
+    - {section: I,  mood: "宙ぶらりんで、気持ちが定まらない",         value: 2}
+    - {section: A1, mood: "日常を淡々と語る",     value: 3}
+    - {section: B1, mood: "そわそわし始める",         value: 5}
+    - {section: C1, mood: "気持ちのままに身を任せる",               value: 8}
+    - {section: A2, mood: "日常に戻ろうとしても、もう戻れない", value: 4}
+    - {section: B2, mood: "焦りが増す",               value: 6}
+    - {section: C2, mood: "気持ちのままにすべてを委ねる",           value: 9}
+    - {section: D,  mood: "ふっと何もなくなり、後悔がよぎる",   value: 3}   # ← ここが転機
+    - {section: C3, mood: "もう後悔はない",           value: 10}
+    - {section: O,  mood: "電車のドアが閉まる",           value: 4}
 
 material:
-  motif: "主歌首句的下行四音动机：级进两音后跳进三度，二拍长，起在第二拍的后半"
-  character: "松弛、往后靠"
+  motif: "ヴァースの最初のフレーズに出る 4 音の下降モチーフ。2 音を順次進行で下ったあと、3 度跳躍する。長さは 2 拍で、第 2 拍の裏から入る"
+  character: "力を抜いて、拍の後ろに乗る"
   stated_in: [A1]
 
 form:
   - id: I
     name: "Intro"
-    bars: 6                       # ★ 非 8 的倍数：让开头就不对称
+    bars: 6                       # ★ 8 の倍数を外し、冒頭から非対称にする
     start_bar: 1
     harmony: "|IVmaj7 |III7 |VIm7 |%  |IVmaj7 |V |"
     harmony_letters: "|Gmaj7 |F#7 |Bm7 |%  |Gmaj7 |A |"
@@ -50,7 +50,7 @@ form:
     development: new
     energy: 2
     events: [ep_in, syn_lead_in]
-    note: "6 小节而非 8——第 5–6 小节是被砍掉一半的乐句，进人声时听感是'提前了'"
+    note: "8 小節のフレーズを 6 小節に詰める。第 5–6 小節はフレーズの後半を切った形で、ボーカルが早く入ったように聴こえる"
 
   - id: A1
     name: "Verse"
@@ -62,11 +62,11 @@ form:
     development: new
     energy: 3
     events: [drums_in, bass_in, gtr_in, vocal_in]
-    note: "人声全程在中低音区，为副歌留出 6 度的抬升空间"
+    note: "ボーカルはこのセクションを通して中低音域にとどめ、サビで 6 度上げられる余地を残す"
 
   - id: B1
     name: "Pre-Chorus"
-    bars: 6                       # ★ 非 8：抬升句故意短，把副歌提前推出来
+    bars: 6                       # ★ 8 小節を外し、盛り上げるフレーズをあえて短くしてサビを前倒しする
     start_bar: 23
     harmony: "|IIm7 |IIIm7 |IVmaj7 |#IVm7b5 |V |%  |"
     harmony_letters: "|Em7 |F#m7 |Gmaj7 |G#m7b5 |A |%  |"
@@ -74,7 +74,7 @@ form:
     development: sequence
     energy: 5
     events: [strings_teaser]
-    note: "#IVm7♭5 是全曲第一个调外和弦，作用是让副歌的 I 听起来像'终于到了'"
+    note: "#IVm7♭5 は曲中で最初に出る調外のコード。サビの I に着いたときに「やっと着いた」と感じさせる"
 
   - id: C1
     name: "Chorus"
@@ -86,11 +86,11 @@ form:
     development: new
     energy: 8
     events: [strings_in, syn_hook_returns]
-    note: "王道 4536。第一个字就是全段最高音，不铺垫"
+    note: "王道の 4536 進行。出だしの一音でセクションの最高音に跳び込む"
 
   - id: A2
     name: "Verse"
-    bars: 12                      # ★ 比 A1 短 4 小节：第二段不许原样复制
+    bars: 12                      # ★ A1 より 4 小節短くし、2 回目のヴァースに変化をつける
     start_bar: 45
     harmony: "|Imaj7 |IIIm7 |IVmaj7 |V |VIm7 |IIIm7 |IVmaj7 |V |IIm7 |IIIm7 |IVmaj7 |V |"
     harmony_letters: "|Dmaj7 |F#m7 |Gmaj7 |A |Bm7 |F#m7 |Gmaj7 |A |Em7 |F#m7 |Gmaj7 |A |"
@@ -98,7 +98,7 @@ form:
     development: vary
     energy: 4
     events: [gtr_out_half, strings_out]
-    note: "砍掉 A1 的第二遍前半，靠第 44 小节的 fill 掩盖接缝"
+    note: "A1 の繰り返し部分の前半をカットし、第 44 小節のフィルでつなぎ目を目立たなくする"
 
   - id: B2
     name: "Pre-Chorus"
@@ -110,7 +110,7 @@ form:
     development: repeat
     energy: 6
     events: [drums_build]
-    note: "与 B1 同和声，但人声高八度、鼓换成 16 分连击"
+    note: "コード進行は B1 と共通。ボーカルを 1 オクターブ上げ、ドラムを 16 分音符の連打に切り替える"
 
   - id: C2
     name: "Chorus"
@@ -122,23 +122,23 @@ form:
     development: repeat
     energy: 9
     events: [full_band, gtr_exit_after]
-    note: "进入前的最后半拍全体静止（见 subtraction_events）"
+    note: "入る直前の半拍は全パートを止める（subtraction_events 参照）"
 
   - id: D
     name: "Bridge"
-    bars: 10                      # ★ 非 8
+    bars: 10                      # ★ 8 小節を外す
     start_bar: 79
     harmony: "|bVImaj7 |bVII |IIIm7 |VI7 |bVImaj7 |bVII |Imaj7 |V/V |V |%  |"
     harmony_letters: "|Bbmaj7 |C |F#m7 |B7 |Bbmaj7 |C |Dmaj7 |E7 |A |%  |"
     melody_register: "低"
     development: fragment
-    energy: 3                     # ★ 能量曲线的下降点
+    energy: 3                     # ★ エネルギー曲線が落ち込む箇所
     events: [drums_out, bass_out, sax_in]
-    note: "★ 全曲唯一的离调段：♭VI/♭VII 借自同主音小调，VI7 与 V/V 是副属。鼓贝全撤，只剩电钢＋人声＋萨克斯"
+    note: "★ 曲中で唯一、調から外れるセクション。♭VI/♭VII は同主短調からの借用で、VI7 と V/V はセカンダリー・ドミナント。ドラムとベースをすべて抜き、エレクトリックピアノ、ボーカル、サックスだけを残す"
 
   - id: C3
     name: "Chorus"
-    bars: 18                      # ★ 比 C1/C2 多 2 小节的 tag
+    bars: 18                      # ★ C1/C2 に対し、タグを 2 小節追加
     start_bar: 89
     harmony: "|IVmaj7 |V |IIIm7 |VIm7 |IVmaj7 |V |Imaj7 |%  |x2 |IVmaj7 |V |"
     harmony_letters: "|Gmaj7 |A |F#m7 |Bm7 |Gmaj7 |A |Dmaj7 |%  |x2 |Gmaj7 |A |"
@@ -146,7 +146,7 @@ form:
     development: recap
     energy: 10
     events: [all_in, vocal_ad_lib]
-    note: "末尾 2 小节 tag 不解决，直接挂在 V 上进 Outro"
+    note: "末尾 2 小節のタグは解決させず、V にとどめたまま Outro に入る"
 
   - id: O
     name: "Outro"
@@ -158,71 +158,71 @@ form:
     development: fragment
     energy: 4
     events: [vocal_out, sax_solo, fade_none]
-    note: "回到 Intro 的和声但停在 VIm——出发时是 D，回来是 Bm，'没到站'。不淡出，硬切"
+    note: "Intro のコード進行に戻り、VIm で止める。出発時は D、戻った先は Bm で「駅には着かなかった」。フェードアウトせず、ばっさり切る"
 
 arrangement:
   roster:
-    - {id: drums_acoustic, midi: {program: 0, bank: 0, channel: 10}, instrument: "70 年代收音的原声鼓＋gated snare", role: "律动",     band: "60 Hz–12 kHz", entry: A1, exit: end,  note: "D 段整段静默"}
-    - {id: bass_el,        midi: {program: 33, bank: 0, channel: 2}, instrument: "Precision Bass，指弹，短延音",     role: "低频",     band: "40–250 Hz",    entry: A1, exit: end,  note: "抢拍 12 ms"}
-    - {id: ep_rhodes,      midi: {program: 4, bank: 0, channel: 3}, instrument: "Rhodes Mk I ＋ 轻 chorus",         role: "和声铺底", band: "200 Hz–2 kHz", entry: I,  exit: end,  note: "音区限 C3–C4"}
-    - {id: gtr_clean_16th, midi: {program: 27, bank: 0, channel: 4}, instrument: "Strat 单线圈，16 分音符闷音刷弦",  role: "织体",     band: "1–3 kHz",      entry: A1, exit: C2,   note: "★ D 段之后不再出现，把空间让给萨克斯"}
-    - {id: syn_lead_saw,   midi: {program: 81, bank: 0, channel: 5}, instrument: "Prophet 类锯齿单音，慢滑音",       role: "记忆点",   band: "1.5–4 kHz",    entry: I,  exit: end,  note: "只弹 hook，不做垫底"}
-    - {id: strings_pad,    midi: {program: 48, bank: 0, channel: 6}, instrument: "弦乐群，高把位长音",               role: "色彩",     band: "400 Hz–6 kHz", entry: C1, exit: end,  note: "A2 退出一次，C2 再回来"}
-    - {id: sax_tenor,      midi: {program: 66, bank: 0, channel: 7}, instrument: "次中音萨克斯",                     role: "旋律",     band: "250 Hz–4 kHz", entry: D,  exit: O,    note: "★ 全曲过半才进场，Outro 是它的"}
-    - {id: vocal_lead,     midi: {program: 53, bank: 0, channel: 1}, instrument: "女声，气声偏多，不贴脸",           role: "旋律",     band: "200 Hz–8 kHz", entry: A1, exit: C3,   note: "★ Outro 无人声"}
+    - {id: drums_acoustic, midi: {program: 0, bank: 0, channel: 10}, instrument: "70 年代風に録ったアコースティックドラム＋gated snare", role: "律动",     band: "60 Hz–12 kHz", entry: A1, exit: end,  note: "D はセクションを通して鳴らさない"}
+    - {id: bass_el,        midi: {program: 33, bank: 0, channel: 2}, instrument: "Precision Bass。指弾きで、音の伸びは短め",     role: "低频",     band: "40–250 Hz",    entry: A1, exit: end,  note: "拍より 12 ms 先行"}
+    - {id: ep_rhodes,      midi: {program: 4, bank: 0, channel: 3}, instrument: "Rhodes Mk I ＋ 薄めの chorus",         role: "和声铺底", band: "200 Hz–2 kHz", entry: I,  exit: end,  note: "音域は C3–C4 に限定"}
+    - {id: gtr_clean_16th, midi: {program: 27, bank: 0, channel: 4}, instrument: "Strat のシングルコイル。16 分音符のミュートストローク",  role: "织体",     band: "1–3 kHz",      entry: A1, exit: C2,   note: "★ D 以降はギターを入れず、サックスにスペースを譲る"}
+    - {id: syn_lead_saw,   midi: {program: 81, bank: 0, channel: 5}, instrument: "Prophet 系のノコギリ波を単音で鳴らし、ゆっくりグライドさせる",       role: "记忆点",   band: "1.5–4 kHz",    entry: I,  exit: end,  note: "フックだけを弾く。伴奏の下支えには使わない"}
+    - {id: strings_pad,    midi: {program: 48, bank: 0, channel: 6}, instrument: "ストリングス。高いポジションでロングトーンを弾く",               role: "色彩",     band: "400 Hz–6 kHz", entry: C1, exit: end,  note: "A2 で一度抜け、C2 で戻る"}
+    - {id: sax_tenor,      midi: {program: 66, bank: 0, channel: 7}, instrument: "テナーサックス",                     role: "旋律",     band: "250 Hz–4 kHz", entry: D,  exit: O,    note: "★ 曲の後半で初めて入り、Outro では主役になる"}
+    - {id: vocal_lead,     midi: {program: 53, bank: 0, channel: 1}, instrument: "女性ボーカル。息を多めに混ぜ、前に出しすぎない",           role: "旋律",     band: "200 Hz–8 kHz", entry: A1, exit: C3,   note: "★ Outro はボーカルなし"}
 
   depth_map: {vocal_lead: 前景, syn_lead_saw: 前景, sax_tenor: 前景, gtr_clean_16th: 中景, drums_acoustic: 中景, bass_el: 背景, ep_rhodes: 背景, strings_pad: 背景}
-  bass_kick_relation: {mode: 交织式, detail: "A/B 段贝斯避开底鼓点（互答），C 段与底鼓重合加厚（结合）；D 段无鼓"}
+  bass_kick_relation: {mode: 交织式, detail: "A/B ではベースをキックとずらして掛け合いにする。C ではキックと重ねて厚みを出す。D にはドラムを入れない"}
 
   spectrum_budget:
-    - {band: "40–120 Hz",   owner: bass_el,        competitors: [drums_acoustic], resolution: "Kick 侧链 Bass 30 ms 释放，Bass 在 Kick 击点让出 3 dB"}
-    - {band: "200–500 Hz",  owner: ep_rhodes,      competitors: [strings_pad, vocal_lead], resolution: "错开音区：ep 限 C3–C4，strings 只写 C4 以上"}
-    - {band: "1–3 kHz",     owner: gtr_clean_16th, competitors: [syn_lead_saw],   resolution: "交替出现：gtr 只在 A/B 段，syn_lead 只在 I/C/O 段的句尾空档"}
-    - {band: "6–12 kHz",    owner: drums_acoustic, competitors: [strings_pad],    resolution: "strings 高频滚降 8 kHz，把空气感留给 hihat"}
+    - {band: "40–120 Hz",   owner: bass_el,        competitors: [drums_acoustic], resolution: "Kick をトリガーに Bass をサイドチェインでダッキング。リリースは 30 ms で、Kick が鳴るタイミングで Bass を 3 dB 下げる"}
+    - {band: "200–500 Hz",  owner: ep_rhodes,      competitors: [strings_pad, vocal_lead], resolution: "错开音区：音域をずらす。ep は C3–C4 に絞り、strings は C4 以上だけに書く"}
+    - {band: "1–3 kHz",     owner: gtr_clean_16th, competitors: [syn_lead_saw],   resolution: "交替出现：交互に鳴らす。gtr は A/B のみ、syn_lead は I/C/O のフレーズ末尾の隙間のみ"}
+    - {band: "6–12 kHz",    owner: drums_acoustic, competitors: [strings_pad],    resolution: "strings は 8 kHz で高域をロールオフし、空気感は hihat に任せる"}
 
   energy_curve: {I: 2, A1: 3, B1: 5, C1: 8, A2: 4, B2: 6, C2: 9, D: 3, C3: 10, O: 4}
 
   subtraction_events:
-    - {at: {section: C2, bar_offset: -1, beat: 4.5}, what: "进入前最后半拍全体静止（含鼓）", why: "第二段副歌不能靠更响赢第一段，靠前面那个洞"}
-    - {at: {section: D}, what: "鼓与贝斯整段撤出，只剩电钢＋人声＋萨克斯", why: "全曲能量最低点必须在 C3 之前，否则 C3 不成立"}
-    - {at: {section: A2}, what: "弦乐与半数吉他退出", why: "第二段主歌要比第一段更空，而不是更满"}
+    - {at: {section: C2, bar_offset: -1, beat: 4.5}, what: "入る直前の半拍は、ドラムも含めて全パートを止める", why: "2 回目のサビは、音量を上げる代わりに直前の無音で 1 回目より強く印象づける"}
+    - {at: {section: D}, what: "セクション全体でドラムとベースを抜き、エレクトリックピアノ、ボーカル、サックスだけを残す", why: "C3 を成立させるには、その前に曲全体のエネルギーが最も低くなる箇所が必要"}
+    - {at: {section: A2}, what: "ストリングスとギターの半数を抜く", why: "2 回目のヴァースは 1 回目より音数を減らし、隙間を広く取る"}
 
   hooks:
     vocal_hook:
-      where: "C1 第 1–2 小节"
-      shape: "第一个字直接落在全段最高音，随后 5→3 下行，不做铺垫"
+      where: "C1 第 1–2 小節"
+      shape: "前置きなしに最初の音節でセクションの最高音を歌い、続いて 5→3 と下行する"
     arrangement_hook:
-      what: "syn_lead_saw 的三音上行 riff：D–E–F#，末音延长一拍半后慢滑下小三度"
+      what: "syn_lead_saw の 3 音の上行リフ D–E–F#。最後の音を 1 拍半伸ばしてから、短3度下へゆっくりグライドする"
       first_at: I
       recurs_at: [C1, C2, C3, O]
 
   groove:
     feel: "straight16"
     push_pull:
-      - {part: bass_el,        offset_ms: -12, note: "贝斯抢拍，是这首歌'往前赶'的唯一来源"}
-      - {part: gtr_clean_16th, offset_ms: 8,   note: "刷弦略拖，与贝斯拉开，产生宽度错觉"}
-      - {part: drums_acoustic, offset_ms: 0,   note: "鼓守网格，做参照系"}
+      - {part: bass_el,        offset_ms: -12, note: "ベースだけが拍を先取りし、曲に前へ進む感覚を出す"}
+      - {part: gtr_clean_16th, offset_ms: 8,   note: "ストロークをわずかに遅らせ、ベースとのタイミングの差で幅が広がったように聴かせる"}
+      - {part: drums_acoustic, offset_ms: 0,   note: "ドラムはグリッドにそろえ、タイミングの基準にする"}
     fill_policy:
       bars: [22, 28, 44, 62, 78, 88, 106]
-      rationale: "只在段落切换前一小节；第 44 小节是唯一的段中 fill，用来掩盖 A2 比 A1 短 4 小节的接缝。刻意不等距。"
+      rationale: "原則としてセクションが切り替わる前の 1 小節だけに入れる。セクションの途中に置く唯一のフィルは第 44 小節で、A2 が A1 より 4 小節短くなるつなぎ目を目立たなくする。フィルの間隔はあえて不均等にする。"
 
 vocal:
-  persona: "二十多岁的女声，中低音区为主（副歌抬到中高），气声偏多、不贴脸，八十年代东京 city pop 的都会质感"
-  delivery: "气声偏多的半声，咬字松，不追求字正腔圆——这首歌是自言自语不是宣告"
+  persona: "20 代の女性ボーカル。主に中低音域を使い、サビで中高音域まで上げる。息を多めに混ぜて前に出しすぎず、80 年代の東京の city pop らしい都会的な質感を出す"
+  delivery: "息を多めに混ぜ、声量を抑える。独り言のように、発音を作り込みすぎず力を抜いて歌う"
   dynamics_by_section: {I: 0, A1: 3, B1: 5, C1: 7, A2: 4, B2: 6, C2: 8, D: 2, C3: 9, O: 0}
   phrasing:
-    - {line: "C1 第一句", timing: "抢 40ms", why: "副歌第一个字就是最高音，抢进来才不像在铺垫"}
-    - {line: "A2 每句句尾", timing: "拖 80ms", why: "第二段主歌要比第一段更懒，靠拖不靠减音符"}
-    - {line: "D 段末两句", timing: "自由", why: "鼓贝已撤，让人声脱离网格"}
+    - {line: "C1 の最初のフレーズ", timing: "40ms 前に出す", why: "サビは最初の音節が最高音なので、拍より早く入って前置きのない歌い出しにする"}
+    - {line: "A2 の各フレーズの末尾", timing: "80ms 後ろにずらす", why: "2 回目のヴァースは 1 回目より気だるく歌う。音数はそのままに、タイミングを後ろへずらす"}
+    - {line: "D の最後の 2 フレーズ", timing: "自由", why: "ドラムとベースを抜いてあるので、ボーカルはグリッドから離れて歌う"}
   breath_points:
-    - {section: C1, line: 1, after_syllable: 8, note: "第 2 小节后换气，换气声保留，不剪掉"}
-    - {section: D, line: 4, after_syllable: 0, note: "D 段最后 2 小节完全不唱（留白处，见 self_audit）"}
+    - {section: C1, line: 1, after_syllable: 8, note: "第 2 小節のあとで息を継ぎ、ブレス音は残す"}
+    - {section: D, line: 4, after_syllable: 0, note: "D の最後の 2 小節は歌わない（余白の箇所。self_audit 参照）"}
   ad_libs:
-    - {at: {section: C2}, what: "句尾一声极轻的上滑，只此一次"}
-    - {at: {section: C3, bar_offset: 12}, what: "第 13–16 小节的 tag 上叠即兴，与主旋律错开"}
-  chorus_variation: "C1 直白；C2 尾音拖长半拍；C3 第 3 句改唱低八度、第 4 句才回到原音区"
-  stacking: "C1 无和声；C2 加三度一层；C3 加三度＋六度两层，仅在'不想到站'那一句"
-  register_arc: "A 段中低 → C 段中高 → D 段回落到低 → C3 全曲最高"
+    - {at: {section: C2}, what: "フレーズ末尾で、ごく小さな声で音を滑らせて上げる。この 1 回のみ"}
+    - {at: {section: C3, bar_offset: 12}, what: "第 13–16 小節のタグにアドリブを重ね、主旋律とタイミングをずらす"}
+  chorus_variation: "C1 は素直に歌う。C2 は語尾の音を半拍伸ばす。C3 は第 3 フレーズを 1 オクターブ下げ、第 4 フレーズで元の音域に戻す"
+  stacking: "C1 はハモリなし。C2 は 3 度のハモリを 1 声加える。C3 は「駅に着いてほしくない」のフレーズにだけ、3 度と 6 度のハモリを 2 声重ねる"
+  register_arc: "A は中低音域 → C は中高音域 → D で低音域に戻る → C3 で曲中の最高音に達する"
 
 mix_intent:
   ducking_map:
@@ -234,22 +234,22 @@ mix_intent:
   dynamics:
     target_DR_dB: 10
     notes:
-      - "D 段必须比 C2 低 6 dB（短时响度），这是全曲唯一允许的大落差"
-      - "C3 只比 C2 高 1.5 dB，多出来的冲击靠编制和 18 小节的长度，不靠音量"
+      - "D の短時間ラウドネスは C2 より必ず 6 dB 低くする。曲中でこれほど大きな落差をつけるのはここだけ"
+      - "C3 のラウドネスは C2 より 1.5 dB 高いだけに抑え、編成と 18 小節の長さでインパクトを強める"
   width_map: {I: medium, A1: narrow, B1: medium, C1: wide, A2: narrow, B2: medium, C2: wide, D: narrow, C3: wide, O: medium}
   loudness_target: "-10 LUFS integrated"
 
 render:
   suno:
     style_prompt: "1980s Japanese city pop, 112 BPM, D major, Rhodes electric piano, 16th-note muted clean guitar, electric bass playing ahead of the beat, gated reverb snare, analog saw synth lead riff, tenor saxophone solo in the bridge and outro, female vocal with breathy tone mixed back, warm tape saturation"
-    # section_tags 由 form[].name 派生，不手填
+    # section_tags は form[].name から生成するため、手入力は不要
     exclude: ["EDM drop", "trap hi-hats", "modern sidechain pumping", "orchestral epic", "fade out ending"]
     knobs: {model: "v4.5+", weirdness: "35%", style_influence: "65%"}
   yue:
     genre_tags: "city pop, japanese, female vocal, rhodes electric piano, clean guitar, tenor saxophone, analog synth lead, 112 bpm, D major, nostalgic, night drive"
     structure: ["intro", "verse", "pre-chorus", "chorus", "verse", "pre-chorus", "chorus", "bridge", "chorus", "outro"]
     ref_audio: null
-    abc: null   # 由 mc-symbolic-score 编译；端到端跑通前留空
+    abc: null   # mc-symbolic-score でコンパイルする。処理全体が通るまでは空欄
   midi:
     instrument_map:
       drums_acoustic: {name: "Standard Kit", program: 0, bank: 0, channel: 10}
@@ -259,21 +259,21 @@ render:
       syn_lead_saw: {name: "Lead 2 (sawtooth)", program: 81, bank: 0, channel: 5}
       strings_pad: {name: "String Ensemble 1", program: 48, bank: 0, channel: 6}
       sax_tenor: {name: "Tenor Sax", program: 66, bank: 0, channel: 7}
-      vocal_lead: {name: "Voice Oohs（Suno/YuE 生成，MIDI 基准里占位）", program: 53, bank: 0, channel: 1}
+      vocal_lead: {name: "Voice Oohs（Suno/YuE で生成。基準となる MIDI では仮音源として使う）", program: 53, bank: 0, channel: 1}
 
 checks:
   self_audit:
-    - "[x] one_thing 念出来是一句话——'不想到站'，不是两件事"
-    - "[x] 两个参照各借的点不重叠：一个借织体，一个借人声距离感"
-    - "[x] arrangement_hook 不看谱能哼出来：三个音的上行"
-    - "[x] melody_register 有对比：A 段中低，C 段中高，D 段低，C3 高"
-    - "[x] 留白处：D 段最后 2 小节人声停住不唱，只有萨克斯——'后悔的那一瞬'不说出来"
+    - "[x] one_thing を声に出すと、「駅に着いてほしくない」という一つの気持ちを表す一文になっている"
+    - "[x] リファレンス 2 曲から取り入れる要素が異なる。一方はテクスチャー、もう一方はボーカルの距離感"
+    - "[x] arrangement_hook は譜面なしで口ずさめる 3 音の上行フレーズ"
+    - "[x] melody_register に対比がある。A は中低音域、C は中高音域、D は低音域、C3 は高音域"
+    - "[x] D の最後の 2 小節はボーカルが止まり、サックスだけになる。「後悔がよぎる瞬間」を言葉にせず、余白を作る"
   exemptions: []
 
-# 消息通道（schema §5.3）：给混音的一条，示范写法
+# メッセージチャンネル（schema §5.3）。ミックス担当に送るメッセージの記入例
 messages:
   - from: music
     to: sound
     about: ["mix_intent.dynamics", "arrangement.subtraction_events"]
-    says: "D 段比 C2 低 6 dB 是全曲唯一的大落差，C2 前最后半拍的全体静止也是有意的；-10 LUFS 的目标下请留住这两处，别让总线压缩把它们填平。留不住的话回一句，本包改 C3 的编制来补"
+    says: "D を C2 より 6 dB 下げるところが、曲中で唯一の大きな落差です。C2 の直前に全パートを半拍止めるのも意図したものです。-10 LUFS を目標に調整する際は、バスコンプでこの落差や無音が埋まらないよう、両方とも残してください。残すのが難しければ一言返信をください。このパッケージ側で C3 の編成を変えて補います"
     status: open

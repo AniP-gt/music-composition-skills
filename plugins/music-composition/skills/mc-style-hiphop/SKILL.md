@@ -1,452 +1,452 @@
 ---
 name: mc-style-hiphop
-description: Hip-hop and trap as a style layer (嘻哈风格层); beat-first music where the producer is a programmer, not a drummer. Covers the third time-feel from Dilla Time (straight and swung at once) with usable numbers (rushed snare ~65 ms, per-voice swing, shift-timing ticks), the tempo bands for standard / slow / half-time, the 808 as harmony carrier versus the kick, sample-based beat making from Schloss's Making Beats (digging, looping vs chopping, sampling ethics, locking up a beat, sample layers in the roster), and rap vocals from How to Rap 1 & 2 (flow on the grid, rests and breath, delivery dimensions of pitch / volume / timbre / staccato, 16-bar verse and 4- or 8-bar hook, ad-libs, the rap-versus-sung boundary). Use when writing or arranging hip-hop, trap, boom-bap, lo-fi or a rap section inside another style, when a beat sounds stiff, when the 808 fights the kick, or when deciding what to sample and how to chop it. 嘻哈、说唱、trap、boom bap、808、Dilla、半拍、律动、beat、采样、切片、chop、loop、digging、flow、delivery、气口、ad-lib。
+description: Hip-hop and trap as a style layer (ヒップホップのスタイルレイヤー); beat-first music where the producer is a programmer, not a drummer. Covers the third time-feel from Dilla Time (straight and swung at once) with usable numbers (rushed snare ~65 ms, per-voice swing, shift-timing ticks), the tempo bands for standard / slow / half-time, the 808 as harmony carrier versus the kick, sample-based beat making from Schloss's Making Beats (digging, looping vs chopping, sampling ethics, locking up a beat, sample layers in the roster), and rap vocals from How to Rap 1 & 2 (flow on the grid, rests and breath, delivery dimensions of pitch / volume / timbre / staccato, 16-bar verse and 4- or 8-bar hook, ad-libs, the rap-versus-sung boundary). Use when writing or arranging hip-hop, trap, boom-bap, lo-fi or a rap section inside another style, when a beat sounds stiff, when the 808 fights the kick, or when deciding what to sample and how to chop it. ヒップホップ、ラップ、trap、boom bap、808、Dilla、ハーフタイム、グルーヴ、beat、サンプリング、スライス、chop、loop、digging、flow、delivery、ブレス位置、ad-lib。
 ---
 
-# 嘻哈风格层（Hip-hop / Trap）
+# ヒップホップのスタイルレイヤー（Hip-hop / Trap）
 
-> **这个风格里，制作者是程序员，不是"碰巧在打鼓机的鼓手"。**
-> 《Dilla Time》对 J Dilla 的定论正是这一句——
-> *"contrary to the trope that he was simply a great drummer who happened to play the drum machine, he was actually a programmer."*（《Dilla Time》作者按；第 8 章又从反面论证：关掉量化只是复制设备，有鼓手反射的人多得是，做出那种律动的只有他一个）
+> **このスタイルの制作者はプログラマーであり、「たまたまドラムマシンを叩いているドラマー」ではない。**
+> 『Dilla Time』で J Dilla を評したのが、まさにこの一文。
+> *"contrary to the trope that he was simply a great drummer who happened to play the drum machine, he was actually a programmer."*（『Dilla Time』の著者注。第8章では逆からも論じている。クオンタイズを切るだけなら機材の設定を再現したにすぎない。ドラマーの反射神経を持つ人は大勢いるが、あのグルーヴを作れたのは彼だけだった）
 
-所以本 skill 的立场和别的风格层不同：**律动是被设计的，不是被演奏的。**
-"松"、"醉"、"拖"都是**参数**，不是失误。
+そこでこのスキルは、ほかのスタイルレイヤーと異なり、**グルーヴを演奏の結果ではなく設計の対象として扱う。**
+「ゆるさ」「酔ったような揺れ」「後ノリ」はすべて意図して設定する**パラメーター**。
 
-## 本 skill 覆盖什么
+## このスキルの対象範囲
 
-| 覆盖 | 不覆盖 |
+| 扱うこと | 対象外 |
 |---|---|
-| 《Dilla Time》——律动理论（§3） | trap 的专门做法（hat 滚奏语法、build/drop 结构） |
-| Schloss《Making Beats》——采样型 hip-hop 的制作逻辑与规则（§6） | 中文说唱的编曲实务 |
-| Edwards《How to Rap》1 & 2——rap 人声在编曲里的位置与 delivery（§7） | 词本身（押韵密度、多音节韵、内容）→ 作词 |
-| 语料 hiphop-rnb **10 首**实测 ARR-SPEC（§6.1–6.2） | 采样的版权与清样 |
-| Drummer's Bible 的鼓型与速度区间（p0089–0090、p0109）；DeSantis、野崎 | |
+| 『Dilla Time』のグルーヴ理論（§3） | trap 固有の制作手法（hat のロールの組み方、build/drop 構成） |
+| Schloss『Making Beats』のサンプル主体の hip-hop 制作の考え方とルール（§6） | 中国語ラップの実践的なアレンジ |
+| Edwards『How to Rap』1 & 2 の rap ボーカルのアレンジ上の位置と delivery（§7） | 歌詞そのもの（韻の密度、多音節韻、内容）→ 作詞 |
+| コーパス hiphop-rnb **10曲**の実測 ARR-SPEC（§6.1–6.2） | サンプリングの著作権と権利処理 |
+| Drummer's Bible のドラムパターンとテンポ範囲（p0089–0090、p0109）。DeSantis、野崎 | |
 
-★ 语料的 10 首是 **hiphop-rnb 混装**，R&B 一侧的特征已在 `mc-style-citypop-rnb` §7。
+★ コーパスの10曲には **hiphop-rnb が混在**しており、R&B 側の特徴は `mc-style-citypop-rnb` §7 に記載済み。
 
-## 按任务读哪几节
+## 作業別の参照先
 
-| 任务 | 读 |
+| 作業 | 参照先 |
 |---|---|
-| **判断这些手法能不能搬走 / 搬进来** | ★ §2 移植表 |
-| beat 听着僵、像量化过 | ★ §3 第三种时间感；数字在 §3.6 |
-| 定速度 | §4；club / 个人聆听的差异在 §6.7 |
-| 808 和底鼓打架 | §5 |
-| 编制怎么排（采样型） | §6；roster 怎么写见 §6.6 |
-| **能不能采这个、怎么切** | ★ §6.4 规则、§6.5 搭 loop；步骤表在 `reference.md` §1–§2 |
-| rap 和唱怎么分 | §7.1、§7.6 |
-| rap 段的 `push_pull` / 气口 / ad-lib 怎么写 | §7.2–§7.5；参数表在 `reference.md` §3–§5 |
-| **和旋律型风格混合**（rap + 中国风、rap + city pop） | ★ §8 |
+| **手法をほかのスタイルへ持ち出したり取り入れたりできるか判断したい** | ★ §2 応用の可否 |
+| beat がクオンタイズしたように硬く聞こえる | ★ §3 第3の時間感覚。数値は §3.6 |
+| テンポを決める | §4。club と個人でのリスニングの違いは §6.7 |
+| 808 とキックがぶつかる | §5 |
+| サンプル主体の編成を組む | §6。roster の書き方は §6.6 |
+| **この素材をサンプリングできるか、どう切るか** | ★ §6.4 のルール、§6.5 の loop の組み方。手順表は `reference.md` §1–§2 |
+| rap と歌唱を分ける | §7.1、§7.6 |
+| rap のセクションの `push_pull` / ブレス位置 / ad-lib を書く | §7.2–§7.5。パラメーター表は `reference.md` §3–§5 |
+| **メロディ主体のスタイルと融合する**（rap + 中国風、rap + city pop） | ★ §8 |
 
-## 边界
+## 対象範囲の境界
 
-| 不归这里 | 归哪 |
+| このスキルの対象外 | 参照先・担当領域 |
 |---|---|
-| 量化/velocity 的通用原理、幽灵音符、fill | `mc-rhythm-section` |
-| 节奏本身是什么（切分、先现、bounce） | `mc-rhythm-groove` |
-| 808/合成贝斯的**音色设计** | `mc-sound-design`（配方在其 reference §1.1 技法 31） |
-| rap 的**词**：押韵密度、多音节韵的写法、内容与题材 | **作词**的事。★ 本 skill 只管人声的**编曲位置、flow 与拍的关系、delivery 分配、和伴奏的关系** |
-| 演唱的通用语汇（辅音/元音、音准哲学、和声四型） | `mc-vocal-direction`；本 skill §7.3 只写 rap 特有的维度 |
-| R&B 的人声堆叠与和声 | `mc-style-citypop-rnb` §7 |
-| 采样的版权与清样 | 不做。§6.4 写的是制作人社群的**手艺规则**，不是法律 |
-
----
-
-## 1. 动笔前必填
-
-| 必填 | 问法 |
-|---|---|
-| **① 哪一支** | boom-bap / trap / lo-fi / drill / 旋律型说唱。**速度区间和鼓组语法完全不同**（§4） |
-| **② 直的、摇的、还是"第三种"** | §3。这是本风格最重要的一个决定 |
-| **③ 低频归谁** | 808 是贝斯还是底鼓？（§5）**不答这条低频一定糊** |
-| **④ rap 段和唱段的分界** | §7。全曲都 rap 和全曲都唱是两种歌 |
-| **⑤ 采样型还是合成型** | 决定 §6 的编制思路；采样型还要答"采什么、切多碎"（§6.4–6.5） |
+| クオンタイズ／velocity の一般原理、ゴーストノート、fill | `mc-rhythm-section` |
+| リズムそのものの仕組み（シンコペーション、先取り、bounce） | `mc-rhythm-groove` |
+| 808／シンセベースの**音色設計** | `mc-sound-design`（設定例は同 reference §1.1 技法31） |
+| rap の**歌詞**。韻の密度、多音節韻の書き方、内容と題材 | **作詞**の領域。★ このスキルが扱うのは、ボーカルの**アレンジ上の位置、flow と拍の関係、delivery の配分、伴奏との関係** |
+| 歌唱全般の用語や考え方（子音／母音、音程に関する考え方、ハーモニーの4類型） | `mc-vocal-direction`。このスキルの §7.3 では rap 固有の項目を扱う |
+| R&B のボーカルの重ね方とハーモニー | `mc-style-citypop-rnb` §7 |
+| サンプリングの著作権と権利処理 | 対象外。§6.4 ではプロデューサーのコミュニティで共有される**制作上のルール**を扱う |
 
 ---
 
-## 2. ★ 移植表
+## 1. 書き始める前の必須項目
 
-| 手法 | 可搬出去吗 | 说明 |
+| 必須項目 | 確認すること |
+|---|---|
+| **① どの系統か** | boom-bap / trap / lo-fi / drill / メロディックラップ。**テンポ範囲とドラムパターンの組み方がまったく違う**（§4） |
+| **② ストレートか、スウィングか、「第3」の感覚か** | §3。このスタイルで最も重要な判断 |
+| **③ 低域をどちらが担うか** | 808 はベースかキックか（§5）。**ここを決めないと低域は必ず濁る** |
+| **④ rap と歌唱のセクションの境界** | §7。全編 rap の曲と全編歌唱の曲は別の作りになる |
+| **⑤ サンプル主体かシンセ主体か** | §6 の編成の方針が決まる。サンプル主体の場合は「何をサンプリングし、どこまで細かく切るか」も決める（§6.4–6.5） |
+
+---
+
+## 2. ★ 応用の可否
+
+| 手法 | ほかのスタイルに応用できるか | 説明 |
 |---|---|---|
-| **第三种时间感**（直拍与摇摆并存） | ✅ ★ **本风格给别的风格最值钱的东西** | neo-soul、lo-fi、甚至流行抒情都在用。见 §3 |
-| **逐件乐器决定量化** | ✅ 可搬 | 它就是 `mc-rhythm-section` §2.2 的极端形态 |
-| **808 作为和声载体** | ⚠ 半搬 | 搬进旋律型风格时**只留低频功能**，滑音和长尾会立刻被认出来 |
-| **半拍感（half-time）** | ⚠ 半搬 | 强标记。搬进流行副歌可做"落ちサビ"式的落差 |
-| **采样切片作为织体** | ⚠ 半搬 | 在别的风格里是"lo-fi 味"的来源，一搬就被认出来 |
-| **trap hi-hat 的三连/32 分滚奏** | ❌ **不可搬** | 最强的风格标记 |
-| **rap 的 delivery** | ⚠ 半搬 | 作为一个段落（主歌）可以搬进任何风格——这正是 §8 的做法；作为全曲则整首就是 hip-hop |
-| **减法结构**（退场最多） | ✅ ★ **该搬** | §6.2 实测 |
+| **第3の時間感覚**（ストレートとスウィングの共存） | ✅ ★ **このスタイルからほかに応用できる最も価値の高い手法** | neo-soul、lo-fi、ポップバラードでも使われる。§3 を参照 |
+| **楽器ごとにクオンタイズを決める** | ✅ 応用できる | `mc-rhythm-section` §2.2 を極端にした形 |
+| **808 でハーモニーを担う** | ⚠ 一部を応用できる | メロディ主体のスタイルに取り入れる場合は**低域を担う機能だけを残す**。グライドや長い余韻を使うとすぐに hip-hop だと分かる |
+| **ハーフタイム感（half-time）** | ⚠ 一部を応用できる | スタイルが強く出る。ポップスのサビに取り入れると「落ちサビ」のような落差を作れる |
+| **サンプルのスライスをテクスチャに使う** | ⚠ 一部を応用できる | ほかのスタイルでは「lo-fi らしさ」が出るため、取り入れるとすぐに分かる |
+| **trap hi-hat の3連符／32分音符のロール** | ❌ **応用できない** | 最も強くスタイルを印象づける |
+| **rap の delivery** | ⚠ 一部を応用できる | 1セクション（ヴァース）ならどのスタイルにも入れられる。§8 がその手法。全編に使うと曲全体が hip-hop になる |
+| **音を抜いて作る構成**（パートを外す箇所が最も多い） | ✅ ★ **積極的に応用する** | §6.2 の実測 |
 
-★ **判据**：
-> **时间感与减法可以自由借；808 的尾巴、trap hat、采样颗粒是标记，借了就会被认出来。**
+★ **判断基準**：
+> **時間感覚と音を抜く手法は自由に応用できる。808 の余韻、trap hat、サンプルの粒立ちはスタイルの目印で、使えばすぐに分かる。**
 
 ---
 
-## 3. ★ 第三种时间感：本 skill 的核心
+## 3. ★ 第3の時間感覚：このスキルの中核
 
-《Dilla Time》引文按**章**定位（epub 无页码；全书 16 章的目录见 `reference-vocal.md` §6）。
+『Dilla Time』の引用箇所は**章**で示す（epub にページ番号はない。全16章の目次は `reference-vocal.md` §6）。
 
-### 3.1 定义
+### 3.1 定義
 
 > *"Before J Dilla, our popular music essentially had two common 'time-feels'—**straight time and swing time**—meaning that musicians felt and expressed time as either even or uneven pulses. What Dilla created was a third path of rhythm, **juxtaposing those two time-feels, even and uneven simultaneously**, creating a new, pleasurable, disorienting rhythmic friction and a new time-feel: Dilla Time."*
-> ——Dan Charnas《Dilla Time》（作者按）
+> ——Dan Charnas『Dilla Time』（著者注）
 
-**不是"介于直和摇之间"，是"同时是直的和摇的"。**
+**ストレートとスウィングが同時に成立する。**
 
-书在第 8 章把这句话说得更硬：
+第8章ではさらに踏み込んでいる。
 > *"It is the deliberate juxtaposition of multiple expressions of straight and swing time simultaneously, a conscious cultivation of rhythmic friction for maximum musicality and maximum surprise. It is conflicted time."*
-> 它**不是**直拍和摇摆之间的中点，也不是渐变。
+> ストレートとスウィングの中間点でも、片方からもう片方への段階的な変化でもない。
 
-### 3.2 它怎么做出来
+### 3.2 作り方
 
-书里拆了一个具体案例（第 8 章，Slum Village《Fantastic, Vol. 2》）：
+同書では具体例を分析している（第8章、Slum Village『Fantastic, Vol. 2』）。
 
-> 底鼓与军鼓在网格上本该等距，现在变成**短–长–短–长**——这是摇摆；
-> **而 hi-hat 同时保持均匀**——这是直拍。
+> グリッド上では等間隔になるはずのキックとスネアが**短–長–短–長**になり、スウィングを作る。
+> **同時に hi-hat は等間隔**を保ち、ストレートを作る。
 > *"So now there were two time-feels fighting each other: straight and swung."*
 
-★ **落到操作上就一句话：不同鼓件用不同的时间感。**
+★ **実際の操作では、ドラムのパーツごとに異なる時間感覚を使う。**
 
-| 鼓件 | 时间感 | 怎么做 |
+| ドラムのパーツ | 時間感覚 | 設定 |
 |---|---|---|
-| **hi-hat** | 直（守网格） | 量化 100% 或 swing 0 |
-| **kick / snare** | 摇（或提前/拖后） | 不量化，或 swing 55–65% |
-| （或反过来） | | |
+| **hi-hat** | ストレート（グリッドに合わせる） | クオンタイズ 100% または swing 0 |
+| **kick / snare** | スウィング（または前ノリ／後ノリ） | クオンタイズなし、または swing 55–65% |
+| （逆でもよい） | | |
 
-这与 `mc-rhythm-section` §2.2 "只量化部分乐器"是同一个原理，**但 hip-hop 把它推到极端：两套时间感故意打架。**
+`mc-rhythm-section` §2.2 の「一部の楽器だけをクオンタイズする」と同じ原理。**hip-hop ではそれを極端にし、2種類の時間感覚を意図的にぶつける。**
 
-书里还有一个感知细节（第 8 章）：**大脑把 kick 和 snare 当稳定基底**，所以军鼓一抢，**均匀的 hi-hat 反而听起来像摇的**——它其实是直的。这就是为什么"哪一件守网格"要写清楚。
+同書の第8章には聴覚に関する指摘もある。**脳は kick と snare を安定した土台として捉える**。そのためスネアを前にずらすと、**等間隔でストレートな hi-hat がスウィングしているように聞こえる**。だから、どのパーツをグリッドに合わせるか明記する必要がある。
 
-### 3.3 "松"是程序出来的
+### 3.3 「ゆるさ」をプログラムで作る
 
-> 书里描述 Dilla 律动的六个词：*"Sloppy. Drunken. Limping. Lazy. Dragging. Off."*
-> 但它们全是**关掉 Timing Correct** 之后一件一件手打出来的：
-> *"he programmed it without timing correct, increasing the sense of the unexpected."*（第 7 章，Pharcyde《Runnin'》）
+> 同書が Dilla のグルーヴを形容する6つの語。*"Sloppy. Drunken. Limping. Lazy. Dragging. Off."*
+> いずれも **Timing Correct を切った**うえで、パーツを1つずつ手で打ち込んで作った。
+> *"he programmed it without timing correct, increasing the sense of the unexpected."*（第7章、Pharcyde『Runnin'』）
 
-**MPC 的 Timing Correct** 就是量化（第 5 章，Amp Fiddler 教 MPC60 时的原话）：
+**MPC の Timing Correct** はクオンタイズのこと（第5章、Amp Fiddler が MPC60 を教えたときの言葉）。
 > *"If you hit a drum sound too late, or too early, it will automatically put the sound right on time. You can use it on all your sounds, or some of them, or none of them."*
 
-★ **"some of them"就是全部秘密。** 见 §3.2 的表。
+★ **"some of them" に秘密が詰まっている。** §3.2 の表を参照。
 
-同一块还记了另一句：*"You don't have to make every measure four beats. You can loop around every three beats, or five, or six, or seven if you want."*——奇数小节的 loop 从一开始就是这台机器的正常用法（§6.5、§7.5 会回到它）。
+同じ箇所にもう一つの言葉がある。*"You don't have to make every measure four beats. You can loop around every three beats, or five, or six, or seven if you want."* この機材では、奇数小節の loop も初めから普通の使い方だった（§6.5、§7.5 で再び扱う）。
 
-这些形容词后来成了行话：Robert Glasper 第一次听《Fantastic, Vol. 2》时叫它 *"woozy, drunken rhythms"*（第 9 章）；Kendrick Lamar 在 Knxwledge 的 beat 上直接喊 *"I need that sloppy!"*——把形容词当名词用，指那种还没有名字的时间感（第 15 章）。
+こうした形容詞はのちに共通の言い回しになった。Robert Glasper は『Fantastic, Vol. 2』を初めて聴いたとき、*"woozy, drunken rhythms"* と呼んだ（第9章）。Kendrick Lamar は Knxwledge の beat に乗せて *"I need that sloppy!"* と叫び、形容詞を名詞のように使って、まだ名前のなかった時間感覚を指した（第15章）。
 
-### 3.4 一个反直觉的听感
+### 3.4 直感に反する聞こえ方
 
-> *"The hyperactive kick drum raced ahead of the samba sample, which in turn seemed to be racing ahead of the snare drum—which gave the paradoxical illusion that **the snare was somehow late, making the beat feel oddly relaxed, tumbling endlessly forward**."*（第 7 章，《Runnin'》）
+> *"The hyperactive kick drum raced ahead of the samba sample, which in turn seemed to be racing ahead of the snare drum—which gave the paradoxical illusion that **the snare was somehow late, making the beat feel oddly relaxed, tumbling endlessly forward**."*（第7章、『Runnin'』）
 
-**底鼓抢、军鼓不动 → 听起来是军鼓拖 → 整体"放松地往前翻滚"。**
-所以 `push_pull` 里**要有一件守网格当参照系**（`mc-rhythm-section` §3）——在 hip-hop 里通常是军鼓。
+**キックが前ノリで、スネアはグリッドに置く → スネアが後ノリに聞こえる → 全体が「力を抜いて前へ転がる」ように聞こえる。**
+そのため `push_pull` では、**1つのパーツをグリッドに合わせて基準にする**（`mc-rhythm-section` §3）。hip-hop では通常スネアがこの役を担う。
 
-同一首歌的另一个细节（第 7 章）：底鼓不是 2 小节或 4 小节循环，而是**线性编到第 20 小节才重复**，每小节都不一样——模拟真人鼓手的自然变化。这是 `mc-rhythm-section` §4 线性鼓在采样型里的形态。
+同じ曲にはもう1つ特徴がある（第7章）。キックは2小節や4小節のループではなく、**第20小節で初めて繰り返すように連続して打ち込まれ**、小節ごとに異なる。生身のドラマーの自然な変化を再現している。これは `mc-rhythm-section` §4 のリニアなドラムをサンプル主体の制作に当てはめた形。
 
-### 3.5 与佐证表的关系
+### 3.5 裏づけ表との関係
 
-「不该全声部严格对齐网格」**62/62**。hip-hop 是这条规则的**发源地**之一——
-DeSantis：*"在大多数 Hip-hop 中，更松散、有机的感觉更合适，因为该风格常直接采样真实鼓手的录音"*（p0154）。
-★ 但 **trap 是例外**：hat 滚奏必须精确量化，松的只有 808 和采样层。**又回到"逐件决定"。**
+「全パートをグリッドに厳密にそろえるべきではない」は **62/62**。hip-hop はこのルールが**生まれた場**の一つ。
+DeSantis：*「ほとんどの Hip-hop では、よりゆるやかで有機的な感触が合う。このスタイルでは実際のドラマーの録音をそのままサンプリングすることが多いからだ」*（p0154）。
+★ ただし **trap は例外**。hat のロールには正確なクオンタイズが必要で、ゆるさを残すのは 808 とサンプルの層だけ。**ここでも音ごとに判断する。**
 
-### 3.6 ★ 把第三种时间感写成数字
+### 3.6 ★ 第3のタイム感を数値で書く
 
-`push_pull` 只写"稍微靠前"等于没写。《Dilla Time》给了几组可以直接抄进 `offset_ms` 的量：
+`push_pull` に「少し前に」とだけ書いても具体的な指示にならない。《Dilla Time》には `offset_ms` にそのまま転記できる数値例がある。
 
-| 手法 | 数值 | 出处 |
+| 手法 | 数値 | 出典 |
 |---|---|---|
-| **抢拍军鼓**（rushed snare） | 军鼓比反拍**提前约 65 ms**——比失误或 flam 的偏差大两倍多。hi-hat 守直拍像"55 英里/小时"，军鼓像"70 英里/小时"，两个速度感同时存在 | 第 8 章 |
-| 同一件事按网格算 | 一小节切成 **192** 份，军鼓提前 **5** 份（记谱等于五个 128 分音符三连音）。鼓手数不了这么细，所以真鼓手会退到每拍 5、6、7 等分（七连音）去逼近 | 第 8 章 |
-| **鼓机的 shuffle**（Roger Linn） | 把每个偶数十六分音符延后：50/50 是直拍，**66/34** 是完美三连音摇摆，**58/42、54/46** "不直不摇、在两者之间"，才是真有 groove 的量 | 第 6 章 |
-| 逐件 swing | SP-1200 的 swing 是全序列一根橡皮筋一起拉；MPC 允许**每个声音单独设 swing**，再用 **Shift Timing** 按 tick 把某件整体前后挪 | 第 8 章 |
+| **前ノリのスネア**（rushed snare） | スネアはバックビートより**約 65 ms 早く**鳴る。ミスや flam で生じるずれの2倍を超える。hi-hat はストレートを保ち「時速55マイル」、スネアは「時速70マイル」のように聞こえ、2つの速度感が共存する | 第 8 章 |
+| 同じずれをグリッドで換算 | 1小節を **192** 等分し、スネアを **5** 目盛り前に置く（記譜上は128分音符の3連符5つ分に相当）。ドラマーはここまで細かく数えられないため、実際の演奏では1拍を5、6、7等分（7連符）して近づける | 第 8 章 |
+| **ドラムマシンの shuffle**（Roger Linn） | 偶数番目の16分音符を遅らせる。50/50 はストレート、**66/34** は正確な3連符のスウィング。**58/42、54/46** は「ストレートとスウィングの中間」で、本当に groove が出る値 | 第 6 章 |
+| 音ごとの swing | SP-1200 の swing は、シーケンス全体を1本の輪ゴムのようにまとめて引き伸ばす。MPC は**音ごとに swing を個別に設定**でき、**Shift Timing** で特定の音をまとめて tick 単位で前後にずらせる | 第 8 章 |
 
-另外几组量——Jazzy Jeff 的配方、"kick is late, snare is early"、两个脉冲相差约 85 ms、人声整体后挪、用 11 ms 延迟做 flam——见 `reference.md` §6.1。
+ほかの数値例は `reference.md` §6.1 を参照。Jazzy Jeff の設定、"kick is late, snare is early"、2つのパルスの約 85 ms のずれ、ボーカル全体を後ろにずらす方法、11 ms のディレイで flam を作る方法を扱う。
 
-**怎么写进 ARR-SPEC**：`groove.quantize_policy` 逐鼓件写百分比；`groove.push_pull` 至少三行——一行守网格（0 ms，写明"参照系"）、一行抢（负值，量级参考上表）、一行拖；`vocal.phrasing` 给 rap 段单独一行（§7.2）。
+**ARR-SPEC への書き方**。`groove.quantize_policy` にはドラムの音ごとに割合を書く。`groove.push_pull` は少なくとも3行。1行目はグリッドを保つ音（0 ms、「基準」と明記）、もう1行は前ノリ（負の値。ずれの大きさは上表を参照）、もう1行は後ノリ。`vocal.phrasing` にはラップのセクション専用の行を設ける（§7.2）。
 
-★ **它是编程不是反射**（第 8 章、记者手记）：书专门反驳"Dilla = 关掉量化"的传说——关掉校正的音序器只是在复制设备；抢拍军鼓的**规律性**来自 MPC 的特定用法，不是手快。所以你写的偏移必须**在整段里保持恒定**（第 8 章："这些微小调整必须随时间保持恒定，且与其他元素冲突共存"），不是每小节随机抖。
+★ **ずれはプログラミングで作る**（第 8 章、記者の取材ノート）。同書は「Dilla = クオンタイズを切る」という通説を明確に否定する。補正を切ったシーケンサーを使うだけでは機材の再現にとどまる。前ノリのスネアの**規則性**は、手の速さではなくMPCの特定の使い方から生まれる。指定したずれは小節ごとにランダムに揺らさず、**セクション全体で一定に保つ**（第 8 章「このわずかな調整は時間が経っても一定で、他の要素とぶつかりながら共存しなければならない」）。
 
-### 3.7 Schloss 一侧：采样型制作人怎么看量化
+### 3.7 Schloss の記述：サンプリング型のプロデューサーはクオンタイズをどう考えるか
 
-Schloss 记的是 1990 年代末采样型制作人的共识，和《Dilla Time》**互补而不是对立**，两边并排放：
+Schloss が記録したのは1990年代末のサンプリング型プロデューサーの共通認識。《Dilla Time》と**互いに補い合う**ため、並べて示す。
 
-| 议题 | Schloss《Making Beats》 | 《Dilla Time》 |
+| 論点 | Schloss《Making Beats》 | 《Dilla Time》 |
 |---|---|---|
-| 为什么不量化 | Domino：采样里是真人鼓手本来就不精确，量化反而让你的鼓"不准"；他只敲军鼓、需要时手动调（p0155–0156） | 为了让两套时间感打架；底鼓徒手、军鼓抢拍是**设计**（第 7、8 章） |
-| 松到什么程度 | "机械精确"与"过于松散"之间有一个**很窄的窗口**，偏向任一端都会被同行说；RZA 不量化被批为 sloppy，Prince Paul 却说"但它听起来太好了"（p0156–0158） | 书把 RZA 列为先例，但 Dilla 的位移是**刻意且严重的**，不是微妙效果（第 8 章） |
-| 判据 | "感觉对"（Stein）；**能不能跳**——跳舞多的人知道什么会让人动（p0158）；club 里要有 bounce（p0198） | Jazzy Jeff（作者按）：*"You can follow the method and you won't have the feeling. You can have the feeling but no success because you have no method."* |
-| 适用场合 | DJ 要把这首接进下一首，**节奏不稳会妨碍衔接**（p0201）——club 用途的 beat 要稳一些 | 传统乐手复现它的办法：**鼓手戴掉耳机尽量打直、贝斯手滞后**，张力才保得住（第 9 章） |
+| なぜクオンタイズしないか | Dominoによると、サンプルの生ドラムはもともと正確なグリッドに乗っておらず、クオンタイズするとかえって自分のドラムが「ずれる」。スネアだけを打ち込み、必要に応じて手で調整する（p0155–0156） | 2つのタイム感をぶつけるため。キックは手で打ち、スネアは前ノリにするという**設計**（第 7、8 章） |
+| どこまでゆるめるか | 「機械的な正確さ」と「ゆるすぎる」の間には**ごく狭い許容範囲**があり、どちらに寄っても同業者から指摘される。RZA はクオンタイズせず sloppy と評されたが、Prince Paul は「でも最高にいい音なんだ」と言った（p0156–0158） | 同書は RZA を先例とする。Dilla のずれは微妙な効果に収まるものではなく、**意図的で大幅**（第 8 章） |
+| 判断基準 | 「感触が合う」（Stein）。**踊れるかどうか**。よく踊る人は、何が人を動かすかを知っている（p0158）。club では bounce が要る（p0198） | Jazzy Jeff（著者注）：*"You can follow the method and you won't have the feeling. You can have the feeling but no success because you have no method."* |
+| 適用場面 | DJ がこの曲を次の曲につなぐとき、**リズムが不安定だとつなぎにくい**（p0201）。club 用のビートは安定させる | 生演奏の奏者が再現するには、**ドラマーがヘッドホンを外してできるだけストレートに叩き、ベース奏者が後ろにずらす**とテンションを保てる（第 9 章） |
 
-★ 读法：**Schloss 讲的是"别太松"的行规，《Dilla Time》讲的是"松也要松得有规律"。** 两者都在说同一件事——偏移是写下来的量，不是没管。
+★ **Schloss は「ゆるめすぎない」という現場のルールを、《Dilla Time》は「ゆるめるにも規則性が要る」という方法を述べている。** どちらも、ずれを成り行きに任せず、具体的な量として指定する考え方。
 
 ---
 
-## 4. 速度区间
+## 4. テンポの範囲
 
-Drummer's Bible（p0109）：
+Drummer's Bible（p0109）
 
 | feel | BPM |
 |---|---|
 | **Standard Hip Hop** | **60–108** |
 | **Slow feel** | 60–80 |
-| **Half-time feel** | **132–172**（军鼓落在 3 拍，听感速度减半） |
+| **Half-time feel** | **132–172**（スネアが3拍目に来て、体感速度が半分になる） |
 
 > *"there is no one standard Hip Hop/Rap groove … each groove can be played with a straight or swung feel, though the swung feel has become more commonly employed."*
 
-★ **半拍感的写法**：`meta.tempo` 写实际 BPM（如 140），`groove.feel: halftime`。**不要把 140 BPM 的 trap 写成 70 BPM**——hat 的细分会算错，后端也会理解错。《How to Rap 2》p0031 的说法一致：70 bpm 和 140 bpm 是一回事，区别只在 hi-hat 的速度。
+★ **ハーフタイム感の書き方**。`meta.tempo` は実際のBPM（例は 140）を書き、`groove.feel: halftime` とする。**140 BPM の trap を 70 BPM と書かない**。hat の細分の計算がずれ、バックエンドでも誤って解釈される。《How to Rap 2》p0031 でも、70 bpm と 140 bpm は同じで、違いは hi-hat の速さだけだとしている。
 
-**另外两组数**：club 里当代 hip-hop 常态 **88 bpm 或 90 出头**，放 **75–85 bpm** 舞池会清空（Schloss p0200–0201）；按 MC 的感受，**90–100 是中速**、**100 以上算快**（《How to Rap 2》p0025–0027）。
+**ほかの2組の数値**。club でかかる現代の hip-hop は **88 bpm か 90 を少し超えるくらい**が普通で、**75–85 bpm** をかけるとフロアから人がいなくなる（Schloss p0200–0201）。MC の体感では、**90–100 は中速**、**100 を超えると速い**（《How to Rap 2》p0025–0027）。
 
-**语料**：hiphop-rnb 10 首检测 BPM 中位 112，⚠ beat tracking 在半拍感上有倍频误判，**不要引用这个数**。
+**コーパス**。hiphop-rnb 10曲の検出BPMの中央値は 112。⚠ beat tracking はハーフタイム感のある曲を倍のBPMと誤判定することがあるため、**この数値は引用しない**。
 
 ---
 
-## 5. ★ 低频归谁：808 与底鼓
+## 5. ★ 低域を誰が担うか：808 とキック
 
-**hip-hop 最常见的技术失败是 808 和 kick 都在 40–80 Hz 里，谁也听不清。**
+**hip-hop で最もよくある技術的な失敗は、808 と kick がともに 40–80 Hz に集中し、どちらも聞き取りにくくなること。**
 
-三种解法，**必须选一种写进 `bass_kick_relation`**：
+対処法は3つ。**必ず1つを選んで `bass_kick_relation` に書く**。
 
-| 解法 | 做法 | 对应 |
+| 対処法 | やり方 | 対応するスタイル |
 |---|---|---|
-| **808 就是 kick** | 808 的起音当底鼓用，没有独立 kick | trap 的标准做法 |
-| **kick 短、808 长** | kick 只负责 20–60 ms 的敲击，808 在它衰减后接管 | boom-bap / 旋律型说唱 |
-| **互答式** | 808 避开 kick 的击点（`mc-rhythm-section` §7.1） | 采样型 |
+| **808 自体が kick** | 808 のアタックをキックに使い、独立した kick は置かない | trap の標準 |
+| **kick は短く、808 は長く** | kick は 20–60 ms の打音だけを担い、減衰したあとを 808 が引き継ぐ | boom-bap / メロディーを重視するラップ |
+| **掛け合い型** | 808 を kick の打点から外す（`mc-rhythm-section` §7.1） | サンプリング型 |
 
-### 5.1 808 是和声载体
+### 5.1 808 がハーモニーを担う
 
-**在没有和弦乐器的段落里，808 的音高就是和声。**
-所以 808 线要写进 `form[].harmony`——它不是"低频"，它是**低音声部**。
+**コードを鳴らす楽器がないセクションでは、808 の音高そのものがハーモニーになる。**
+そのため、808 のラインは**低音パート**として `form[].harmony` に書く。
 
-★ **差音警告**（`mc-sound-design` §6）：纯正弦的 808 在手机上会消失。
-野崎技法 31 的解法：**OSC2 正弦 +19 半音（第三泛音，十二度）**——*"此泛音大约正好位于低音感与粗厚感的分界点上"*，但**"切忌为了展现气势而过度强调泛音的音量"**（p0113）。
+★ **差音に関する注意**（`mc-sound-design` §6）。純粋なサイン波の 808 はスマートフォンでは聞こえなくなる。
+野崎の技法 31 では、**OSC2 のサイン波を +19 半音（第3倍音、12度）**に設定する。*「この倍音はちょうど低音感と太さの境目あたりにある」*が、**「迫力を出そうとして倍音の音量を強調しすぎないこと」**（p0113）。
 
-### 5.2 采样型的低频：Schloss 的两条
+### 5.2 サンプリング型の低域：Schloss の2項目
 
-- **kick 最难从采样里剥出来**：军鼓、hi-hat 上面叠的东西可以滤掉，kick 是低频，"你不能在它上面放低通"（Schloss p0160–0161）。所以采样型也常常**kick 单独找**（老唱片或鼓机），loop 只出军鼓和 hat。
-- **纯采样在车里会散**：好车载系统上纯采样的低频撑不住，加一个 **808 kick 或键盘贝斯线**会"极大地厚起来"（Schloss p0206–0207）。这就是三选一里"kick 短、808 长"在采样型里的由来。
+- **サンプルから分離するのが最も難しいのは kick**。スネアや hi-hat に重なる音はフィルターで除けるが、kick は低域にあり、「そこにローパスをかけるわけにはいかない」（Schloss p0160–0161）。そのためサンプリング型でも、**kick は別に探し**（古いレコードやドラムマシン）、ループからはスネアと hat だけを鳴らすことが多い。
+- **サンプルだけだと車で音が崩れる**。高性能なカーオーディオではサンプルだけだと低域が持たず、**808 kick か鍵盤のベースライン**を足すと「ものすごく厚くなる」（Schloss p0206–0207）。サンプリング型で3つの選択肢のうち「kick は短く、808 は長く」を使う理由はここにある。
 
 ---
 
-## 6. 编制：采样型的织体
+## 6. 編成：サンプリング型のテクスチャ
 
-### 6.1 实测：织体轨远多于律动轨
+### 6.1 実測：テクスチャのトラックはグルーヴのトラックよりはるかに多い
 
-语料 10 首的 roster 角色分布：
+コーパス10曲の roster における役割の内訳。
 
-| 角色 | 轨数 |
+| 役割 | トラック数 |
 |---|---|
-| **织体** | **171** |
+| **テクスチャ** | **171** |
 | 色彩 | 100 |
-| 旋律 | 77 |
-| 律动 | 27 |
-| 低频 | 15 |
+| メロディー | 77 |
+| グルーヴ | 27 |
+| 低域 | 15 |
 
-**读法**：hip-hop 的"厚"不来自更多的鼓，来自**大量短的、循环的织体层**（采样切片、vocal chop、pad 片段）；律动轨只有 27——**鼓组本身很简**。
-★ **对 `mc-texture-layering` 的后果**：这些织体层大多是**同一个采样的不同切片**，频段天然重叠——**交替出现**（§4.2 解法③）是主要手段，不是让频。
+hip-hop の「厚み」は、**短く反復するテクスチャの層を多く重ねること**から生まれる（サンプルの断片、vocal chop、pad の断片）。グルーヴのトラックは27本にとどまり、**ドラム自体はシンプル**。
+★ **`mc-texture-layering` への適用**。テクスチャの層の多くは**同じサンプルから切り出した別々の断片**なので、帯域がもともと重なる。帯域を譲り合うより、**交互に出す**（§4.2 の対処法③）のが主な手段になる。
 
-### 6.2 ★ 实测：最"减法"的风格
+### 6.2 ★ 実測：最も音を抜くスタイル
 
-| 指标 | hiphop-rnb | pop | jazz |
+| 指標 | hiphop-rnb | pop | jazz |
 |---|---|---|---|
-| **提前退场的乐器比例（中位）** | ★ **71%** | — | — |
-| 提前退场的乐器数（中位） | **28** | 16 | 10 |
-| 开场就在场的比例 | 24% | 21% | 16% |
-| 段落数中位 | 9 | 10 | 9 |
+| **曲が終わる前に抜ける楽器の割合（中央値）** | ★ **71%** | — | — |
+| 曲が終わる前に抜ける楽器数（中央値） | **28** | 16 | 10 |
+| 冒頭から入っている楽器の割合 | 24% | 21% | 16% |
+| 曲のセクション数の中央値 | 9 | 10 | 9 |
 
-**读法**：开场铺得最满，但**七成的层会在结束前撤掉**。结构感来自**不断撤东西**，不是加东西。
-→ **`subtraction_events` 在这个风格里要写得比任何风格都多。**
+冒頭の編成が最も厚い一方、**曲が終わる前に7割の層が抜ける**。**音を次々に抜く**ことで曲の構成が聞こえてくる。
+→ **このスタイルでは `subtraction_events` をどのスタイルよりも多く書く。**
 
-Schloss 把这写成了这个流派的定义（p0151）：制作人的理想是"一个可重复的图形，通过在不同时间**添加或减去**各种元素来改变它"（p0051）。**减法不是修饰，是它唯一的结构手段。**
+Schloss はこれをジャンルの定義としている（p0151）。プロデューサーの理想は「繰り返せるパターンに、さまざまなタイミングで要素を**足したり引いたり**して変化をつけること」（p0051）。**音を引くことが、このスタイルで構成を作る唯一の手段。**
 
-### 6.3 采样的编曲逻辑
+### 6.3 サンプルを軸にした編曲
 
-> Dilla 的日常（《Dilla Time》第 1 章）：*"He listened to entire songs, listened and listened. His vigilance was almost always rewarded by an element deep within a track."*
+> Dilla の日常（《Dilla Time》第 1 章）：*"He listened to entire songs, listened and listened. His vigilance was almost always rewarded by an element deep within a track."*
 
-**采样不是找 loop，是找一个"元素"**——一个和弦、一个人声尾音、一小节鼓。然后**慢放**：把一段吉他放慢一半，"微小的不完美"变成了律动；六拍的采样撞在四拍的 beat 上（第 7 章）；慢到"无法辨认"也不要紧（第 12 章）。★ 这与 `mc-sound-design` §2 "回零点"同理：**素材的不完美是原料，不是要修的东西。**
+**サンプリングでは、一つの「要素」を探す**。コード1つ、ボーカルの余韻1つ、ドラム1小節といった素材を、次に**遅く再生する**。ギターの一節を半分の速さにすると、「わずかな不完全さ」がグルーヴに変わる。6拍のサンプルを4拍のビートにぶつける（第 7 章）。「元が何か分からない」ほど遅くしてもよい（第 12 章）。★ `mc-sound-design` §2 の「ゼロ地点に戻る」と同じ考え方。**素材の不完全さも、そのまま制作に使う。**
 
-Schloss 从另一头说同一件事（p0083）：采样自带**和声方向感、节奏感、音色氛围**，而现场乐器"可以演奏任何东西"反而没有可依托的线索——**采样的价值是它带着约束进来**。所以选采样时先问它带来了什么约束（速度、调性、房间感），再决定其余层怎么让。
+Schloss は別の角度から同じことを述べる（p0083）。サンプルには**ハーモニーの方向性、リズム感、音色の雰囲気**が備わっている。生楽器は「何でも演奏できる」ため、かえって出発点になる手がかりがない。**サンプルの価値は、制約を持ち込むことにある**。まず素材がどんな制約を持ち込むか（テンポ、調性、部屋鳴り）を考え、残りの層をどう譲らせるか決める。
 
-### 6.4 ★ 采样的规则：制作人社群的手艺伦理
+### 6.4 ★ サンプリングのルール：プロデューサー仲間の職業倫理
 
-Schloss 第 5 章记的是采样型制作人之间**默认遵守、违反会被同行嘲笑**的一套规则（Vitamin D："They're rules! It's all following rules."，Schloss p0116）。它们不是法律也不是审美——伦理是"入场费"，遵守只保证被尊重，不保证被赞美（Schloss p0147）。两个底层价值：**体力上的努力**（自己去找唱片）与**智力上的努力**（不用现成的、不用已经很好的）（Schloss p0146）。
+Schloss の第 5 章には、サンプリング型のプロデューサー同士で**暗黙に守られ、破ると仲間から笑われる**ルールが記されている（Vitamin D："They're rules! It's all following rules."、Schloss p0116）。法律や美的基準とは別のもので、倫理は「入場料」にあたる。守れば一目置かれるが、称賛まで得られるとは限らない（Schloss p0147）。根底にある価値は、**足を使う努力**（自分でレコードを探す）と、**頭を使う努力**（出来合いのものや、すでに出来がよいものに頼らない）（Schloss p0146）。
 
-七条是：**no biting**（不重复别人 loop 过的素材或做过的组合）、**鼓可以重用而采样不行**、**只从黑胶采**、**不采其他 hip-hop 唱片**、**不采你尊敬的唱片**（除非能"以完全惊人的方式 flip 它"）、**不用 breakbeat 合辑**、**同一张唱片不采两个声音**。逐条内容、公认例外与页号见 `reference.md` §2.3（Schloss p0116–0147、p0220）；选材怎么找、目标乐器清单见 §2.1–§2.2。
+ルールは7つ。**no biting**（他人がループした素材や作った組み合わせを使い回さない）、**ドラム音は再利用できるが、ほかのサンプルは再利用しない**、**レコードからだけ採る**、**ほかの hip-hop のレコードからは採らない**、**敬意を抱くレコードからは採らない**（「まったく予想外のやり方で flip できる」場合を除く）、**breakbeat のコンピレーションは使わない**、**同じレコードから2つの音を採らない**。各ルールの内容、認められている例外、ページ番号は `reference.md` §2.3（Schloss p0116–0147、p0220）、素材の探し方と対象楽器の一覧は §2.1–§2.2 を参照。
 
-★ **对写规格单的意义**：`roster` 里每条采样层都要说得出**它从哪类素材来、和同曲其他采样层是不是同源**（§6.6）；同源的层只能是 chop 出的连续 loop 或鼓件——**艺术的一部分是把通常不会被组合的元素组合起来**（Schloss p0145）。伦理的落点不是"能不能采"，是"用得恰不恰当"（Schloss p0218）。
+★ **仕様書への落とし込み**。`roster` では各サンプル層について、**どんな種類の素材から来たか、同じ曲のほかのサンプル層と出どころが同じか**を説明できるようにする（§6.6）。出どころの同じ層は、chop で切り出した連続するループかドラム音に限る。**ふだん組み合わされない要素を組み合わせることに、この表現の芸術性の一端がある**（Schloss p0145）。倫理上の判断は「その素材を採れるか」から「その使い方がふさわしいか」まで及ぶ（Schloss p0218）。
 
-### 6.5 ★ 一个 loop 怎么搭：从 break 到 beat
+### 6.5 ★ loop の組み方：break から beat へ
 
-**术语先钉死**（Schloss p0121、p0166、p0179）：**looping** = 采一或多小节几乎不改地重复；**chopping** = 切成更小片段重新排序；**flipping** = 任何实质性的创造性改变。1990 年代末 chopping 已取代整段 loop 成为主流（Schloss p0166）——要的是采样的**纹理和声音**而不是原曲的**作曲**（p0179）。
+**まず用語を定義する**（Schloss p0121、p0166、p0179）。**looping** = 1小節以上をサンプリングし、ほぼそのまま繰り返す。**chopping** = さらに小さな断片に切り分けて並べ替える。**flipping** = 素材に実質的な変化を加える創作上の加工全般。1990年代末には、まとまったフレーズをそのまま loop する方法に代わって chopping が主流になった（Schloss p0166）。求められたのは、原曲の作曲内容よりも、サンプルの**テクスチャと響き**だった（p0179）。
 
-**loop 本身会长出新东西**（Schloss p0152–0153）：乐句结尾反复接到开头是原乐手从未打算的并置；含一次和弦变化的采样在 loop 点上**产生原作曲家从未写过的和弦进行**；旋律变成节奏；**call-and-response 是 loop 自带的**。切碎同样能造新和声（第 7 章）。四条的展开见 `reference.md` §1.3。
+**loop 自体が新しい音楽を生む**（Schloss p0152–0153）。フレーズの終わりを冒頭につなぎ直すたび、元の奏者が意図していなかった並びが生まれる。コードが1回変わるサンプルでは、loop の継ぎ目に**元の作曲者が書いていないコード進行が生まれる**。メロディはリズムに変わる。**call-and-response は loop 自体に備わっている**。断片に切り分けても新しい和声を作れる（第7章）。4点の詳細は `reference.md` §1.3を参照。
 
-**搭建顺序**（十步的完整表、判据与常见失败见 `reference.md` §1.2、§1.6）：
+**組み立ての順序**（全10ステップの表、判断基準、よくある失敗は `reference.md` §1.2、§1.6を参照）：
 
-> ① **先鼓**（鼓是 backbone，Schloss p0154）→ ② 用唱机**试装**（p0069）→ ③ **truncate** 定死起止点 → ④ **loop & layer** → ⑤ 用**小节数**定各段长度（第 5 章）→ ⑥ **切碎重排**（p0157）→ ⑦ ★ **锁住**（"locking up"，**锁没锁上是有无的问题**，p0154）→ ⑧ 查采样里**自带的 hi-hat** 有没有在和你的鼓打架（p0157–0158）→ ⑨ **统一年代与音色**（p0161）→ ⑩ 按段落**加减层**（§6.2）。
+> ① **まずドラム**（ドラムは backbone、Schloss p0154）→ ② ターンテーブルで**試しに組み合わせる**（p0069）→ ③ **truncate** で開始点と終了点を確定する → ④ **loop & layer** → ⑤ **小節数**で各セクションの長さを決める（第5章）→ ⑥ **細かく切って並べ替える**（p0157）→ ⑦ ★ **各パートをかみ合わせる**（"locking up"。**かみ合うかどうかは二者択一**、p0154）→ ⑧ サンプルに**元から入っている hi-hat** が自分のドラムとぶつからないか確認する（p0157–0158）→ ⑨ **年代と音色をそろえる**（p0161）→ ⑩ セクションごとに**レイヤーを足し引きする**（§6.2）。
 
-**几条判断**：
-- **snare 是审美规范不是道德规则**：Mr. Supreme——"hip-hop 没规则，不需要副歌、不需要桥段"，但军鼓是普遍偏好；MC 在无鼓贝斯线上 freestyle 那种"你等 beat 进来、它一直不进"的歌，意义正在于违背这个预期（Schloss p0169–0170）。
-- **拍号可以拗**：5/4 的爵士片段可以 loop 进 4/4 鼓型（Schloss p0181）；同类手法还有 3 拍转 4 拍、6 拍采样撞 4 拍鼓、**7 小节 loop 对 4 小节 beat 使 verse 和 chorus 在不可预测的位置开始**、loop 点不在强拍（第 7、8 章；见 `reference.md` §1.5）。
-- **不为 chop 而 chop**：Jake One——"我在乎的是听起来怎样，不管他 loop 还是 chop"（Schloss p0182）。
+**判断の目安**：
+- **snare は美的な慣習で、守る義務はない**。Mr. Supreme は「hip-hop にルールはない。サビもブリッジもいらない」と言うが、スネアは広く好まれている。MC がドラムのないベースラインに乗せて freestyle する曲では、「beat が入るのを待っているのに、いつまでも入ってこない」という期待の裏切りそのものに意味がある（Schloss p0169–0170）。
+- **拍子はずらして組める**。5/4のジャズの断片を4/4のドラムパターンに重ねて loop できる（Schloss p0181）。ほかにも、3拍を4拍に変える、6拍のサンプルを4拍のドラムにぶつける、**7小節の loop を4小節の beat に重ねて、verse と chorus を予測できない位置から始める**、loop の継ぎ目を強拍から外すといった方法がある（第7、8章。`reference.md` §1.5を参照）。
+- **chop 自体を目的にしない**。Jake One は「loop か chop かは気にしない。大事なのはどう聞こえるかだ」と言う（Schloss p0182）。
 
-### 6.6 采样型 vs 演奏型：roster 怎么写
+### 6.6 サンプリング主体と演奏主体：roster の書き方
 
-Schloss 的核心提醒（p0029–0030）：把一段 hip-hop 录音按乐器分成"鼓、贝斯、钢琴、小号"各一个声部，**是对制作人实际动作的误读**——更可能是：一个采样里带着 upright bass + piano，另一个带着鼓 + Rhodes + 小号，第三个只有萨克斯。**被采样和编排的是整个乐句，不是音高。**
+Schloss の指摘（p0029–0030）では、hip-hop の音源を「ドラム、ベース、ピアノ、トランペット」と楽器ごとに1パートずつに分けると、**プロデューサーが実際に行った作業を見誤る**。実際には、あるサンプルに upright bass + piano、別のサンプルにドラム + Rhodes + トランペット、さらに別のサンプルにサックスだけが入っている可能性が高い。**サンプリングと編曲の単位はフレーズ全体であり、個々の音高ではない。**
 
-所以采样型的 `roster` 按**采样层**列，不按乐器列：
+したがって、サンプリング主体の `roster` は**サンプルレイヤー単位**で記載し、楽器単位には分けない。
 
-| 字段 | 采样型的写法 |
+| フィールド | サンプリング主体の場合の書き方 |
 |---|---|
-| `id` / `instrument` | **一个采样层一行**：`loopA: 1970s soul 采样，Rhodes+bass 同源，2 小节，切 4 片`；层里有几件乐器写在 `note`，不拆行 |
-| `role` | 采样层多为 `织体`；**鼓件单独成行**（kick/snare/hat 常来自不同唱片），role 写 `律动` |
-| `band` | 写**处理后**的频段：滤掉高频让爵士采样变得"无形而阴郁"（第 7 章）——写 `中低（低通后）` |
-| `timbre` | ★ 必写**来源年代与介质感**：70 年代唱片的压缩与失真、不同采样不同房间感、被截断的 attack/release、循环接缝处的不连续（Schloss p0085–0086）。混音意图可以就一句：*"I want this to sound like a cassette."*（第 12 章） |
-| 演奏层 | 必须**支持采样里已有的主题**，且**听起来得像采样**（"it's gotta blend in"，Schloss p0085–0087） |
-| `entry` / `exit` | 织体层多、退场多（§6.2）；stabs 之类按段进出 |
-| 同源检查 | ★ 同一张唱片来的两层，只能是 chop 出的连续片段或纯鼓件（§6.4），否则改素材或合并成一层 |
+| `id` / `instrument` | **1サンプルレイヤーにつき1行**。例：`loopA: 1970s soul のサンプル、Rhodes+bass は同じ音源、2小節、4片に分割`。レイヤーに含まれる楽器は `note` に記載し、行を分けない |
+| `role` | サンプルレイヤーの多くは `织体`（テクスチャ）。**ドラムの各音は個別の行**にする（kick/snare/hat は別々のレコードから取ることが多い）。role は `律动`（グルーヴ）と書く |
+| `band` | **加工後**の帯域を書く。高域を落としてジャズのサンプルを「輪郭がぼやけた陰鬱な音」にする場合（第7章）は、`中低（低通后）`（中低域、ローパス後）と記載する |
+| `timbre` | ★ **音源の年代とメディアの質感**を必ず記載する。70年代のレコードの圧縮と歪み、サンプルごとの部屋鳴りの違い、途中で切った attack/release、ループの継ぎ目で音が不連続になることなど（Schloss p0085–0086）。ミックスの意図は一言でもよい。*"I want this to sound like a cassette."*（第12章） |
+| 演奏レイヤー | **サンプルにすでにあるテーマを支え**、かつ**サンプルのように聞こえる**必要がある（"it's gotta blend in"、Schloss p0085–0087） |
+| `entry` / `exit` | テクスチャのレイヤーが多く、途中で抜けるものも多い（§6.2）。stabs などはセクション単位で出入りする |
+| 音源の重複確認 | ★ 同じレコードに由来する2レイヤーは、chop で切り出した連続する断片か、ドラム単体の音に限る（§6.4）。それ以外は素材を変えるか、1レイヤーにまとめる |
 
-`spectrum_budget` 的 `resolution` 默认写**交替出现**（§6.1）——追求音色来源的异质而不是频段分工的整洁（`reference.md` §1.4）；`depth_map` 里采样层的前景/背景**由滤波决定**。
+`spectrum_budget` の `resolution` には、デフォルトで**交互に鳴らす**と書く（§6.1）。帯域をきれいに分担させることよりも、出どころの異なる音色を組み合わせることを優先する（`reference.md` §1.4）。`depth_map` では、サンプルレイヤーを前景に置くか背景に置くかを**フィルター処理で決める**。
 
-### 6.7 给 MC 和 DJ 留的空
+### 6.7 MCとDJのために空けておく場所
 
-采样型 beat 的最终用户是 MC 和 DJ，他们的要求直接影响 `form` 和 `roster`（Schloss 第 7 章）：
+サンプリング主体の beat を最終的に使うのはMCとDJであり、両者の要件が `form` と `roster` に直接影響する（Schloss 第7章）。
 
-- **MC**：速度**既不能快到听不清 MC，也不能慢到没能量**；**采样数量不能太多**，否则 MC 会"在混音里迷失"（p0185–0186）。
-- **club DJ**：四条筛选是速度、节奏一致性、**能不能接进下一首**、压片质量（p0200）；★ **8 或 16 小节的纯器乐 intro、16 小节 outro** 是 DJ 最爱的做法——"那就是衔接机会"，loop 也"留得很开"方便 beat-juggling（p0202）。
-- **耳机听众**：允许**更复杂的节奏结构、不同速度、全频段**；不为跳舞服务的歌放这里（p0206）。
+- **MC**：テンポは**MCが聞き取れないほど速くせず、勢いが失われるほど遅くもしない**。**サンプルを増やしすぎない**。多すぎるとMCが「ミックスに埋もれる」（p0185–0186）。
+- **club DJ**：選曲の4条件はテンポ、リズムの一貫性、**次の曲につなげられるか**、レコードのプレス品質（p0200）。★ **8または16小節のインストのみの intro と、16小節の outro** が最も好まれる。「そこがつなぐチャンス」だからで、beat-juggling しやすいよう loop にも「十分な余白を残す」（p0202）。
+- **ヘッドホンで聴く人**：**より複雑なリズム構成、さまざまなテンポ、全帯域の使用**が許容される。踊る用途を想定しない曲はここに置く（p0206）。
 
-★ **写进规格**：`form` 的 Intro/Outro 至少一处是 8 或 16 小节纯器乐；同时在场的采样层数量对着 MC 的密度算（§7.5）。
+★ **仕様に書く**。`form` の Intro/Outro の少なくとも一方は、8または16小節のインストのみとする。同時に鳴らすサンプルレイヤー数は、MCの言葉の密度に合わせて決める（§7.5）。
 
 ---
 
-## 7. 人声：rap 与唱的分界
+## 7. ボーカル：rap と歌の境界
 
-### 7.1 分界表
+### 7.1 違いの一覧
 
-| | rap 段 | 唱段（hook） |
+| | rap セクション | 歌のセクション（hook） |
 |---|---|---|
-| 音高 | 无固定音高（语调） | 有 |
-| 与网格 | ★ **flow 本身是律动的一部分**，`push_pull` 要给人声一行 | 按 `mc-vocal-direction` |
-| 倒字 | **不适用**（无旋律音高）——但**重音位置**要和拍对齐 | 适用（中文） |
-| 密度 | 高，一小节 8–16 音节 | 低 |
-| 谁管词 | **作词** | 作词 |
+| 音高 | 固定の音高はない（イントネーション） | ある |
+| グリッドとの関係 | ★ **flow 自体がグルーヴの一部**。`push_pull` にボーカル用の1行を設ける | `mc-vocal-direction` に従う |
+| 倒字（中国語の声調と旋律の向きが食い違うこと） | **適用外**（メロディの音高がない）。ただし**アクセントの位置**は拍に合わせる | 適用する（中国語） |
+| 密度 | 高い。1小節に8–16音節 | 低い |
+| 歌詞の担当 | **作詞** | 作詞 |
 
-★ **本 skill 只管**：哪几段 rap、哪几段唱、人声在 `roster` 里的进退场、rap 段的 `push_pull`、delivery 怎么分配、人声和伴奏的关系。**flow 的具体节奏只示意**（占位音节 da-da / X 标记，记法见 `reference.md` §3.1）；要不要出词按 `mc-workflow` §2.3 词的三种情况；有同一首歌的歌词就从 `meta.upstream.lyrics` 读。
+★ **このスキルで扱うのは**、どのセクションを rap にし、どこを歌にするか、`roster` 上でのボーカルの出入り、rap セクションの `push_pull`、delivery の割り振り、ボーカルと伴奏の関係。**flow の細かなリズムは例示にとどめる**（仮の音節 da-da / X マーク。記法は `reference.md` §3.1を参照）。歌詞を出すかどうかは `mc-workflow` §2.3の歌詞に関する3つの場合に従う。同じ曲の歌詞があれば `meta.upstream.lyrics` から読む。
 
-《How to Rap》对"rap 是什么"的定义正好是编曲侧的定义：**flow = 歌词里的节奏 + 押韵**，与朗读诗的区别在于"歌词的节奏必须契合音乐的基本节奏"（p0076）；《How to Rap 2》更进一步："**节奏是 MCing 唯一完全不可或缺的元素**"——没节奏、跟不上拍，内容再好也不算 MC（p0018）。Schloss 从制作人侧说了同一件事：gangsta rap 对听众而言不是由歌词定义的，是由合成器和 **MC 的 flow** 定义的（p0214）。
+《How to Rap》の「rap とは何か」という定義は、ちょうど編曲側の定義にもなる。**flow = 歌詞のリズム + 韻**で、詩の朗読との違いは「歌詞のリズムが音楽の基本リズムに合っていなければならない」こと（p0076）。《How to Rap 2》はさらに、「**リズムは MCing において、唯一絶対に欠かせない要素**」だとする。リズムがなく、拍についていけなければ、内容がどれだけよくてもMCにはならない（p0018）。Schloss もプロデューサーの立場から同じことを述べる。聴き手にとって gangsta rap を特徴づけるのは、歌詞よりもシンセサイザーと **MC の flow**（p0214）。
 
-### 7.2 ★ flow 的要素：它怎么落在网格上
-这一小节写的是 flow **与拍的关系**——它决定 `vocal.phrasing` 和 `groove.push_pull` 里人声那一行怎么写。押韵密度、多音节韵怎么写是作词的事。
+### 7.2 ★ flow の要素：グリッド上のどこに置くか
+ここでは flow と**拍の関係**を扱う。それに基づいて、`vocal.phrasing` と `groove.push_pull` のボーカル行をどう書くかを決める。韻の密度や複数音節での韻の踏み方は作詞の範囲。
 
-**两条地基**：
+**2つの基礎**：
 
-★ 全文在 [reference-vocal.md](reference-vocal.md) §8–§11。
+★ 全文は [reference-vocal.md](reference-vocal.md) §8–§11。
 
-### 7.3 ★ delivery 的维度：分配给哪一段
-《How to Rap 2》把 delivery 拆成可以逐段分配的维度。**声音是听众第一个听到、据此决定听不听下去的东西**（p0072）。八个维度是**总体音高、音高变化量、逐词音高、音量、音色、长短、口吃/重复、气息**——每个维度的档位、效果与例子在 `reference.md` §4.1；个性类型（狂野 / 弹跳 / 权威 / 放松 / 内省 / 愤怒，即 `vocal.persona` 的选项集）在 §4.2；口音与角色声在 §4.3。分配逻辑：
+### 7.3 ★ delivery の各要素：どのセクションにどう割り振るか
+《How to Rap 2》は delivery を、セクションごとに割り振れる要素に分けている。**聴き手は最初に声を耳にし、その声で聴き続けるかを決める**（p0072）。8つの要素は**全体の音高、音高の変化量、語ごとの音高、音量、声色、音の長さ、つかえ・反復、息づかい**。各要素の段階、効果、例は `reference.md` §4.1を参照。個性のタイプ（荒々しい / 弾むような / 威厳のある / リラックスした / 内省的な / 怒りを帯びた、すなわち `vocal.persona` の選択肢）は§4.2、アクセントと役柄ごとの声は§4.3。割り振り方：
 
-★ 全文在 [reference-vocal.md](reference-vocal.md) §8–§11。
+★ 全文は [reference-vocal.md](reference-vocal.md) §8–§11。
 
-### 7.4 rap 段的结构：verse、hook、bridge、ad-lib
-**默认数字**：verse **16 小节**（"a 16"，公式是三段 16；story rap 上限 32，《How to Rap》p0206–0209），verse 里最难的是**第 1–2、9–10、15–16 小节**（p0210）；hook **4 或 8 小节**，词比 verse 简单、密度低、拖长一点，**旋律化的 hook 比说唱 hook 更受欢迎**（p0200–0202）；hook 旋律常是第一句升调"提问"、第二句降调"回答"（《How to Rap 2》p0162–0164）；ad-lib 更常见的是**只叠关键词**——Twista 只重叠**每小节最后一个词**（《How to Rap》p0295）。
-
-
-★ 全文在 [reference-vocal.md](reference-vocal.md) §8–§11。
-
-### 7.5 ★ 人声和伴奏的关系
-这一小节回答"rap 段的 `roster` 怎么配"。
-
-**① beat 领着写。** 多数 MC 对着最终的 beat 写（Dray："像跳舞，beat 是领舞的"）；"那是你要在上面说的一切的模板"（《How to Rap》p0181–0183）。beat 里若已有**人声采样**，它会直接引导内容（p0183）。**换 beat 就换了重音**——录完人声再换 beat，"重音和词是按原来那首音乐强调的"（p0187）。
+### 7.4 rap セクションの構成：verse、hook、bridge、ad-lib
+**小節数の目安**。verse は **16小節**（"a 16"。定型は16小節を3セクション。story rap の上限は32、《How to Rap》p0206–0209）。verse で最も難しいのは**第1–2、9–10、15–16小節**（p0210）。hook は **4または8小節**で、歌詞は verse より単純で密度が低く、長めに伸ばす。**メロディのある hook は rap の hook より好まれる**（p0200–0202）。hook のメロディは、第1フレーズが上昇して「問い」、第2フレーズが下降して「答える」形が多い（《How to Rap 2》p0162–0164）。ad-lib は**キーワードだけに重ねる**ことが多い。Twista は**各小節の最後の語**だけに重ねる（《How to Rap》p0295）。
 
 
-★ 全文在 [reference-vocal.md](reference-vocal.md) §8–§11。
+★ 全文は [reference-vocal.md](reference-vocal.md) §8–§11。
 
-### 7.6 rap 与唱之间的过渡地带
+### 7.5 ★ ボーカルと伴奏の関係
+ここでは rap セクションの `roster` の組み方を扱う。
 
-分界不是一刀切，《How to Rap 2》p0155–0167 给了一个谱系，写规格时要说清落在哪一格（每格的做法与例子见 `reference.md` §5.4）：**按段落分** → **半唱吟诵段**（重叠的短句反复吟唱，打破"三段 verse 一个 chorus"的常规）→ **verse 内部切换**（只半唱某几个词）→ **半唱作为整体风格**（接近真唱 → 常半唱 → 声音本身有旋律感但不唱）→ **唱别人的歌**。
+**① beat に導かれて書く。** 多くのMCは完成版の beat に合わせて書く（Dray：「ダンスみたいなもので、beat がリードする」）。「その上で話すすべてのひな型になる」（《How to Rap》p0181–0183）。beat に**ボーカルのサンプル**が入っていれば、それが内容を直接導く（p0183）。**beat を変えるとアクセントも変わる**。ボーカルを録った後で beat を変えても、「アクセントや言葉は元の曲に合わせて強調したものだ」（p0187）。
 
-两条约束：半唱常配 **matching patterns**（每小节相同的节奏型，重复强化旋律，p0165–0166）；**半唱的旋律要在 beat 的调里**（§7.5 ⑤），组内分工按音域给（p0155）。
 
-★ **写规格**：`vocal.delivery` 逐段写 `rap` / `半唱` / `唱`；`style_layers` 里 `vocal_delivery_verse` 与 `vocal_delivery_chorus` 分开签字（§8）。半唱段落**同时**要写 `push_pull`（它仍是 rap 的时间感）和 `melody_register`（它已经有音高）。
+★ 全文は [reference-vocal.md](reference-vocal.md) §8–§11。
+
+### 7.6 rap と歌の中間領域
+
+rap と歌の境界は連続的で、《How to Rap 2》p0155–0167はその段階を示している。仕様ではどの段階かを明記する（各段階の手法と例は `reference.md` §5.4）。**セクションごとに分ける** → **半分歌うように唱えるセクション**（短いフレーズを重ねて繰り返し、「verse 3つに chorus 1つ」の定型を崩す）→ **verse 内で切り替える**（いくつかの語だけを半分歌うように発する）→ **半分歌うスタイルを全体に使う**（本格的な歌唱に近い → 頻繁に半分歌う → 歌わず、声そのものにメロディ感がある）→ **他人の曲を歌う**。
+
+制約は2つ。半分歌う場合は **matching patterns** をよく使う（各小節で同じリズムパターンを繰り返し、メロディを印象づける。p0165–0166）。また、**半分歌うメロディは beat のキーに収める**（§7.5 ⑤）。グループ内での担当は音域に応じて割り振る（p0155）。
+
+★ **仕様に書く**。`vocal.delivery` はセクションごとに `rap` / `半唱`（半分歌う） / `唱`（歌う）と記載する。`style_layers` の `vocal_delivery_verse` と `vocal_delivery_chorus` は別々に承認する（§8）。半分歌うセクションには `push_pull`（rap の時間感覚が残っているため）と `melody_register`（音高があるため）を**両方**記載する。
 
 ---
 
-## 8. ★ 和旋律型风格混合
+## 8. ★ メロディ主体のスタイルとの融合
 
-**hip-hop 是最常被拿来混合的风格**（rap + 中国风、rap + city pop、rap + 摇滚）。
-用 `mc-workflow` §2.4 的分工表，**本 skill 通常是 overlay**，拥有：
+**hip-hop は最も頻繁に他と組み合わせられるスタイル**（rap + 中国風、rap + city pop、rap + ロック）。
+`mc-workflow` §2.4 の分担表では、**このスキルは通常 overlay** として、次を担当する。
 
-| 维度 | 归 hip-hop 时意味着 |
+| 項目 | hip-hop が担当する場合の内容 |
 |---|---|
-| `groove` | 第三种时间感（§3）、半拍感 |
-| `low_end` | 808 承担低音声部（§5.1） |
-| `vocal_delivery_verse` | 主歌 rap |
+| `groove` | 第3の時間感覚（§3）、ハーフタイム感 |
+| `low_end` | 808 がベースパートを担う（§5.1） |
+| `vocal_delivery_verse` | ヴァースの rap |
 
-**通常让出去的**：`harmony`、`melody`、`color_instruments`、`vocal_delivery_chorus`、`form`。
+**通常は相手に任せる項目**：`harmony`、`melody`、`color_instruments`、`vocal_delivery_chorus`、`form`。
 
-### 8.1 《桃花扇》式（rap + 中国风）的分工
+### 8.1 『桃花扇』型（rap + 中国風）の分担
 
-| 维度 | Owner | 注意 |
+| 項目 | Owner | 注意点 |
 |---|---|---|
-| harmony / melody（副歌五声） | 中国风 | 808 的音高**要跟五声旋律的低音走**，不能自己走一套 |
-| color_instruments（古筝/笛） | 中国风 | ★ **只在人声句缝里，不占律动位**——否则和采样织体抢 |
-| groove / low_end | hip-hop | 半拍感 + 808 |
+| harmony / melody（サビの五音音階） | 中国風 | 808 の音高は**五音音階のメロディに沿った低音の動きに合わせる**。独立したラインにしない |
+| color_instruments（古箏／笛） | 中国風 | ★ **ボーカルのフレーズの隙間だけに入れ、グルーヴを担う位置には置かない**。サンプルのテクスチャとぶつかるため |
+| groove / low_end | hip-hop | ハーフタイム感 + 808 |
 | vocal_delivery_verse | hip-hop | rap |
-| vocal_delivery_chorus | 中国风 | 唱 |
-| form | 中国风 | 仍是主歌–副歌，不是 trap 的 build/drop |
+| vocal_delivery_chorus | 中国風 | 歌唱 |
+| form | 中国風 | ヴァース–サビの構成を維持する。trap の build/drop にはしない |
 
-`fusion_note` 的写法：**说清两边在接缝上共有的东西**（例："民乐的句尾花和 rap 的句尾押韵落在同一个位置"）。
+`fusion_note` には、**両スタイルの接点で何が共通しているかを明記する**（例：「中国伝統楽器のフレーズ末尾の装飾と、rap の行末の韻が同じ位置に来る」）。
 
-### 8.2 一条实测的边界
+### 8.2 実際の検証で分かった限界
 
-实测中 agent 在没有本 skill 的情况下做过这个混合，
-用 `citypop-rnb` 的 R&B 半边 + `rhythm-section` 顶上——**能做，但 §3 的第三种时间感和 §5 的 808 分工都没提到**。
-**这就是本 skill 存在的理由。**
+検証では、エージェントがこのスキルなしで同じ組み合わせを試し、
+`citypop-rnb` の R&B 部分と `rhythm-section` で対応した。**融合自体はできたが、§3 の第3の時間感覚と §5 の 808 の役割分担には触れなかった**。
+**そのためにこのスキルがある。**
 
 ---
 
-## 9. 与 ARR-SPEC 的字段对应
+## 9. ARR-SPEC のフィールドとの対応
 
-| 字段 | 本 skill |
+| フィールド | このスキルでの扱い |
 |---|---|
-| `meta.style_layer` / `style_layers` | `mc-style-hiphop`，混合时通常是 `overlay`（§8） |
-| `meta.tempo` + `groove.feel` | §4——半拍感写实际 BPM + `halftime` |
-| `groove.quantize_policy` | ★ §3.2——**逐鼓件**写（hat 100 / kick 0 / snare 0…） |
-| `groove.push_pull` | §3.4、§3.6——军鼓守网格做参照，抢/拖用 §3.6 的量级；**rap 段人声要有一行**（§7.2） |
-| `arrangement.bass_kick_relation` | ★ §5——三选一；采样型注意 §5.2 |
-| `form[].harmony` | §5.1——808 线写进去 |
-| `form[].bars` / `form[].note` | §7.4——16/8/4 是默认；奇数小节 loop 与非 4/4 写进 `note`（§6.5、§7.2） |
-| `form` 的 Intro/Outro | §6.7——至少一处 8 或 16 小节纯器乐 |
-| `subtraction_events` | §6.2——比别的风格多 |
-| `roster[]` 各字段 | §6.1、§6.6——按**采样层**列，`timbre` 必写年代与介质感 |
-| `spectrum_budget[].resolution` | §6.1——采样层默认**交替出现** |
-| `vocal.persona` / `delivery` | §7.3、§7.6——个性类型与音高档；逐段写 rap / 半唱 / 唱 |
-| `vocal.phrasing` / `breath_points` | §7.2——逐句抢/拖/lazy tail/staccato；换气写进休止 |
-| `vocal.ad_libs` / `stacking` / `chorus_variation` | §7.4、§7.3——关键词叠、每小节末词叠、hook 层数、每遍换哪个维度 |
-| `mix_intent.mood` | §6.6——采样型常是一句"像磁带" |
+| `meta.style_layer` / `style_layers` | `mc-style-hiphop`。融合時は通常 `overlay`（§8） |
+| `meta.tempo` + `groove.feel` | §4。ハーフタイム感は実際の BPM + `halftime` と書く |
+| `groove.quantize_policy` | ★ §3.2。**ドラムのパーツごとに**書く（hat 100 / kick 0 / snare 0…） |
+| `groove.push_pull` | §3.4、§3.6。スネアをグリッドに合わせて基準とし、前ノリ／後ノリのずれ幅は §3.6 を参照。**rap のセクションではボーカル用に1行設ける**（§7.2） |
+| `arrangement.bass_kick_relation` | ★ §5。3択。サンプル主体の場合は §5.2 に注意 |
+| `form[].harmony` | §5.1。808 のラインを記入する |
+| `form[].bars` / `form[].note` | §7.4。既定は 16/8/4。奇数小節のループや 4/4 以外の拍子は `note` に記入（§6.5、§7.2） |
+| `form` の Intro/Outro | §6.7。少なくとも1か所に8または16小節のインスト部分を置く |
+| `subtraction_events` | §6.2。他のスタイルより多めに設ける |
+| `roster[]` の各フィールド | §6.1、§6.6。**サンプルのレイヤーごとに**列挙し、`timbre` に年代と媒体の質感を必ず書く |
+| `spectrum_budget[].resolution` | §6.1。サンプルのレイヤーは原則として**交互に出す** |
+| `vocal.persona` / `delivery` | §7.3、§7.6。キャラクターのタイプと音高の段階を指定し、セクションごとに rap / 半分歌う / 歌唱を書く |
+| `vocal.phrasing` / `breath_points` | §7.2。フレーズごとに前ノリ／後ノリ／lazy tail／staccato を指定し、ブレスは休符に記入する |
+| `vocal.ad_libs` / `stacking` / `chorus_variation` | §7.4、§7.3。キーワードの重ね方、小節末の語の重ね方、hook のレイヤー数、繰り返すたびに変える要素 |
+| `mix_intent.mood` | §6.6。サンプル主体なら「カセットテープのような音」などのひと言で表すことが多い |
 
 ---
 
-## 10. 写完后必过
+## 10. 書き終えたら必ず確認する項目
 
-- [ ] 说清是**哪一支**，速度落在 §4 的区间里，半拍感写的是实际 BPM
-- [ ] ★ **量化是逐鼓件写的**，且至少一件直、一件摇（§3.2）
-- [ ] 有一件守网格做参照系（通常是军鼓）；抢/拖的 `offset_ms` 有量级，且**整段恒定**（§3.6）
-- [ ] ★ **低频归属三选一**写进 `bass_kick_relation`；808 的音高写进了和声，纯正弦补了第三泛音
-- [ ] `subtraction_events` **不少于三处**；织体层的频段冲突用**交替出现**解决（§6.1）
-- [ ] 采样型：`roster` 按采样层列，每层写得出来源年代与处理后的频段；**同源的两层只能是连续 chop 或纯鼓件**（§6.4、§6.6）
-- [ ] 采样型：鼓是先搭的、loop 锁上了、采样里没有别人的 hi-hat 在和你的鼓打架（§6.5）；Intro 或 Outro 有一处 8/16 小节纯器乐（§6.7）
-- [ ] rap 段与唱段分界清楚，半唱段落标了格（§7.6）；**词的取舍符合 `mc-workflow` §2.3 词的三种情况**
-- [ ] rap 段：`push_pull` 有人声一行，写明跟哪一件乐器；换气写进了休止（§7.2）
-- [ ] rap 段：delivery 按段分配了音高档 / 音量档 / 音色，hook 与 verse 不同（§7.3）
-- [ ] hook 4 或 8 小节，verse 16（或写明为什么不是）；ad-lib 没有均匀撒（§7.4）
-- [ ] 混合时 `style_layers` 里 hip-hop 拥有的维度**不与 base 重叠**（lint #17）
+- [ ] **どの系統か**を明記し、テンポは §4 の範囲内に収めた。ハーフタイム感は実際の BPM で書いた
+- [ ] ★ **クオンタイズをドラムのパーツごとに**記述し、少なくとも1つはストレート、1つはスウィングにした（§3.2）
+- [ ] 1つのパーツ（通常はスネア）をグリッドに合わせて基準とし、前ノリ／後ノリの `offset_ms` のずれ幅を決め、**セクション全体で一定**にした（§3.6）
+- [ ] ★ **低域の役割分担を3択から選び**、`bass_kick_relation` に記入した。808 の音高をハーモニーに記入し、純粋なサイン波なら第3倍音を補った
+- [ ] `subtraction_events` を**3か所以上**設けた。テクスチャを構成するレイヤーの帯域が競合する場合は**交互に出す**ことで解消した（§6.1）
+- [ ] サンプル主体の場合、`roster` はサンプルのレイヤーごとに列挙し、各レイヤーの素材の年代と処理後の帯域を説明できる。**同じ素材から取った2レイヤーは、連続する chop かドラム単体音に限る**（§6.4、§6.6）
+- [ ] サンプル主体の場合、先にドラムを組み、ループを同期させ、元のサンプルの hi-hat が自分のドラムとぶつからないことを確かめた（§6.5）。Intro または Outro に8／16小節のインスト部分を1か所設けた（§6.7）
+- [ ] rap と歌唱のセクションの境界を明確にし、半分歌うセクションには該当欄に印を付けた（§7.6）。**歌詞の取捨選択は `mc-workflow` §2.3 の歌詞に関する3つのケースに従った**
+- [ ] rap のセクションでは、`push_pull` にボーカルの行を設け、どの楽器に合わせるかを明記した。ブレスは休符に記入した（§7.2）
+- [ ] rap のセクションでは、delivery の音高／音量の段階と音色をセクションごとに割り振り、hook と verse に違いをつけた（§7.3）
+- [ ] hook は4または8小節、verse は16小節にした（異なる場合は理由を明記した）。ad-lib は均等に散らしていない（§7.4）
+- [ ] 融合時、`style_layers` で hip-hop が担当する項目は **base と重複しない**（lint #17）
 
 ---
 
-## 附：来源
+## 付録：出典
 
-- **Dan Charnas《Dilla Time: The Life and Afterlife of J Dilla》**（按块号引用；16 章目录与块号索引见 `reference.md` §6）——§3 全部引文，§6.3、§6.5、§6.6、§7.3、§7.5。
-- **Joseph G. Schloss《Making Beats: The Art of Sample-Based Hip-Hop》**——§3.7、§5.2、§6.2–§6.7、§7.1；采样处理与选材细则见 `reference.md` §1–§2。
-- **Paul Edwards《How to Rap》**与 **《How to Rap 2》**——§4、§7.1–§7.6；flow 记谱法、delivery 参数表与人声音效清单见 `reference.md` §3–§5。
-- **Drummer's Bible**（p0089–0090、p0109）——§4。**DeSantis《Making Music》** p0154——§3.5。**野崎貴朗** 技法 31（p0111–0113）——§5.1。Cambridge-MT 多轨实测（hiphop-rnb 10 首）——§6.1–6.2。
-- ⚠ 本 skill 不覆盖 trap 的专门做法与中文说唱编曲实务。
+- **Dan Charnas『Dilla Time: The Life and Afterlife of J Dilla』**（ブロック番号で引用。全16章の目次とブロック番号の索引は `reference.md` §6 を参照）。§3 の全引用と §6.3、§6.5、§6.6、§7.3、§7.5。
+- **Joseph G. Schloss『Making Beats: The Art of Sample-Based Hip-Hop』**。§3.7、§5.2、§6.2–§6.7、§7.1。サンプル処理と素材選びの詳細は `reference.md` §1–§2 を参照。
+- **Paul Edwards『How to Rap』** と **『How to Rap 2』**。§4、§7.1–§7.6。flow の記譜法、delivery のパラメーター表、ボーカルエフェクト一覧は `reference.md` §3–§5 を参照。
+- **Drummer's Bible**（p0089–0090、p0109）は §4。**DeSantis『Making Music』** p0154 は §3.5。**野崎貴朗**の技法31（p0111–0113）は §5.1。Cambridge-MT のマルチトラックによる実測（hiphop-rnb 10曲）は §6.1–6.2。
+- ⚠ このスキルの対象外は、trap 固有の制作手法と中国語ラップの実践的なアレンジ。

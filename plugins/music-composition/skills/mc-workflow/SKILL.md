@@ -1,401 +1,401 @@
 ---
 name: mc-workflow
-description: Entry point and router for the music composition library (作曲编曲工作流与路由). The S0-S7 stage table from brief to delivered audio, which skill to load for which task, the full-library boundary table that prevents two skills claiming the same decision, the ARR-SPEC gate rules, and the three checks (boundary tables against style bleed, text-layer A/B, compliance rate). Load this FIRST for any request that will produce or change an ARR-SPEC (a whole track, a section rewrite, a generation run). A single knowledge question or a single-part task goes straight to the owning skill without this one. Use when starting a new track, when unsure which skill owns a question, when a spec fails lint, when a generated result sounds wrong and you need the diagnostic path, or when handing the spec to another department (lyrics, mixing, editing). 作曲、编曲、工作流、路由、该读哪个 skill、ARR-SPEC、出歌流程。
+description: Entry point and router for the music composition library (作曲・編曲のワークフローとスキルの振り分け). The S0-S7 stage table from brief to delivered audio, which skill to load for which task, the full-library boundary table that prevents two skills claiming the same decision, the ARR-SPEC gate rules, and the three checks (boundary tables against style bleed, text-layer A/B, compliance rate). Load this FIRST for any request that will produce or change an ARR-SPEC (a whole track, a section rewrite, a generation run). A single knowledge question or a single-part task goes straight to the owning skill without this one. Use when starting a new track, when unsure which skill owns a question, when a spec fails lint, when a generated result sounds wrong and you need the diagnostic path, or when handing the spec to another department (lyrics, mixing, editing). 作曲、編曲、ワークフロー、スキルの振り分け、どの skill を読むか、ARR-SPEC、楽曲制作の流れ。
 ---
 
-# 作曲编曲工作流与路由（Workflow & Routing）
+# 作曲・編曲のワークフローとスキルの振り分け（Workflow & Routing）
 
-**任何作曲/编曲请求先读这个 skill，再决定读哪个别的。**
+**作曲・編曲の依頼では、まずこの skill を読み、次にどの skill を読むか決める。**
 
-这个库的产出**不是音频，是一份 ARR-SPEC**（编曲规格单）。
-音频由后端生成，规格单决定它长什么样、以及怎么验收它。
+このライブラリが作るのは、音源ではなく **ARR-SPEC**（編曲仕様書）。
+音源はバックエンドが生成し、どんな音源にするか、どう検収するかは仕様書で決める。
 
-> **本库的根本立场**：AI 味不是音色问题，是**没有人做过选择**。
-> 整套流程就是一台**强迫做选择的机器**。
+> **このライブラリの基本方針**：AIっぽさの原因は音色ではなく、**誰も選択をしていないこと**にある。
+> このワークフローは、各工程で何を選ぶかを明示するためにある。
 
 ---
 
-## 0. 三十秒定位：我该去哪
+## 0. 30秒でわかる参照先
 
-| 你现在要做的事 | 去 |
+| 今やりたいこと | 参照先 |
 |---|---|
-| 从零开始一首歌 | §1 阶段表，从 S0 走。★ S2a 必须先读 `mc-development` 再填 `material` 与 `form[].development`，只照 schema 的字段说明填会把每段写成一个新画面 |
-| 已有 brief，要出规格单 | §1 的 S1–S4（S2 现分 S2a 材料与发展、S2b 和声） |
-| 规格单写完了，要生成 | §1 的 S5 ＋ `mc-render-compile` |
-| 生成回来了，不对劲 | §4 诊断路径 |
-| 不知道某个问题归哪个 skill | §2 全库边界表 |
-| lint 不过 | §3.2 |
-| 要交给作词、混音、剪辑等别的部门 / 别的人 | §5 对外接口 |
-| 要检验：选的 skill 对不对、两版哪个好、后端照做没有 | §6 三个检验办法 |
-| **要混合两种风格**（rap + 中国风、city pop + EDM…） | ★ §2.4 |
+| ゼロから1曲作る | §1 の工程表に従って S0 から進める。★ S2a では必ず `mc-development` を読んでから `material` と `form[].development` を記入する。schema のフィールド説明だけで埋めると、セクションごとに別々の場面を描くことになる |
+| brief があり、仕様書を作りたい | §1 の S1–S4（S2 は S2a 素材と展開、S2b 和声に分かれる） |
+| 仕様書ができたので生成したい | §1 の S5 ＋ `mc-render-compile` |
+| 生成結果に違和感がある | §4 の診断手順 |
+| どの skill の担当かわからない | §2 のライブラリ全体の担当範囲表 |
+| lint を通過できない | §3.2 |
+| 作詞、ミックス、編集などの別担当・別の人に渡したい | §5 の他工程との連携 |
+| skill の選び方、2版の優劣、バックエンドが仕様に従ったかを検証したい | §6 の3つの検証方法 |
+| **2つのスタイルを組み合わせたい**（rap + 中国風、city pop + EDM…） | ★ §2.4 |
 
 ---
 
-## 1. 阶段表 S0–S7
+## 1. 工程表 S0–S7
 
-**每个阶段有明确的产出物和门禁。门禁不过不许进下一阶段。**
+**各工程には成果物と通過条件がある。条件を満たしてから次へ進む。**
 
-| 阶段 | 做什么 | 产出 | 门禁 | 主用 skill |
+| 工程 | 作業 | 成果物 | 通過条件 | 主に使う skill |
 |---|---|---|---|---|
-| **S0 立意** | 把 brief 变成"只干一件事" | `intent` 四项 | **四项齐全**，`borrow` 不许只写歌名 | 本 skill §3.1 |
-| **S1 骨架** | 定调、拍、速度、曲式表 | `meta` + `form` | 段落首尾相接；**不许全是 8 的倍数** | `mc-form`、`mc-harmony`、`mc-arrangement-arch` |
-| **S2a 材料与发展** | 定主题动机、原始陈述在哪段、每段拿它做什么 | `material` + `form[].development` | **先读 `mc-development` 再填**；motif 与 stated_in 非空；每段 development 都填；填 new 的段不过半 | `mc-development`、`mc-melody` |
-| **S2b 旋律与和声** | 写主旋律、和声进行、必要的对位 | `form[].harmony` + `harmony_letters` | **双记号都要有**；至少一段有调外和弦 | `mc-melody`、`mc-harmony`、`mc-progressions`、`mc-modulation`、`mc-counterpoint` |
-| **S3 编制** | 谁在场、什么时候进退、占什么频段 | `arrangement` 全段 | 能量曲线**必须有下降**；至少一件乐器提前退场；至少一个减法事件 | `mc-arrangement-arch`、`mc-orchestration`、`mc-texture-layering`、`mc-rhythm-section`、`mc-sound-design` |
-| **S4 演唱与混音意图** | 怎么唱、声场怎么摆 | `vocal` + `mix_intent` | 力度**逐段不同**；副歌**逐遍有变化**；宽度至少两种取值 | `mc-vocal-direction`、`mc-mix-intent` |
-| **S5 编译** | 规格单 → 各后端输入 | `render.*` | 按 §3.0 的 20 条自查一遍；不过的条目改掉或写明理由 | `mc-render-compile`、`mc-symbolic-score` |
-| **S6 生成** | 跑后端，取多版 | 音频 | 按 `backends.yaml` 的 `honors` 决定哪些字段可指望 | `mc-render-compile` |
-| **S7 验收** | 先算再听 | 照做率 + AI 味旗标 | 先分开看两件事：后端照做了没有、成品有没有机器指纹；耳朵在这之后介入 | `mc-ai-tell-audit` |
+| **S0 コンセプト** | brief を「やることは1つだけ」と言える形に絞る | `intent` の4項目 | **4項目すべてを記入**し、`borrow` には曲名に加えて借りる要素を書く | この skill の §3.1 |
+| **S1 骨格** | 調、拍子、テンポ、曲式表を決める | `meta` + `form` | セクションを隙間なくつなぎ、**すべての小節数が8の倍数になるのを避ける** | `mc-form`、`mc-harmony`、`mc-arrangement-arch` |
+| **S2a 素材と展開** | 主題のモチーフ、最初に提示するセクション、各セクションでの使い方を決める | `material` + `form[].development` | **`mc-development` を読んでから記入する**。motif と stated_in は必須。全セクションの development を記入し、new は半数以下にする | `mc-development`、`mc-melody` |
+| **S2b メロディと和声** | 主旋律、コード進行、必要な対位法を書く | `form[].harmony` + `harmony_letters` | **2種類の表記をそろえる**。少なくとも1セクションにノンダイアトニックコードを入れる | `mc-melody`、`mc-harmony`、`mc-progressions`、`mc-modulation`、`mc-counterpoint` |
+| **S3 楽器編成** | どの楽器を使うか、いつ入り、いつ抜けるか、どの帯域を受け持つかを決める | 全セクションの `arrangement` | エネルギーカーブに**必ず下降を設ける**。少なくとも1つの楽器を曲の途中で抜き、少なくとも1か所で音を引く | `mc-arrangement-arch`、`mc-orchestration`、`mc-texture-layering`、`mc-rhythm-section`、`mc-sound-design` |
+| **S4 歌唱とミックスの意図** | 歌い方と音場での配置を決める | `vocal` + `mix_intent` | 歌唱の強さを**セクションごとに変える**。サビは**毎回変化をつける**。ステレオ幅には少なくとも2種類の値を使う | `mc-vocal-direction`、`mc-mix-intent` |
+| **S5 コンパイル** | 仕様書 → 各バックエンドの入力 | `render.*` | §3.0 の20項目を自己点検し、条件を満たさない項目は修正するか理由を書く | `mc-render-compile`、`mc-symbolic-score` |
+| **S6 生成** | バックエンドを実行し、複数の版を得る | 音源 | `backends.yaml` の `honors` を見て、どのフィールドの反映を期待できるか判断する | `mc-render-compile` |
+| **S7 検収** | 先に照合し、その後で聴く | 仕様遵守率 + AIっぽさのフラグ | バックエンドが仕様に従ったか、生成物に機械的な特徴が出ているかを個別に確認してから、耳で判断する | `mc-ai-tell-audit` |
 
-### 1.1 ★ 三条不许跳的顺序
+### 1.1 ★ 必ず守る3つの順序
 
-1. **`intent` 不齐不许写 `form`** —— 这是整套流程唯一的硬门禁
-2. **17 条不过不许编译** —— 不过说明规格没写完，不是挑刺。★ 按 §3.0 逐条自查，**不要为此写 lint 脚本**
-3. **照做率不过不许用耳朵返工** —— 先改规格重生成，耳朵是最后一小步
+1. **`intent` がそろってから `form` を書く**。これが全工程で唯一の厳格な通過条件
+2. **17項目を通過してからコンパイルする**。条件を満たせないのは仕様がまだ書き上がっていないためで、あら探しが目的ではない。★ §3.0 に沿って1項目ずつ確認し、**このための lint スクリプトは書かない**
+3. **仕様遵守率が基準に達してから耳で手直しする**。まず仕様を直して再生成し、最後に耳で判断する
 
-> 第 3 条最容易破。"我听着不对，我调一下混音"——
-> 那一刻你就从**规格驱动**掉回**手感驱动**了，
-> 而手感驱动的产物无法复现、无法 AB、无法积累。
+> 一番破りやすいのが第3項。「聴いて違和感があるから、ミックスを少し調整しよう」と手を入れた瞬間、
+> **仕様に沿った制作**から**感覚に頼った制作**に戻ってしまう。
+> 感覚に頼って作ったものは再現できず、AB 比較もできず、知見を蓄積できない。
 
-### 1.2 耳朵怎么介入（S7 之后）
+### 1.2 耳で判断する手順（S7 の後）
 
-照做率过关后才听，而且要：**A/B 打乱 → 成对比较 → 同一对听两遍看结论稳不稳。**
-两遍不是多余的谨慎：听觉系统会在重复暴露里改变自己的处理策略，同一段声音第二次听可能得到不同的结论，这类判断天然容易不可重复（p0251-p0252）。结论两遍不一致 = 这个差异不存在，别改。
+仕様遵守率が基準を満たしたら、**A/B の順番をランダムにする → 2つを一組にして比較する → 同じ組を2回聴き、結論が一致するか確認する。**
+繰り返し聴くと、聴覚系は音の処理の仕方を変える。同じ音でも2回目には別の結論に至る場合があり、もともと判断の再現性を得にくい（p0251-p0252）。2回の結論が一致しなければ、その差はないものとして修正しない。
 
-如果两次听中间隔的时间较长，还要防一种相反的偏差：耳朵会对持续暴露的音色变化逐渐适应，越听越觉得两版差不多，容易把真实存在的差异误判成"不存在"（p0342）。**两次判断之间留出间断，别来回连着切**，能同时防住这两头。
-
----
-
-## 2. 全库边界表
-
-**每一个决策只有一个 owner。** 拿不准就查这张表。
-
-### 2.1 按问题查
-
-| 问题 | Owner |
-|---|---|
-| 这首歌要干什么 | **本 skill** S0 |
-| 用什么曲式、段落多长 | `mc-form`（乐理） ＋ `mc-arrangement-arch`（非对称与能量） |
-| 旋律怎么写、可唱性 | `mc-melody` |
-| 和弦怎么选、怎么配 | `mc-harmony` |
-| 查一个现成进行 | `mc-progressions` |
-| 怎么转调 | `mc-modulation` |
-| 节奏型是什么 | `mc-rhythm-groove` |
-| 声部怎么独立、怎么避免平行 | `mc-counterpoint` |
-| 一个动机怎么长成一段、一段怎么长成一首 | `mc-development`（L1）；旋律本身在 `mc-melody`，段落功能在 `mc-form` |
-| 乐器什么时候进、什么时候退、能量曲线 | `mc-arrangement-arch` |
-| 用哪件乐器、混合音色 | `mc-orchestration` |
-| 频段怎么分、谁和谁抢、前中后景 | `mc-texture-layering` |
-| 打得像不像人、贝司和底鼓怎么配 | `mc-rhythm-section` |
-| 合成器音色怎么做 | `mc-sound-design` |
-| 人声怎么唱、和声怎么加 | `mc-vocal-direction` |
-| 声场怎么摆、谁给谁让路 | `mc-mix-intent` |
-| 这个风格该怎么做 | `mc-style-*`（L3） |
-| 规格单怎么变成 prompt | `mc-render-compile` |
-| 要出 ABC / MIDI / MusicXML | `mc-symbolic-score` |
-| 生成的东西哪里像 AI | `mc-ai-tell-audit` |
-| 找一个真实作品的拆解 | `mc-case-studies` |
-
-### 2.2 六组最容易混的分界（★ 逐条记住）
-
-| A ⇄ B | 分界线 |
-|---|---|
-| `mc-form` ⇄ `mc-arrangement-arch` | **form 管曲式是什么（乐理），arrangement-arch 管这首歌为什么这么切（决策）** |
-| `mc-rhythm-groove` ⇄ `mc-rhythm-section` | **groove 管节奏本身是什么，rhythm-section 管怎么把它打出来像人** |
-| `mc-texture-layering` ⇄ `mc-mix-intent` | **texture 的解法是"改写"（换音区/减音符/交替），mix-intent 的解法是"改混"（让频/侧链/动态）。能改写解决的不许留给混音** |
-| `mc-orchestration` ⇄ `mc-sound-design` | **orchestration 管真实乐器与混合，sound-design 管合成音色的设计** |
-| `mc-sound-design` ⇄ 声音（音效、拟音） | 本库的 sound-design 是**乐音音色**；影视意义的"声音设计"（音效/拟音/空间）是**声音**这一职能的事，同名不同事 |
-| 本库 ⇄ 作词 | **词的一切是作词的事**，包括词曲对齐（符割り、字余り、倒字、协音）——那是词的工序；本库读同一首歌的歌词（`meta.upstream.lyrics`），共享六字段谁定谁读见 §5.1 |
-
-### 2.4 ★ 风格混合：不是调匀，是分维度签字
-
-> ★ **边界是分工，不是禁令。** 隔离的目的是让每个选择都有人签字，不是把风格锁死。写 J-Pop 规格时顺手借一个 city pop 的裏和弦、写中国风时低音走了 hip-hop 的 808——只要在 `style_layers` / `fusion_note` 里写一句为什么，就是合法的混合；**轻微的串音完全可以接受**，真正要防的是「没人选、默认长成那样」。
-
-**污染隔离 ≠ 禁止混合。** 两者的区别只有一条：
-
-> **混合是写下来的选择；污染是没人选。**
-> 一首 rap + 中国风的歌（如汪苏泷《桃花扇》）完全成立——前提是规格单说得出**哪个维度归谁**。
-
-**做法**：`meta.style_layers` 填一张分工表（schema §1.1.1），一个 `base` + 若干 `overlay`，
-每层写明它 `owns` 哪些维度：
-
-| 维度 | 《桃花扇》式的分法（示意） |
-|---|---|
-| `harmony`、`melody`、`color_instruments` | 中国风（五声旋律、民乐采样做色彩层） |
-| （完整分工见 `mc-style-hiphop` §8.1） | |
-| `groove`、`low_end`、`vocal_delivery_verse` | hip-hop（律动、808、主歌 flow） |
-| `vocal_delivery_chorus`、`form` | 中国风副歌唱、结构仍是主副歌 |
-
-★ `owns` 是**封闭集合**，只能从这十四个里选：
-`harmony`　`melody`　`groove`　`low_end`　`fill_policy`　`instrumentation`　`color_instruments`　`timbre`　`arrangement_hook`　`vocal_delivery`（可拆成 `vocal_delivery_verse` / `vocal_delivery_chorus`）　`form`　`mix`。
-要分配的东西不在表里，归到最接近的那个，并在 `fusion_note` 里写一句说明，**不要自造名字**。
-
-**三条规则**（第 18 条自查）：
-1. **每个维度只有一个 owner**——两层都声称 `groove` = 两种默认值叠在一起，谁也没选
-2. **每层至少拥有一个维度**——否则它只是被读了，没起作用
-3. **`fusion_note` 一句话说这个组合为什么成立**——说不出就是硬凑
-
-**怎么用各 L3 的移植表**：overlay 搬进来的，正是它移植表里标"不可搬／会被认出来"的项——
-**那就是你要的辨识度**。但每搬一项都要在 `owns` 里签字，并看 base 风格的移植表是否允许让出那个维度
-（例如 city pop 的移植表说"抢拍贝司可搬"，那 base 是 city pop 时 `groove` 让给别人就要三思）。
-
-**路由上**：混合 brief 应**读全部被点名的 L3 skill**，这不算污染；
-读了**没被点名**的风格才是。
-
-### 2.3 不归本包的东西
-
-| 内容 | 归哪个职能 |
-|---|---|
-| EQ 频点、压缩比、混响参数、总线链、母带 | **声音（混音、母带）**；本包只给 `mix_intent` 这份意图 |
-| 影视音效、Foley、环境声、空间设计 | **声音**（录音、音效） |
-| 跟画面走的配乐结构、cue sheet、spotting | **配乐**（为画面写音乐） |
-| 歌词写作、押韵、意象、叙事人称 | **作词**。★ **词的三种情况**：用户**没提词** → 可出可不出，出了就在 `checks.exemptions` 记一条"词未经作词工序"；用户明确要**纯音乐 / 轻音乐 / 器乐** → 一个字都不加，`vocal` 留空；用户**明确要词** → 必须出词，有同一首歌的歌词（`meta.upstream.lyrics`）就照它，没有就按本库的 `mc-vocal-direction` 写并记豁免。只示意人声节奏（rap 的 flow、副歌字数）时用占位音节（da-da / 拉拉）或 X 标记 |
-| 商业流程（compe、仮歌、版权、分成） | 不做 |
+2回の試聴の間隔が長い場合には、逆方向の偏りにも注意する。音色の変化にさらされ続けると耳が徐々に順応し、聴くほど2版が似て感じられ、実際にある差を「ない」と判断しやすくなる（p0342）。**2回の判断の間には休止を入れ、立て続けに切り替えない**ことで、両方の偏りを抑えられる。
 
 ---
 
-## 3. ARR-SPEC：本库唯一的交接物
+## 2. ライブラリ全体の担当範囲表
 
-**完整规范在本 skill 目录下的 [ARR-SPEC.schema.md](ARR-SPEC.schema.md)（v1.0），空模板 [ARR-SPEC.template.yaml](ARR-SPEC.template.yaml)，后端能力档案 [backends.yaml](backends.yaml)。**
-★ **写规格单前先 Read 模板，照它的字段名填**——实测不看模板的话 agent 会自己发明字段（`intent.scene/borrow`、`push_pull` 写成字符串）。
-（这三个文件就是本库随包交付的全部"格式"——除了 Read 它们，不需要任何工具。）
+**1つの判断につき owner は1つ。** 迷ったらこの表を参照する。
 
-### 3.1 一物四用
+### 2.1 判断したいことから引く
 
-| 用途 | 怎么用 |
+| 判断したいこと | Owner |
 |---|---|
-| **对外交接** | 给混音师、乐手、作词和别的部门看的，是这一份（§5） |
-| **AB 测试对象** | 改一个字段 → 重生成 → 比对。**变量可控** |
-| **编译源** | `mc-render-compile` 把它编译成 Suno prompt / YuE 输入 / MIDI |
-| **验收基准** | 生成回来的东西逐字段对照它，看后端照做了多少 |
+| 曲の目的 | **この skill** の S0 |
+| 曲式とセクションの長さ | `mc-form`（音楽理論） ＋ `mc-arrangement-arch`（非対称性とエネルギー） |
+| メロディの書き方、歌いやすさ | `mc-melody` |
+| コードの選び方と組み合わせ方 | `mc-harmony` |
+| 既存のコード進行を調べる | `mc-progressions` |
+| 転調の仕方 | `mc-modulation` |
+| リズムパターン | `mc-rhythm-groove` |
+| 声部の独立性を保つ方法、平行進行の避け方 | `mc-counterpoint` |
+| モチーフをセクションに展開し、セクションから1曲を組み立てる方法 | `mc-development`（L1）。メロディ自体は `mc-melody`、セクションの機能は `mc-form` |
+| 楽器の出入りとエネルギーカーブ | `mc-arrangement-arch` |
+| 楽器選びと音色の組み合わせ | `mc-orchestration` |
+| 帯域の分担、音の競合、前景・中景・後景 | `mc-texture-layering` |
+| 人間らしい演奏、ベースとキックの組み合わせ | `mc-rhythm-section` |
+| シンセサイザーの音色の作り方 | `mc-sound-design` |
+| 歌い方とコーラスの重ね方 | `mc-vocal-direction` |
+| 音場での配置と、各パートが互いにスペースを譲る方法 | `mc-mix-intent` |
+| スタイルに沿った作り方 | `mc-style-*`（L3） |
+| 仕様書を prompt に変換する方法 | `mc-render-compile` |
+| ABC / MIDI / MusicXML を出力する | `mc-symbolic-score` |
+| 生成物のどこがAIっぽいか | `mc-ai-tell-audit` |
+| 実際の作品の分析を探す | `mc-case-studies` |
 
-★ 第二和第四条是关键：**没有规格单就没有可控实验，没有可控实验就只能靠感觉。**
+### 2.2 混同しやすい6組の担当範囲（★ 1組ずつ覚える）
 
-### 3.0 ★ 写完的 20 条自查
+| A ⇄ B | 担当範囲 |
+|---|---|
+| `mc-form` ⇄ `mc-arrangement-arch` | **form は曲式の定義（音楽理論）、arrangement-arch はこの曲をその構成にする理由（制作上の判断）を担当する** |
+| `mc-rhythm-groove` ⇄ `mc-rhythm-section` | **groove はリズム自体、rhythm-section はそのリズムを人間らしく演奏する方法を担当する** |
+| `mc-texture-layering` ⇄ `mc-mix-intent` | **texture は編曲を直す（音域を変える、音符を減らす、交互に鳴らす）。mix-intent はミックスで調整する（帯域を譲る、サイドチェインをかける、ダイナミクスを調整する）。編曲で解決できることは編曲で対処する** |
+| `mc-orchestration` ⇄ `mc-sound-design` | **orchestration は実際の楽器とその組み合わせ、sound-design は合成音色の設計を担当する** |
+| `mc-sound-design` ⇄ 音響（効果音、フォーリー） | このライブラリの sound-design は**楽音の音色**を扱う。映像制作でいう「サウンドデザイン」（効果音、フォーリー、空間設計）は**音響**の担当で、同じ名前でも作業は異なる |
+| このライブラリ ⇄ 作詞 | **歌詞に関することはすべて作詞の担当**。歌詞と旋律を合わせる作業（符割り、字余り、声調やアクセントの逆転、発音と旋律の整合）も作詞工程に含む。このライブラリは同じ曲の歌詞（`meta.upstream.lyrics`）を読み込む。共有する6フィールドを誰が決め、誰が読むかは §5.1 を参照 |
 
-**本库不需要用户机器上有任何工具**——没有 lint、没有脚本、不预设 Python 或 Node。
-写完规格单，自己把下面 20 条逐条过一遍，结果写进 `checks.self_audit`。
-★ **这是判据，不是铁律**：某条不过，要么改，要么一句话写明为什么这首歌就该这样。
-写了理由的偏离就是合法的选择；**没有任何一条会"卡住"后面的编译**。
-★ 不要为了检查去写脚本（实测有 agent 这么干过，白费很多轮）——20 条全部用眼睛就能判。
+### 2.4 ★ スタイルの組み合わせは要素ごとに担当を決める
 
-| # | 自查问法 | 对照字段 |
+> ★ **境界は分担を示すために設ける。** スタイルを固定するための制約ではなく、どの選択も担当を明らかにするためにある。J-Pop の仕様に city pop の裏和音を借りたり、中国風の曲の低音に hip-hop の 808 を使ったりしても、`style_layers` / `fusion_note` に理由を1文書けば、意図した組み合わせとして扱える。**軽微な混入は許容できる**。防ぎたいのは、誰も選ばないまま既定の作り方が入り込むこと。
+
+**意図しない混入の防止 ≠ スタイルの組み合わせの禁止。** 違いは1つだけ。
+
+> **組み合わせは選択を記録してあり、混入は誰も選んでいない。**
+> rap + 中国風の曲（汪苏泷《桃花扇》など）は、仕様書に**どの要素をどのスタイルが担当するか**を明記すれば成立する。
+
+**記入方法**：`meta.style_layers` に分担表を書く（schema §1.1.1）。1つの `base` と、必要な数の `overlay` を置き、
+各レイヤーの担当要素を `owns` に明記する。
+
+| 要素 | 《桃花扇》風の分担例 |
+|---|---|
+| `harmony`、`melody`、`color_instruments` | 中国風（ペンタトニックのメロディ、中国の伝統楽器のサンプルで音色に彩りを加える） |
+| （分担の全体像は `mc-style-hiphop` §8.1 を参照） | |
+| `groove`、`low_end`、`vocal_delivery_verse` | hip-hop（グルーヴ、808、ヴァースの flow） |
+| `vocal_delivery_chorus`、`form` | サビは中国風に歌い、構成はヴァースとサビを軸にする |
+
+★ `owns` には**次の14種類**から指定する。
+`harmony`　`melody`　`groove`　`low_end`　`fill_policy`　`instrumentation`　`color_instruments`　`timbre`　`arrangement_hook`　`vocal_delivery`（`vocal_delivery_verse` / `vocal_delivery_chorus` に分けられる）　`form`　`mix`。
+割り当てたい要素が一覧にない場合は、最も近い項目に含め、`fusion_note` に1文で補足する。**独自の名前は作らない。**
+
+**3つのルール**（自己点検の第18項目）：
+1. **各要素の owner は1つだけ**。2つのレイヤーがどちらも `groove` を担当すると、2種類の既定値を重ねただけになり、誰も選択したことにならない
+2. **各レイヤーは少なくとも1つの要素を担当する**。担当がなければ、読んだだけで曲には反映されない
+3. **`fusion_note` に組み合わせが成立する理由を1文で書く**。説明できなければ無理に組み合わせている
+
+**各 L3 の移植表の使い方**：overlay から持ち込むのは、そのスタイルの移植表で「移植不可／聴けばそのスタイルだとわかる」とされている要素。
+**その特徴があるからこそ、聴いてスタイルがわかる。** 持ち込む要素は1つずつ `owns` に記載し、base の移植表で、その要素を他のスタイルに任せてよいか確認する
+（たとえば city pop の移植表に「前ノリのベースは移植可」とあっても、city pop が base の場合は `groove` を譲ってよいか慎重に判断する）。
+
+**読む skill の選び方**：スタイルを組み合わせる brief では、**指定された L3 skill をすべて読む**。その範囲での併用は意図した組み合わせに当たる。
+**指定されていない**スタイルを読むと、意図しない混入につながる。
+
+### 2.3 このパッケージの担当外
+
+| 内容 | 担当 |
+|---|---|
+| EQ の周波数、コンプレッサーのレシオ、リバーブのパラメータ、バスの処理チェーン、マスタリング | **音響（ミックス、マスタリング）**。このパッケージは意図を `mix_intent` で伝える |
+| 映像の効果音、Foley、環境音、空間設計 | **音響**（録音、効果音） |
+| 映像に合わせた劇伴の構成、cue sheet、spotting | **劇伴**（映像に合わせた作曲） |
+| 歌詞の執筆、韻、イメージ、語り手の人称 | **作詞**。★ **歌詞の扱いは3通り**。ユーザーが**歌詞に触れていない** → 歌詞を付けてもよい。付けたら `checks.exemptions` に「作詞工程を経ていない」と記録する。ユーザーが**インスト曲 / イージーリスニング / 器楽曲**を明示した → 歌詞は一文字も加えず、`vocal` は空欄にする。ユーザーが**歌詞を明示的に求めた** → 必ず歌詞を出す。同じ曲の歌詞（`meta.upstream.lyrics`）があればそれに従い、なければこのライブラリの `mc-vocal-direction` に従って書き、例外として記録する。歌唱のリズム（rap の flow、サビの字数）だけを示す場合は仮の音節（da-da / 拉拉〈ララ〉）か X を使う |
+| 商業上の手続き（compe、仮歌、著作権、収益分配） | 担当外 |
+
+---
+
+## 3. ARR-SPEC：このライブラリで唯一の引き継ぎ資料
+
+**完全な仕様はこの skill のディレクトリにある [ARR-SPEC.schema.md](ARR-SPEC.schema.md)（v1.0）、空のテンプレートは [ARR-SPEC.template.yaml](ARR-SPEC.template.yaml)、バックエンドの対応表は [backends.yaml](backends.yaml)。**
+★ **仕様書を書く前にテンプレートを Read し、そこにあるフィールド名で記入する**。実際、テンプレートを見ないと agent は独自のフィールドを作ることがある（`intent.scene/borrow`、`push_pull` を文字列で書くなど）。
+（この3ファイルがパッケージに同梱する書式のすべて。これらを Read できれば、ほかのツールは不要。）
+
+### 3.1 4つの用途
+
+| 用途 | 使い方 |
+|---|---|
+| **他工程への引き継ぎ** | ミックス担当者、演奏者、作詞担当者、その他の部署にこの1ファイルを渡す（§5） |
+| **AB テストの対象** | フィールドを1つ変える → 再生成する → 比較する。**変数を制御できる** |
+| **コンパイル元** | `mc-render-compile` が Suno prompt / YuE の入力 / MIDI にコンパイルする |
+| **検収の基準** | 生成結果をフィールドごとに仕様書と照合し、バックエンドがどの程度仕様に従ったかを確認する |
+
+★ 特に重要なのは2番目と4番目。**仕様書があれば変数を制御した比較ができ、感覚だけに頼らずに検証できる。**
+
+### 3.0 ★ 書き上げた後の20項目の自己点検
+
+**このライブラリを使うためにユーザーのマシンへツールを導入する必要はない**。lint やスクリプトは用意せず、Python や Node も前提にしない。
+仕様書を書き上げたら、次の20項目を1つずつ確認し、結果を `checks.self_audit` に記録する。
+★ **各項目は判断基準として使う**。条件を満たさない場合は、修正するか、この曲でその判断を選んだ理由を1文で書く。
+理由を書けば意図した選択として扱える。**どの項目も後続のコンパイルを止める条件にはならない。**
+★ 点検用のスクリプトは書かない（実際に agent がスクリプトを書いて何往復も費やした例がある）。20項目すべてを目視で判断できる。
+
+| # | 自己点検の内容 | 対応フィールド |
 |---|---|---|
-| 1 | `intent` 四项都填了？`reference_pair` 恰好 2 项且每项写了"借哪一点"？ | `intent` |
-| 2 | 各段 `start_bar` 首尾相接？（上一段 start + bars = 下一段 start） | `form` |
-| 3 | 至少一段的 `bars` 不是 8 的倍数？ | `form[].bars` |
-| 4 | `energy_curve` 的 key 集合 == `form` 的 id 集合？（不多不少） | `energy_curve` |
-| 5 | 能量曲线至少下降一次？ | `energy_curve` |
-| 6 | `subtraction_events` ≥ 1？ | `subtraction_events` |
-| 7 | 每件乐器有 `entry`；至少一件 `exit` 不是 `end`？ | `roster` |
-| 8 | `arrangement_hook.what` 非空？ | `hooks` |
-| 9 | 至少一个非 Intro/Outro 段有调外和弦或转调标记？（小调里 `bIII`／`bVI`／`bVII` 是本调和弦，不算） | `form[].harmony` |
-| 10 | `fill_policy.bars` 不是公差 4 的等差数列？ | `groove` |
-| 11 | `push_pull` 至少一项 `offset_ms ≠ 0`，且每项是 `{part, offset_ms, note}` 字典？ | `groove` |
-| 12 | `width_map` 至少两种取值？ | `mix_intent` |
-| 13 | `style_prompt` 非空且无 epic/emotional/beautiful；`section_tags` 若手填则与 `form` 段数、顺序一致（由 `form[].name` 派生，可不填）？ | `render.suno` |
-| 14 | `Σbars × 每小节拍数 ÷ tempo × 60` 与 `target_duration` 偏差 ≤ 10%？ | `meta` |
-| 15 | 有人声时 `dynamics_by_section` 至少两种取值？（器乐作品跳过） | `vocal` |
-| 16 | 有人声时 `chorus_variation` 非空？（器乐作品跳过） | `vocal` |
-| 17 | 多风格时：恰好一个 base；每个维度只有一个 owner；每层至少一个维度；`fusion_note` 非空？ | `meta.style_layers` |
-| 18 | `material.motif` 与 `stated_in` 非空；每段 `development` 填了；`new` 不过半；至少一段 `repeat` 或 `recap`；副歌各遍不全是 `new`？ | `material` `form[].development` |
-| 19 | 和弦拼写全 ASCII，后缀在封闭集合里（`maj7` `m7b5` `dim`，不写 △ ø ° ♭ ♯ ×）？ | `form[].harmony_letters` `harmony` |
-| 20 | `key` 是"主音 major/minor"；`mode` 在枚举内；段名在封闭集合内；`subtraction_events[].at` 是 `{section, bar_offset}` 这样的结构不是句子？ | `meta` `form[].name` `subtraction_events` |
+| 1 | `intent` の4項目をすべて記入したか。`reference_pair` はちょうど2項目で、それぞれ何を借りるかを書いたか | `intent` |
+| 2 | 各セクションの `start_bar` は隙間なくつながっているか（前のセクションの start + bars = 次のセクションの start） | `form` |
+| 3 | `bars` が8の倍数でないセクションが少なくとも1つあるか | `form[].bars` |
+| 4 | `energy_curve` の key の集合 == `form` の id の集合か（過不足がないか） | `energy_curve` |
+| 5 | エネルギーカーブは少なくとも1回下降するか | `energy_curve` |
+| 6 | `subtraction_events` ≥ 1 を満たすか | `subtraction_events` |
+| 7 | 各楽器に `entry` があり、少なくとも1つの楽器の `exit` が `end` 以外になっているか | `roster` |
+| 8 | `arrangement_hook.what` を記入したか | `hooks` |
+| 9 | Intro/Outro 以外のセクションのうち少なくとも1つに、ノンダイアトニックコードか転調の表記があるか（短調の `bIII`／`bVI`／`bVII` はその調のコードなので数えない） | `form[].harmony` |
+| 10 | `fill_policy.bars` は公差4の等差数列になっていないか | `groove` |
+| 11 | `push_pull` の少なくとも1項目で `offset_ms ≠ 0` を満たし、各項目が `{part, offset_ms, note}` の辞書になっているか | `groove` |
+| 12 | `width_map` に少なくとも2種類の値があるか | `mix_intent` |
+| 13 | `style_prompt` が空欄でなく、epic/emotional/beautiful を含まないか。`section_tags` を手入力した場合は `form` とセクションの数、順序が一致するか（`form[].name` から導出できるため省略可） | `render.suno` |
+| 14 | `Σbars × 1小節あたりの拍数 ÷ tempo × 60` と `target_duration` の差が ≤ 10% か | `meta` |
+| 15 | ボーカルがある場合、`dynamics_by_section` に少なくとも2種類の値があるか（器楽曲は省略） | `vocal` |
+| 16 | ボーカルがある場合、`chorus_variation` を記入したか（器楽曲は省略） | `vocal` |
+| 17 | 複数のスタイルを使う場合、base はちょうど1つか。各要素の owner は1つか。各レイヤーが少なくとも1つの要素を担当しているか。`fusion_note` を記入したか | `meta.style_layers` |
+| 18 | `material.motif` と `stated_in`、全セクションの `development` を記入したか。`new` は半数以下か。`repeat` または `recap` が少なくとも1セクションにあるか。サビの全回が `new` になっていないか | `material` `form[].development` |
+| 19 | コード表記はすべて ASCII で、接尾辞は許可された値（`maj7` `m7b5` `dim` など）を使っているか（△ ø ° ♭ ♯ × は使わない） | `form[].harmony_letters` `harmony` |
+| 20 | `key` は「主音 major/minor」の形式か。`mode` は列挙値のいずれか、セクション名は許可された値のいずれか。`subtraction_events[].at` は文章でなく `{section, bar_offset}` のような構造になっているか | `meta` `form[].name` `subtraction_events` |
 
-**YAML 本身的自查**（agent 最常写坏的地方）：
-- 列表字段（`roster` / `sound_stage` / `push_pull` / `emotional_arc` …）的 `- {…}` 条目下面**不能挂 `note:` 键**——要注释用同级 `xxx_note:` 或 `#`
-- 冒号后有空格；值里有冒号的加引号；缩进统一两格
+**YAML 構文の自己点検**（agent が特によく間違える箇所）：
+- リスト型のフィールド（`roster` / `sound_stage` / `push_pull` / `emotional_arc` …）では、`- {…}` の項目の下に **`note:` キーを追加できない**。注記にはリストと同じ階層の `xxx_note:` または `#` を使う
+- コロンの後に空白を入れる。コロンを含む値は引用符で囲む。インデントは2スペースに統一する
 
-### 3.2 自查不过怎么办
+### 3.2 自己点検で条件を満たさなかった場合
 
-**不过的条目通常指向一个没读的 skill**，而不是需要硬填：
+**条件を満たさない箇所には、まだ読んでいない skill の説明が役立つことが多い。** 無理に記入する前に、次の参照先を確認する。
 
-| 不过的条目 | 多半是哪个 skill 没读 |
+| 条件を満たさなかった項目 | 確認する skill |
 |---|---|
-| 1（intent 不齐） | 本 skill §1 的 S0——**回去想清楚，不要硬填** |
-| 2、3、14（段落与时长） | `mc-arrangement-arch` §4 |
-| 4、5（能量曲线） | `mc-arrangement-arch` §2 |
-| 6（减法事件） | `mc-arrangement-arch` §3 |
-| 7（编制进退场） | `mc-arrangement-arch` §5 |
+| 1（intent の不足） | この skill の §1 の S0。**戻って考え直してから記入する** |
+| 2、3、14（セクションと曲の長さ） | `mc-arrangement-arch` §4 |
+| 4、5（エネルギーカーブ） | `mc-arrangement-arch` §2 |
+| 6（音を引く箇所） | `mc-arrangement-arch` §3 |
+| 7（楽器の出入り） | `mc-arrangement-arch` §5 |
 | 8（arrangement_hook） | `mc-arrangement-arch` §7 |
-| 9（和声单调） | `mc-harmony`、`mc-modulation` |
-| 10、11（fill 与律动） | `mc-rhythm-section` §3、§8 |
-| 12（宽度恒定） | `mc-mix-intent` §2 |
-| 13（编译不完整） | `mc-render-compile` |
-| 15、16（人声） | `mc-vocal-direction` §1、§4 |
+| 9（和声が単調） | `mc-harmony`、`mc-modulation` |
+| 10、11（fill とグルーヴ） | `mc-rhythm-section` §3、§8 |
+| 12（ステレオ幅が一定） | `mc-mix-intent` §2 |
+| 13（コンパイルの記述が不十分） | `mc-render-compile` |
+| 15、16（ボーカル） | `mc-vocal-direction` §1、§4 |
 
-**豁免的规矩**：写进 `checks.exemptions`，**必须带理由**。
-静默跳过 = 没写完。
+**例外の記録方法**：`checks.exemptions` に**必ず理由とともに記録する**。
+理由を書かずに飛ばした項目は未記入として扱う。
 
-### 3.3 ★ 生成后端的默认值对照表
+### 3.3 ★ 生成バックエンドの既定の傾向と対応フィールド
 
-**后端在无指令时会滑向左列。ARR-SPEC 的对应字段就是为了把它拉回来。**
+**指示を省くとバックエンドは左列の傾向を示す。ARR-SPEC の対応フィールドで意図を指定する。**
 
-| 后端默认倾向 | 对抗字段 | lint |
+| バックエンドの既定の傾向 | 対応フィールド | lint |
 |---|---|---|
-| 段落等长、都是 8 的倍数 | `form[].bars` | #3 |
-| 能量单调上升到底 | `energy_curve` | #5 |
-| 开场就把乐器铺满 | `roster[].entry` | — |
-| 所有乐器从头响到尾 | `roster[].exit` | #7 |
-| 只加不减 | `subtraction_events` | #6 |
-| 每 4 小节一个过门 | `fill_policy.bars` | #10 |
-| 全声部严格对齐网格 | `groove.push_pull` | #11 |
-| 人声全程一个力度 | `vocal.dynamics_by_section` | #15 |
-| 副歌逐遍原样复制 | `vocal.chorus_variation` | #16 |
-| 人声音准全中 | `vocal.pitch_policy` | 人工项 |
-| 立体声宽度全曲不变 | `mix_intent.width_map` | #12 |
-| 动态被压平 | `mix_intent.dynamics` | 人工项 |
-| 没有非人声记忆点 | `hooks.arrangement_hook` | #8 |
-| 时长永远 3:30 | `meta.target_duration` | #14 |
+| セクションが同じ長さで、すべて8の倍数 | `form[].bars` | #3 |
+| エネルギーが最後まで単調に上昇する | `energy_curve` | #5 |
+| 曲の冒頭から楽器を詰め込む | `roster[].entry` | — |
+| すべての楽器が最初から最後まで鳴る | `roster[].exit` | #7 |
+| 音を足す一方で引かない | `subtraction_events` | #6 |
+| 4小節ごとにフィルを入れる | `fill_policy.bars` | #10 |
+| 全パートがグリッドにぴったりそろう | `groove.push_pull` | #11 |
+| ボーカルの強さが曲を通して一定 | `vocal.dynamics_by_section` | #15 |
+| サビを毎回そのまま繰り返す | `vocal.chorus_variation` | #16 |
+| ボーカルのピッチがすべて正確 | `vocal.pitch_policy` | 手動確認 |
+| ステレオ幅が曲を通して変わらない | `mix_intent.width_map` | #12 |
+| ダイナミクスがつぶれる | `mix_intent.dynamics` | 手動確認 |
+| ボーカル以外に耳に残る要素がない | `hooks.arrangement_hook` | #8 |
+| 曲の長さがいつも 3:30 | `meta.target_duration` | #14 |
 
 ---
 
-## 4. 诊断路径：生成回来不对劲
+## 4. 生成結果に違和感があるときの診断手順
 
-**按这个顺序查，不要凭直觉跳。**
+**直感で飛ばさず、この順番で確認する。**
 
 ```
-听着"像 AI"
- └─ 先分开两个问题：后端照做了没有（照做率）、成品有没有机器指纹（AI 味旗标）
-     ├─ 照做率低  → 后端没照做
-     │   ├─ 查 backends.yaml：这个字段该后端 honors 是 none 吗？
-     │   │   └─ 是 → 不是它的错。换后端（YuE2 控制力最强）或接受
-     │   └─ 否 → 编译问题，查 mc-render-compile
-     └─ 照做率高但仍像 AI → 规格本身不够
-         └─ 走 mc-ai-tell-audit 的清单
+聴くと「AIっぽい」
+ └─ まず、バックエンドが仕様に従ったか（仕様遵守率）、生成物に機械的な特徴があるか（AIっぽさのフラグ）を個別に確認する
+     ├─ 仕様遵守率が低い → バックエンドが仕様に従っていない
+     │   ├─ backends.yaml を確認。このバックエンドでは対象フィールドの honors が none か？
+     │   │   └─ はい → バックエンドの仕様どおり。バックエンドを変える（YuE2 が最も制御しやすい）か、生成結果を受け入れる
+     │   └─ いいえ → コンパイルに問題がある。mc-render-compile を確認する
+     └─ 仕様遵守率は高いが、それでもAIっぽい → 仕様自体に不足がある
+         └─ mc-ai-tell-audit のチェックリストを確認する
 ```
 
-### 4.1 具体症状 → skill
+### 4.1 具体的な症状 → skill
 
-| 症状 | 先查 |
+| 症状 | 最初に確認する箇所 |
 |---|---|
-| 平、没起伏 | `mc-arrangement-arch` §2 能量曲线 |
-| 糊、浑 | `mc-texture-layering` §4 → **先查持续音，不是先怪鼓** |
-| 主角不突出 | `mc-texture-layering` §3 四条深度线索 |
-| 机械、太准 | `mc-rhythm-section` §2 ＋ `mc-vocal-direction` §4 |
-| 听着还行但记不住 | `mc-arrangement-arch` §7 —— `arrangement_hook` 是不是空的 |
-| 第二遍副歌和第一遍一样 | `mc-arrangement-arch` §6 ＋ `mc-vocal-direction` §1④ |
-| 人声埋在伴奏里 | **先查音准**（`mc-vocal-direction` §4.1），再查频段 |
-| 贝斯在手机上消失 | `mc-sound-design` §6 差音 |
-| 结尾很突兀 / 淡出了事 | `mc-arrangement-arch` §8 三种结尾 |
-| 技术上干净但情绪不对 | `mc-mix-intent` §3.1 —— `mood` 是不是没写 |
+| 平坦で起伏がない | `mc-arrangement-arch` §2 エネルギーカーブ |
+| 音がぼやける、濁る | `mc-texture-layering` §4 → **ドラムを疑う前に、伸ばし続けている音を確認する** |
+| 主役が埋もれる | `mc-texture-layering` §3 奥行きを判断する4つの手がかり |
+| 機械的で、タイミングやピッチが正確すぎる | `mc-rhythm-section` §2 ＋ `mc-vocal-direction` §4 |
+| 聴いた印象は悪くないが、耳に残らない | `mc-arrangement-arch` §7。 `arrangement_hook` が空欄か確認する |
+| 2回目のサビが1回目と同じ | `mc-arrangement-arch` §6 ＋ `mc-vocal-direction` §1④ |
+| ボーカルが伴奏に埋もれる | **最初にピッチを確認する**（`mc-vocal-direction` §4.1）。次に帯域を確認する |
+| スマートフォンではベースが聞こえなくなる | `mc-sound-design` §6 差音 |
+| 終わり方が唐突 / フェードアウトで済ませている | `mc-arrangement-arch` §8 3種類の終わり方 |
+| 技術的にはきれいだが、感情の方向が合わない | `mc-mix-intent` §3.1。 `mood` が空欄か確認する |
 
-### 4.2 ★ 两个数不许混为一谈
+### 4.2 ★ 2つの指標は別々に評価する
 
-| | 问什么 | 怎么算 |
+| | 評価する内容 | 評価方法 |
 |---|---|---|
-| **照做率** | 后端照着规格做了多少 | 逐字段对照规格听/看；0–100 的参考线见 §6.3 |
-| **AI 味旗标** | 成品有没有机器指纹 | `mc-ai-tell-audit` 的清单，独立计数 |
+| **仕様遵守率** | バックエンドがどの程度仕様に従ったか | 聴くか目で見てフィールドごとに仕様と照合する。0–100 の目安は §6.3 を参照 |
+| **AIっぽさのフラグ** | 生成物に機械的な特徴があるか | `mc-ai-tell-audit` のチェックリストに従って別に数える |
 
-**照做率 100 的东西完全可能满是 AI 味**——那说明规格写得像 AI。
-反过来，照做率 40 但好听，说明后端自己干得不错，但你**不可复现**。
+**仕様遵守率が100でも、生成物にAIっぽさが強く出ることはある**。その場合は、仕様自体にAIっぽくなる指示が含まれている。
+逆に、仕様遵守率が40でも聴いて良いと感じるなら、バックエンドが独自に良い結果を出したことになる。ただし、**同じ結果は再現できない**。
 
 ---
 
-## 5. 对外接口
+## 5. 他工程との連携
 
-**本库管一首歌的作曲与编曲决定**（调、速度、段落、和声、主题材料、谁什么时候进退、能量曲线、怎么唱、混音要达到什么），产出是 ARR-SPEC。不假设下游是谁、用什么工具；对外只经规格单：交出去的字段、有就读的上游字段（§5.2）、`messages`（§5.3）。字段怎么理解：`ARR-SPEC.schema.md` §5。
+**このライブラリは1曲の作曲・編曲に関する判断を担い**（調、テンポ、セクション、和声、主題素材、楽器の出入り、エネルギーカーブ、歌い方、ミックスの目標）、ARR-SPEC を作る。後工程の担当者や使用ツールを前提にせず、受け渡しは仕様書を通じて行う。他工程に渡すフィールド、あれば読み込む上流フィールド（§5.2）、`messages`（§5.3）を使う。各フィールドの解釈は `ARR-SPEC.schema.md` §5 を参照。
 
-| 职能 | 不归本库的 | 交出去 |
+| 担当 | このライブラリの担当外となる作業 | 渡すもの |
 |---|---|---|
-| 作词 | 词怎么写：押韵、意象、叙事人称；字怎么安到音上（符割り、字余り、倒字、协音） | 共享六字段（§5.1）；`vocal.phrasing／breath_points`、`hooks.vocal_hook`、`intent.emotional_arc`、`form[].melody_register` |
-| 声音（混音、母带） | EQ 频点、压缩比、混响参数、总线链、母带；录音；影视意义的音效与拟音 | `mix_intent`（只写意图）、`roster`、`depth_map`、`spectrum_budget`、`subtraction_events`、`vocal.pitch_policy／stacking`；`deliverable` 含 `stems` 时交分轨 |
-| 配乐（为画面写音乐） | 跟画面走的结构：spotting、cue sheet、从哪一帧进 | `meta.tempo／tempo_map／target_duration`、`form[].start_bar／bars`、`material`、`hooks.arrangement_hook`、`energy_curve` |
-| 剪辑环节 | 把音乐放到画面上：切在哪、剪短、接缝 | 同上的时间字段、`subtraction_events`、stems |
+| 作詞 | 歌詞を書く（韻、イメージ、語り手の人称）。歌詞を音に当てる（符割り、字余り、声調やアクセントの逆転、発音と旋律の整合） | 共有6フィールド（§5.1）、`vocal.phrasing／breath_points`、`hooks.vocal_hook`、`intent.emotional_arc`、`form[].melody_register` |
+| 音響（ミックス、マスタリング） | EQ の周波数、コンプレッサーのレシオ、リバーブのパラメータ、バスの処理チェーン、マスタリング、録音、映像制作における効果音とフォーリー | `mix_intent`（意図のみ）、`roster`、`depth_map`、`spectrum_budget`、`subtraction_events`、`vocal.pitch_policy／stacking`。`deliverable` に `stems` が含まれる場合はステムも渡す |
+| 劇伴（映像に合わせた作曲） | 映像に合わせた構成（spotting、cue sheet、音楽を入れるフレームの決定） | `meta.tempo／tempo_map／target_duration`、`form[].start_bar／bars`、`material`、`hooks.arrangement_hook`、`energy_curve` |
+| 編集工程 | 映像に音楽を合わせる（カット位置、尺の短縮、つなぎ目の処理） | 上記と同じ時間関連のフィールド、`subtraction_events`、stems |
 
-镜头设计按放音拍时读速度与段落时间，交出去以后再改要先写消息；商用前的许可看 `backends.yaml` 的 `license`（制片与现场）。小节换算成秒的约定见 schema §5.1。
+音楽を流しながら撮影する場合、ショット設計担当はテンポとセクションの時間を参照する。共有後に変更する場合は、先にメッセージを送る。商用利用前の許諾は `backends.yaml` の `license` を参照する（制作および現場の担当）。小節を秒に換算する規則は schema §5.1 を参照。
 
-### 5.1 与歌曲另一侧共享的六个字段
+### 5.1 作曲・編曲と作詞で共有する6フィールド
 
-`form[].id` / `form[].bars` / `form[].name` / `meta.tempo` / `meta.key` / `vocal.persona`。两边用同一套段落 id。
+`form[].id` / `form[].bars` / `form[].name` / `meta.tempo` / `meta.key` / `vocal.persona`。両方の工程で同じセクション id を使う。
 
-- **谁先做谁定。** 先曲后词：本库定，写进自己的字段。先词后曲：从 `meta.upstream.lyrics.shared` 原样读进来，当锁死项用；词的字数和句式反过来约束 `form[].bars`。
-- **后做时不改这六项。** 词放不进这几小节、调或速度唱不下来，就写一条 `messages`（`to: lyrics`），说清改哪一项、为什么；对方接受并改了它自己的规格单，本库再重新读。
-- 只有曲、没有歌词那一侧时，这六项由本库自己定。
+- **先に作業する側が決める。** 曲先の場合はこのライブラリが決め、自分のフィールドに書く。詞先の場合は `meta.upstream.lyrics.shared` からそのまま読み込み、固定項目として扱う。歌詞の字数と文の形が `form[].bars` の制約になる。
+- **後から作業する側はこの6項目を変更しない。** 歌詞が小節数に収まらない、調やテンポの都合で歌えないといった場合は、`messages`（`to: lyrics`）を1件書き、何を変えたいかとその理由を伝える。相手が受け入れて自分の仕様書を変更したら、このライブラリで読み直す。
+- 歌詞を付ける工程がなく、曲だけを作る場合は、このライブラリで6項目を決める。
 
-完整规则与原文：schema §5.4。
+規則の全文は schema §5.4 を参照。
 
-### 5.2 上游：有就读
+### 5.2 上流の資料があれば読む
 
-`meta.upstream.brief／lyrics／picture` 来自谁不重要：有就读（先词后曲时的共享六项是锁死项），没有就按本库自己的分析走——S0 从 brief 起，没有歌词就按 §2.3 的三种情况，没有画面时长就自己定时长。已填的上游字段不改写；冲突时照实写本库的字段，再写消息给来源的职能。
+`meta.upstream.brief／lyrics／picture` は提供元を問わず、あれば読む（詞先の場合、共有6項目は固定）。なければ、このライブラリで判断して進める。S0 は brief から始め、歌詞がなければ §2.3 の3通りの扱いに従い、映像の尺がなければ曲の長さを自分で決める。記入済みの上流フィールドは書き換えない。矛盾があるときは、このライブラリのフィールドに実態どおりに書き、提供元の担当にメッセージを送る。
 
-### 5.3 `messages`：怎么收发
+### 5.3 `messages` の送受信方法
 
-- **收**：S0 开工与每次改规格前读 `to: music` 的，交给 `about` 所指字段的 owner（§2.1）；改了标 `accepted`、不改标 `rejected`，`reply` 写改了什么或理由。
-- **发**：如 `{from: music, to: sound, about: "mix_intent.dynamics", says: "D 段比 C2 低 6 dB 是唯一的大落差，母带请留住", status: open}`；`to` 取 `lyrics` `sound` `editing` `shot-design` `writing` `production`。
-- **不等待**：读不到回话就当没有；`open` 不挡自查、不停阶段，交付时原样交出去。
-
----
-
-## 6. 三个检验办法
-
-### 6.1 选 skill 时对照边界表
-
-开工前把这首歌要读的 skill 列出来，对照 §2 和各 skill 的边界表看两件事：
-
-1. **该读的读了没有**：brief 里每个要做的决定，都有一个 owner 被选中
-2. **不该读的混进来没有**
-   —— 尤其是 L3 风格层，**多读一个没被点名的风格 skill，最容易把它的默认值带进这首歌**（被点名的混合不算，见 §2.4）
-
-> 这就是为什么每个 skill 都必须有「边界：什么不归这个 skill 管」表——
-> 那张表是给选 skill 时看的，不只是给人看的。
-
-### 6.2 文本层 AB
-
-**评判表在看结果之前定稿。** 改一个字段 → 重生成 → 盲比。
-定稿之后再看结果，否则你会不自觉地把评判标准调向你已经看到的那个。
-
-比响度前先对齐电平，再比内容：声音只要更响，耳朵就倾向觉得它更好，这条偏差会把"哪个字段起了作用"的判断，悄悄换成"哪个版本更响"（p0299-p0300）。两版生成结果如果响度或整体密度对不齐，先拉平这两项再做成对比较，不然字段本身的效果会被响度差盖过去。
-
-### 6.3 先算再听（照做率）
-
-见 §1 的 S7 与 §4.2。
-
-★ **零点校准**（参考值，供理解量级，不是交付门槛）：拿一份 City Pop 规格（112 BPM、10 段、114 小节）去比三首与它无关、制作精良的华语成品，按字段加权打分得 **63–66**，
-所以我们把 **82 / 70** 当"照做得好 / 勉强"的参考线，不是 60。
-逐字段对照时，照做率就是对照后的一个判断，不必算成数。
+- **受信**：S0 の着手時と仕様を変更する前に毎回、`to: music` のメッセージを読み、`about` が指すフィールドの owner に渡す（§2.1）。変更したら `accepted`、変更しなければ `rejected` とし、`reply` に変更内容または理由を書く。
+- **送信**：例 `{from: music, to: sound, about: "mix_intent.dynamics", says: "D セクションが C2 より 6 dB 低くなる箇所が唯一の大きな落差です。マスタリングでも差を残してください", status: open}`。`to` は `lyrics` `sound` `editing` `shot-design` `writing` `production` のいずれか。
+- **返信は待たない**：返信を読めなければ、返信なしとして扱う。`open` のままでも自己点検や工程を進め、納品時にはそのまま渡す。
 
 ---
 
-## 7. 目录地图
+## 6. 3つの検証方法
+
+### 6.1 skill を選ぶときに担当範囲表と照合する
+
+着手前にこの曲で読む skill を列挙し、§2 と各 skill の担当範囲表に照らして2点を確認する。
+
+1. **必要な skill を読んだか**：brief で求められる判断の一つひとつに owner が決まっているかを確認する
+2. **不要な skill が混ざっていないか**
+   —— 特に L3 のスタイル層では、**指定されていないスタイルの skill を1つ余分に読むだけで、その既定の作り方が曲に入り込みやすい**（指定されたスタイルの組み合わせは §2.4 を参照）
+
+> 各 skill に「境界：この skill の担当外」の表が必要なのは、
+> 人が読むだけでなく、どの skill を使うか選ぶ際に参照するため。
+
+### 6.2 テキスト仕様の AB 比較
+
+**結果を見る前に評価表を確定する。** フィールドを1つ変更する → 再生成する → どちらの版かを伏せて比較する。
+評価表を確定してから結果を見る。先に見ると、見た結果に合わせて無意識に評価基準を変えてしまう。
+
+音の内容を比較する前に、まずレベルをそろえる。音が大きいだけで良く聞こえる傾向があり、「どのフィールドが効いたか」を調べているつもりでも、実際には「どちらの版が大きく聞こえたか」を判断しやすい（p0299-p0300）。生成した2版でラウドネスや全体の密度が異なる場合は、先に両方をそろえてから組にして比較する。音量差があると、フィールドを変えた効果が聞き取りにくくなる。
+
+### 6.3 聴く前に仕様と照合する（仕様遵守率）
+
+§1 の S7 と §4.2 を参照。
+
+★ **基準点の確認**（数値の感覚をつかむための参考値で、納品条件には使わない）。City Pop の仕様書（112 BPM、10セクション、114小節）を用意し、その仕様とは無関係で完成度の高い中国語圏の完成曲3曲と比較すると、フィールドごとの重み付き得点は **63–66** だった。
+そのため、60ではなく **82 / 70** をそれぞれ「よく従っている / かろうじて従っている」の目安とする。
+フィールドごとに照合する際は、その結果から仕様遵守率を判断できればよく、数値に換算する必要はない。
+
+---
+
+## 7. ディレクトリ構成
 
 ```
-随包发布（用户拿到的就是这些，全是文本）：
-  skills/<27 个 skill>/SKILL.md, reference.md
-  skills/mc-workflow/ARR-SPEC.schema.md      ★ 规格单定义（v1.0）
-  skills/mc-workflow/ARR-SPEC.template.yaml  空模板
-  skills/mc-workflow/backends.yaml           ★ 各后端的 honors 声明
-  skills/mc-workflow/example-*.yaml          填好的示例（citypop / 混合 / 反面样本）
+パッケージ同梱ファイル（ユーザーに配布するものはすべてテキスト）：
+  skills/<27個の skill>/SKILL.md, reference.md
+  skills/mc-workflow/ARR-SPEC.schema.md      ★ 仕様書の定義（v1.0）
+  skills/mc-workflow/ARR-SPEC.template.yaml  空のテンプレート
+  skills/mc-workflow/backends.yaml           ★ 各バックエンドの honors の定義
+  skills/mc-workflow/example-*.yaml          記入済みの例（citypop / スタイル混合 / 悪い例）
 ```
 
 ---
 
-## 8. 写完一首歌的自检
+## 8. 1曲書き上げた後の自己点検
 
-- [ ] `intent` 四项是**想出来的**，不是为了过 lint 填的
-- [ ] §3.0 的 20 条逐条过了，不过的都写了理由
-- [ ] 每个字段都能说出**是哪个 skill 的哪一节**决定的
-- [ ] 逐字段对照过生成结果，且知道哪些项因 `honors: none` 本来就不指望
-- [ ] 跑过 `mc-ai-tell-audit`
-- [ ] 耳朵是**最后**介入的，且 A/B 结论两遍一致
+- [ ] `intent` の4項目は、lint を通すための穴埋めで済ませず、**曲の内容を考えて**記入した
+- [ ] §3.0 の20項目を1つずつ確認し、条件を満たさない項目にはすべて理由を書いた
+- [ ] 各フィールドについて、**どの skill のどの節**に従って決めたかを説明できる
+- [ ] 生成結果をフィールドごとに照合し、どの項目が `honors: none` のため反映を期待できないか把握している
+- [ ] `mc-ai-tell-audit` を実施した
+- [ ] 耳で判断したのは**最後**で、A/B の結論が2回とも一致した
 
 ---
 
-## 附：这个库为什么这样分层
+## 付録：ライブラリをこの構成にした理由
 
-**分库/分 skill 的判据是四件事全不同**：交接物、裁判、语料、评判方法。
-**按工序切，不按知识领域切。**
+**ライブラリや skill を分ける基準は、引き継ぎ資料、判断する担当、参照資料、評価方法の4つがすべて異なること。**
+**知識の分野よりも、制作工程の違いを基準に分ける。**
 
-所以：
-- "和声"是**知识领域**，但它被切进 `mc-harmony`（写的时候）和 `mc-progressions`（查的时候）——
-  因为这是两道工序
-- "city pop"是**风格**，它的鼓型不进 `mc-rhythm-section`，进 `mc-style-citypop-rnb`——
-  因为"打得像人"和"打得像 city pop"是两道工序
-- "混音"横跨三层：意图在 `mc-mix-intent`，改写型解法在 `mc-texture-layering`，
-  参数是**混音**的事——因为它们的裁判不同（作曲判断 / 编曲判断 / 工程判断）
+具体例：
+- 「和声」は1つの**知識分野**だが、`mc-harmony`（書くとき）と `mc-progressions`（調べるとき）に分ける。
+  書く工程と調べる工程が異なるため。
+- 「city pop」は**スタイル**で、そのドラムパターンは `mc-style-citypop-rnb` に置く。
+  `mc-rhythm-section` で扱う「人間らしく演奏する」工程と、「city pop らしく演奏する」工程は異なるため。
+- 「ミックス」は3つの層にまたがる。意図は `mc-mix-intent`、編曲を修正して解決する方法は `mc-texture-layering`、
+  パラメータの調整は**ミックス工程**が担当する。それぞれ判断基準が異なるため（作曲上の判断 / 編曲上の判断 / エンジニアリング上の判断）。
 
-## 附：来源
+## 付録：出典
 
-- **Howard & Angus《音乐声学与心理声学》**（Acoustics and Psychoacoustics）——§1.2 两遍复听的两条心理声学依据：重复听音会改变听觉系统的处理策略、以及持续暴露带来的听觉适应。页码为中译本页。
-- **Roey Izhaki《Mixing Audio》**（混音指南）——§6.2 提醒的响度偏差：更响的版本容易被判定"更好"，与内容本身的差异无关。页码为该书页。
-本库其余各 skill 引用的书目见各自的「附：来源」。
+- **Howard & Angus《音乐声学与心理声学》**（Acoustics and Psychoacoustics）—— §1.2 で2回聴き直す根拠となる2つの心理音響学的知見。繰り返し聴くと聴覚系の処理の仕方が変わることと、同じ音にさらされ続けると聴覚が順応すること。ページ番号は中国語訳版に準拠。
+- **Roey Izhaki《Mixing Audio》**（ミックスのガイド）—— §6.2 で触れたラウドネスによる評価の偏り。音の内容に差がなくても、音量の大きい版を「良い」と判断しやすい。ページ番号は同書に準拠。
+このライブラリのほかの skill が引用する書籍は、各 skill の「付録：出典」を参照。

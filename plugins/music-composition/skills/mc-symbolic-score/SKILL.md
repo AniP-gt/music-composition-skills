@@ -1,320 +1,320 @@
 ---
 name: mc-symbolic-score
-description: Compiling ARR-SPEC into symbolic notation (符号乐谱输出) - ABC, MusicXML and MIDI from one emitter. Why the symbolic path matters (it is the only fully reproducible output and the only way YuE2 executes rather than guesses), the field-by-field mapping from spec to ABC headers and body, roman numerals to letter chords, multi-voice and per-part output, what each target format can and cannot carry, MIDI CC and velocity for expression, and the verification loop that catches a bad emit before it reaches a synth. Use when producing ABC for YuE2, when exporting MIDI or MusicXML for a DAW, when a deterministic reference render is needed for A/B, or when an LLM should write notation directly. 符号乐谱、ABC、MusicXML、MIDI、打ち込み、直出乐谱、确定性渲染。
+description: Compiling ARR-SPEC into symbolic notation (記号形式での楽譜出力) - ABC, MusicXML and MIDI from one emitter. Why the symbolic path matters (it is the only fully reproducible output and the only way YuE2 executes rather than guesses), the field-by-field mapping from spec to ABC headers and body, roman numerals to letter chords, multi-voice and per-part output, what each target format can and cannot carry, MIDI CC and velocity for expression, and the verification loop that catches a bad emit before it reaches a synth. Use when producing ABC for YuE2, when exporting MIDI or MusicXML for a DAW, when a deterministic reference render is needed for A/B, or when an LLM should write notation directly. 記号形式の楽譜、ABC、MusicXML、MIDI、打ち込み、楽譜の直接出力、決定論的レンダリング。
 ---
 
-# 符号乐谱输出（Symbolic Score）
+# 記号形式での楽譜出力（Symbolic Score）
 
-**一个发射器，四个目标格式，两个用途。**
+**1つの出力処理で4形式に対応し、2つの用途に使う。**
 
 ```
-ARR-SPEC（+ meta.upstream.lyrics 的歌词）
+ARR-SPEC（＋ meta.upstream.lyrics の歌詞）
    ↓  mc-symbolic-score
-   ├─→ ABC        → YuE2 的 abc= 输入（★ 让规格被"执行"而不是"提示"）；大模型的母语
-   ├─→ MusicXML   → 记谱软件 / 交接给乐手（领奏谱：旋律、和弦、歌词、段落、力度、换气）
-   ├─→ MIDI       → DAW ＋ 音源，确定性渲染
-   └─→ ChordPro   → 吉他手、排练（段落、和弦、歌词）
+   ├─→ ABC        → YuE2 の abc= 入力（★ 仕様をプロンプトとして渡す段階を省き、直接実行させる）。大規模言語モデルが得意とする形式
+   ├─→ MusicXML   → 記譜ソフト / 演奏者への受け渡し（リードシート：旋律、コード、歌詞、セクション、強弱、息継ぎ）
+   ├─→ MIDI       → DAW ＋ 音源で決定論的レンダリング
+   └─→ ChordPro   → ギタリストやリハーサル向け（セクション、コード、歌詞）
 ```
 
-**为什么是同一个发射器**：ABC ↔ MusicXML ↔ MIDI 可互转，ChordPro 是前三者的子集，
-四者承载的是同一套信息（音高、时值、小节、调号、拍号、力度、和弦、歌词）。
-**分成四个 skill 会让同一份规格产生四份不一致的乐谱。** 规格单可执行字段的拼写就是按这四种格式定的（schema §1.3.1、§4），发射器不需要翻译符号。
+**出力処理を共通にする理由**。ABC ↔ MusicXML ↔ MIDI は相互変換でき、ChordPro は前の3形式のサブセットに当たる。
+4形式は同じ一組の情報（音高、音価、小節、調号、拍子、強弱、コード、歌詞）を扱う。
+**4つのスキルに分けると、同じ仕様から互いに食い違う4つの楽譜ができてしまう。** 仕様書の実行可能なフィールドの表記は、この4形式に合わせて決めてある（schema §1.3.1、§4）。出力時に記号を読み替える必要はない。
 
-## 按任务读哪几节
+## 作業別の参照先
 
-| 任务 | 读 |
+| 作業 | 参照先 |
 |---|---|
-| 给 YuE2 供谱 | §3 ABC ＋ §7 |
-| 出 MIDI 给 DAW | §5 |
-| 出 MusicXML 交给乐手 | §4 |
-| 要一个 AB 的确定性基准 | §2.2 |
-| 级数转字母 | §3.3 |
-| 表情/力度怎么写进 MIDI | §5.2 |
-| 发射完怎么验 | §8 |
+| YuE2に楽譜を渡す | §3 ABC ＋ §7 |
+| DAW向けにMIDIを出力する | §5 |
+| 演奏者に渡すMusicXMLを出力する | §4 |
+| AB比較用に再現可能な基準を作る | §2.2 |
+| ディグリー表記をコードネームに変換する | §3.3 |
+| 表情や強弱をMIDIに書き込む | §5.2 |
+| 出力結果を検証する | §8 |
 
-## 边界
+## 担当範囲
 
-| 不归这里 | 归哪 |
+| このスキルの範囲外 | 担当 |
 |---|---|
-| 提示词、段落标签、后端选择 | `mc-render-compile` |
-| 旋律/和声/对位的内容本身 | L1 各 skill |
-| 用什么音源、采样库选型、keyswitch | 不归本包（用哪家音源由制作环境定）；MIDI CC 在配器上的含义归 `mc-orchestration` reference §5 |
-| MIDI CC 在配器上的含义 | `mc-orchestration` reference §5 |
-| 量化、velocity 的**律动**设计 | `mc-rhythm-section` |
-| 记谱法的完整规范（连音线、装饰音写法） | [reference.md](reference.md) |
+| プロンプト、セクションラベル、バックエンドの選択 | `mc-render-compile` |
+| 旋律、和声、対位法の内容 | L1 の各スキル |
+| 音源やサンプルライブラリの選定、keyswitch | このパッケージの範囲外（使用するメーカーは制作環境に応じて決める）。MIDI CC のオーケストレーション上の意味は `mc-orchestration` reference §5 |
+| MIDI CC のオーケストレーション上の意味 | `mc-orchestration` reference §5 |
+| クオンタイズや velocity による**グルーヴ**の設計 | `mc-rhythm-section` |
+| 記譜法の詳細な規則（スラーや装飾音の書き方） | [reference.md](reference.md) |
 
 ---
 
-## 1. 动笔前必填
+## 1. 作業前の必須項目
 
-| 必填 | 问法 |
+| 必須項目 | 確認内容 |
 |---|---|
-| **① 目标格式** | ABC / MusicXML / MIDI / ChordPro。**能承载的不一样**（§6）；`meta.deliverable` 里列了哪些就发哪些 |
-| **② 声部数** | 只发主旋律+和弦？还是全谱？ |
-| **③ 谁来读** | YuE2 / DAW / 人。**决定详细程度** |
-| **④ 这次是不是做基准** | 是的话**所有随机性都要关掉** |
+| **① 出力形式** | ABC / MusicXML / MIDI / ChordPro。**形式ごとに扱える情報が異なる**（§6）。`meta.deliverable` に列挙された形式をすべて出力する |
+| **② 声部数** | 主旋律とコードだけか、全パートのスコアか |
+| **③ 読み手** | YuE2 / DAW / 人。**読み手に応じて詳しさを決める** |
+| **④ 比較用の基準を作るか** | 作る場合は**すべてのランダム要素を無効にする** |
 
 ---
 
-## 2. 为什么要走符号路径
+## 2. 記号形式を経由する理由
 
-### 2.1 它是唯一能让规格被"执行"的路
+### 2.1 仕様を直接実行できる唯一の経路
 
-其余后端都只能"提示"。YuE2 的合成步骤**直接吃 ABC**——
-`form[].harmony_letters` / `meta.key` / `meta.meter` / `meta.tempo`
-编译成 ABC 之后，**它们就不再是建议了**。
+ほかのバックエンドでは、仕様をプロンプトとして渡すことしかできない。YuE2の合成処理は**ABCを直接読み込む**。
+`form[].harmony_letters` / `meta.key` / `meta.meter` / `meta.tempo` を
+ABCにコンパイルすると、**各フィールドが合成処理に直接反映される**。
 
-> 把模型自己的符号规划那一步**整个旁路掉**，把我们的 ABC 直接送进合成步骤。
-> 支持 YuE2 的载体都能这么接（见 `mc-render-compile` §8.2）；怎么接线是用户环境的事。
+> モデルが自分で記号表現を組み立てる工程を**丸ごとバイパスし**、こちらで作ったABCを合成処理に直接渡す。
+> YuE2に対応する実行環境ならこの方法で接続できる（`mc-render-compile` §8.2 参照）。具体的な接続方法は利用環境に応じて決める。
 
-### 2.2 它是唯一完全可复现的输出
+### 2.2 完全に再現できる唯一の出力
 
-> **同一份规格渲染出来永远一样。**
+> **同じ仕様をレンダリングすれば、常に同じ結果になる。**
 
-这让它成为 **AB 实验的控制变量基准**：
-想知道"改这一个字段到底带来多大差别"，用符号路径渲染两版，差别 100% 来自那个字段。
-生成后端做不到这一点（即使固定种子，改提示词也会改变别的东西）。
+このため、**AB実験で変更対象以外の条件を揃えるための基準**にできる。
+「このフィールドだけ変えると、どれほど違うのか」を知りたい場合は、記号形式を経由して2版をレンダリングする。差は 100% そのフィールドに由来する。
+生成バックエンドでは、シードを固定してもプロンプトを変えるとほかの要素も変わる。
 
-### 2.3 日式打ち込み 工作流本来就是这个形态
+### 2.3 日本式の打ち込みはもともとこの流れで作る
 
-LLM 直出 MIDI/MusicXML，进 DAW，配音源。
-★ **这条路没有人声**，人声要另接（或走生成后端做人声、符号路径做伴奏）。
+LLMからMIDIやMusicXMLを直接出力し、DAWに取り込んで音源を割り当てる。
+★ **この経路だけではボーカルは入らない**。ボーカルは別途用意するか、生成バックエンドで作り、伴奏を記号形式から作る。
 
 ---
 
-## 3. ABC 的映射
+## 3. ABCへのマッピング
 
-### 3.1 头部（Header）
+### 3.1 ヘッダー（Header）
 
-| ABC 字段 | 来自 | 例 |
+| ABCフィールド | 参照元 | 例 |
 |---|---|---|
-| `X:` | 固定 1 | `X:1` |
+| `X:` | 1 に固定 | `X:1` |
 | `T:` | `meta.title` | `T:Night Drive` |
 | `M:` | `meta.meter` | `M:4/4` |
-| `L:` | 默认单位时值（通常 1/8 或 1/16） | `L:1/8` |
+| `L:` | デフォルトの単位音価（通常は 1/8 または 1/16） | `L:1/8` |
 | `Q:` | `meta.tempo` | `Q:1/4=112` |
 | `K:` | `meta.key` | `K:D` |
 
-★ **`tempo_map` 有多项时**：`Q:` 取首项，后续变速写成小节内的 `[Q:...]` 内联域。
+★ **`tempo_map` に複数の項目がある場合**、`Q:` には先頭の値を使い、以降のテンポ変更は小節内のインラインフィールド `[Q:...]` で記す。
 
-### 3.2 主体
+### 3.2 本文
 
-| 内容 | 来自 | 写法 |
+| 内容 | 参照元 | 書き方 |
 |---|---|---|
-| 小节线 | `form[].bars` / `start_bar` | `|` |
-| 段落标记 | `form[].id` + `name` | ★ **写成注释 `%` 或 `[P:A1]` 分段标记**，见 §7.2 |
-| 和弦 | `form[].harmony_letters` | `"F#m7"` 放在音符前的引号里 |
-| 旋律 | L1 写的旋律 | 标准 ABC 音高记号 |
-| 反复 | 段落重复 | `|:` `:|`。★ **慎用**——见 §3.4 |
+| 小節線 | `form[].bars` / `start_bar` | `|` |
+| セクションマーカー | `form[].id` + `name` | ★ **`%` コメントまたは `[P:A1]` のようなセクションマーカーで書く**。§7.2 参照 |
+| コード | `form[].harmony_letters` | `"F#m7"` のように引用符で囲み、音符の前に置く |
+| 旋律 | L1 で作った旋律 | 標準のABC音高記号 |
+| 反復 | セクションの繰り返し | `|:` `:|`。★ **使用は慎重に**。§3.4 参照 |
 
-### 3.3 ★ 级数 → 字母
+### 3.3 ★ ディグリー表記 → コードネーム
 
-**ARR-SPEC 里 `harmony` 是级数、`harmony_letters` 是字母，两者双记。
-发射 ABC 时用字母，但必须校验两者一致。**
+**ARR-SPECでは `harmony` にディグリー、`harmony_letters` にコードネームを併記する。
+ABCの出力にはコードネームを使い、両者が一致することを必ず検証する。**
 
-**校验动作**：把 `harmony_letters` 按 `meta.key` 反推成级数，
-与 `harmony` 逐和弦比对。**对不上就是规格里有笔误**——
-这是 ARR-SPEC 双记号约定的实际用处，不只是为了可读。
+**検証手順**。`harmony_letters` を `meta.key` に基づいてディグリーに逆変換し、
+`harmony` とコードごとに照合する。**一致しなければ仕様の記述ミス**。
+ARR-SPECで2種類の表記を併記することで、読みやすさに加えてこの照合が可能になる。
 
-移调表见 `mc-progressions` [reference.md](../mc-progressions/reference.md) §8。
+移調表は `mc-progressions` [reference.md](../mc-progressions/reference.md) §8 を参照。
 
-### 3.4 ★ 反复记号的陷阱
+### 3.4 ★ 反復記号の落とし穴
 
-ABC 的 `|: :|` 会让**两遍完全一样**。
-但本库的 lint #16 要求**副歌逐遍有变化**——
-**所以多数情况下不要用反复记号，要把每一遍展开写。**
+ABCの `|: :|` を使うと、**2回ともまったく同じ演奏になる**。
+このライブラリの lint #16 は**サビを繰り返すたびに変化を付ける**よう求めている。
+**そのため、多くの場合は反復記号を使わず、繰り返しを毎回書き出す。**
 
-★ **例外**：确实完全一样的段落（比如纯器乐的 vamp）可以用反复。
-但**副歌永远展开写**。
+★ **例外**として、まったく同じセクション（純器楽の vamp など）には反復記号を使える。
+**サビは必ず各回を書き出す**。
 
 ---
 
 ## 4. MusicXML
 
-**用途**：交给记谱软件、交给乐手。
+**用途**は、記譜ソフトへの取り込みや演奏者への受け渡し。
 
-**它比 ABC 多能承载的**：
-- 完整的谱表布局、声部分配
-- 演奏法记号（弓法、连音线、articulation）
-- 力度记号（p / mf / f 及渐变）
-- 歌词（逐音节对齐）
+**ABCより詳しく扱える情報**
 
-**它比 MIDI 多能承载的**：**记谱意图**（同一个音高时值，是升记号还是降记号、是三连音还是附点）。
+- 譜表全体のレイアウトと声部の割り当て
+- 奏法記号（運弓、スラー、articulation）
+- 強弱記号（p / mf / f とその漸次変化）
+- 歌詞（音節ごとに音符に対応付ける）
 
-★ **什么时候必须用它**：`mc-orchestration` 的产出要交给真人演奏时。
-ABC 和 MIDI 都表达不了弓法和分谱。
+**MIDIより詳しく扱える情報**は、**記譜上の意図**。同じ音高や音価でも、シャープとフラットのどちらを使うか、3連符と付点のどちらで書くかを保持できる。
+
+★ **使用が必須の場面**は、`mc-orchestration` の成果物を人に演奏してもらうとき。
+ABCとMIDIでは、運弓やパート譜を表現できない。
 
 ---
 
 ## 5. MIDI
 
-### 5.1 基本映射
+### 5.1 基本のマッピング
 
-| 内容 | 来自 |
+| 内容 | 参照元 |
 |---|---|
-| 音符 | 旋律与和声 |
-| 轨道/通道 | `arrangement.roster[]`，一件一轨 |
-| 音源映射 | `roster[].midi`（`{program, bank, channel}`，GM 号，鼓组 channel 10）；`render.midi.instrument_map` 只放 VST 名等备注 |
-| 速度 | `meta.tempo` / `tempo_map` |
+| 音符 | 旋律と和声 |
+| トラック / チャンネル | `arrangement.roster[]`。楽器ごとに1トラック |
+| 音源の割り当て | `roster[].midi`（`{program, bank, channel}`、GM番号、ドラムセットは channel 10）。`render.midi.instrument_map` には VST 名などの備考のみ記入する |
+| テンポ | `meta.tempo` / `tempo_map` |
 
-### 5.2 ★ 表情：velocity 与 CC
+### 5.2 ★ 演奏表現：velocity と CC
 
-**MIDI 相对 ABC 的最大优势是能写连续控制。**
+**ABCと比べたMIDIの最大の利点は、連続的な制御を書き込めること。**
 
-| 来自 ARR-SPEC | 写成 |
+| ARR-SPECの参照元 | 書き込み先 |
 |---|---|
-| `arrangement.energy_curve` | **CC11（表情）曲线** ＋ velocity 层次 |
-| `vocal.dynamics_by_section` | 人声轨的 CC11（若有人声音源） |
-| `groove.push_pull` | ★ **音符位置的实际偏移**（这是唯一能精确执行 push_pull 的路径） |
-| `groove.quantize_policy` | 逐轨的量化程度 |
-| `roster[].synth_params` | 音源参数或 CC74（亮度）等 |
+| `arrangement.energy_curve` | **CC11（エクスプレッション）のカーブ** ＋ velocity の強弱 |
+| `vocal.dynamics_by_section` | ボーカルトラックの CC11（ボーカル音源がある場合） |
+| `groove.push_pull` | ★ **音符の位置を実際にずらす**（push_pull を正確に実行できる唯一の経路） |
+| `groove.quantize_policy` | トラックごとのクオンタイズの適用度 |
+| `roster[].synth_params` | 音源のパラメーターや CC74（明るさ）など |
 
-★ **CC7 与 CC11 的分工不能混**（→ `mc-orchestration` reference §5.1）：
-- **CC7** 定这一轨在配器里的**位置**
-- **CC11** 定**这一句怎么呼吸**
+★ **CC7 と CC11 は用途を分ける**（→ `mc-orchestration` reference §5.1）。
 
-混用的结果是"推了推子但乐句还是死的"。
+- **CC7** は編成内での**トラックの音量バランス**を決める
+- **CC11** は**フレーズ内の強弱**を付ける
 
-### 5.3 ★ 符号路径上 push_pull 是 exact
+混用すると、フェーダーを上げてもフレーズは平坦なままになる。
 
-`backends.yaml` 里 symbolic 后端的 `groove` 相关项是 **exact**——
-因为音符位置可以精确写。
-**这是验证"push_pull 到底有没有用"的唯一可靠手段**：
-同一份谱，一版对齐网格、一版按 push_pull 偏移，直接对比。
+### 5.3 ★ 記号形式の経路では push_pull が exact
+
+`backends.yaml` では symbolic バックエンドの `groove` 関連項目は **exact**。音符の位置を正確に指定できるためだ。
+**push_pull の効果を確かめる唯一の確実な方法**は、同じ譜面からグリッドに揃えた版と push_pull に従ってずらした版を作り、直接比較すること。
 
 ---
 
-## 6. 四种格式能承载什么
+## 6. 4形式が扱える情報
 
 | | ABC | MusicXML | MIDI | ChordPro |
 |---|---|---|---|---|
-| 音高/时值/小节 | ✅ | ✅ | ✅ | ❌ 只有段落 |
-| 调号/拍号/速度 | ✅ | ✅ | ✅ | ✅ 头部指令 |
-| 和弦符号 | ✅ | ✅ | ⚠ 只能作为文本事件 | ✅ |
-| 歌词 | ✅ 基本 | ✅ 完整 | ⚠ 只能作为文本事件 | ✅ |
-| **记谱意图**（升/降、三连音写法） | 部分 | ✅ | ❌ | ❌ |
-| **演奏法记号**（弓法、articulation） | ❌ | ✅ | ⚠ 只能靠 CC/keyswitch 近似 | ❌ |
-| **连续控制**（CC 曲线） | ❌ | ❌ | ✅ | ❌ |
-| **微时间偏移**（push_pull） | ❌ | ❌ | ✅ | ❌ |
-| **YuE2 直接吃** | ✅ | ❌ | ❌ | ❌ |
+| 音高 / 音価 / 小節 | ✅ | ✅ | ✅ | ❌ セクションのみ |
+| 調号 / 拍子 / テンポ | ✅ | ✅ | ✅ | ✅ ヘッダーのディレクティブ |
+| コードネーム | ✅ | ✅ | ⚠ テキストイベントのみ | ✅ |
+| 歌詞 | ✅ 基本的な対応 | ✅ 完全対応 | ⚠ テキストイベントのみ | ✅ |
+| **記譜上の意図**（シャープ / フラット、3連符の表記） | 一部 | ✅ | ❌ | ❌ |
+| **奏法記号**（運弓、articulation） | ❌ | ✅ | ⚠ CC/keyswitch で近似するのみ | ❌ |
+| **連続制御**（CCのカーブ） | ❌ | ❌ | ✅ | ❌ |
+| **タイミングの微調整**（push_pull） | ❌ | ❌ | ✅ | ❌ |
+| **YuE2に直接入力** | ✅ | ❌ | ❌ | ❌ |
 
-★ **结论**：
-- **要 YuE2 执行 → ABC**
-- **要交给人 → MusicXML**
-- **要表情与律动 → MIDI**
-- **要给吉他手和排练 → ChordPro**
-- **几个都要就几个都发**，但**从同一份规格发**，不要各写各的
+★ **用途別の選択**
 
----
-
-## 6b. YuE2 方言：实测出来的四条（2026-09-17）
-
-同一份从 ARR-SPEC 编译的谱，三种写法送进 YuE2 的 abc 口，结果差得远：`L:1/16` 单声部出 2:18（谱面 4:00，模型提前停），删掉段落注释更短（1:58），**改成 `L:1/32` 跑满 3:56**。所以给 YuE2 的 ABC 照它自己写谱的样子来：
-
-1. **`L:1/32`**：所有时值按三十二分音符计，四分音符写 8、附点二分写 24、整小节休止 `z32`。用 `L:1/16` 它会把谱当成一半长，提前结束。
-   ⚠ 但只改这一条不够：同一份谱改成 `L:1/32` 后时长跑满，whisper 却一个字都识别不出（直出版 76%，模型自写谱 65%，这版 2%）。原因在旋律本身：每个字的时值太长、音太少、音区比模型自写的谱低一个八度。给 YuE2 的人声线要像它自己写的那样：小写音名区（c 到 a 一带）、每小节四到六个音、单字很少超过一拍。实测：同一份谱整体升八度到小写音名区，whisper 识别率从 2% 到 47%；再加上 w: 歌词行到 56%（直出是 76%）。这就是第 5、6 条的来历：
-2. 带 `w:` 歌词行（见第 6 条）。
-3. **声部头写 `V: Vocal clef=treble name="Vocal Melody" snm="Vocal"`**，段落用 `% intro`／`% verse`／`% pre-chorus`／`% chorus`／`% bridge`／`% outro` 注释；它自写的谱还有一条 `V: Ins` 声部放器乐句，单声部也能跑满。
-4. 标题行 `T:` 可空；调用 `K:D` 这类标准写法，模型自写时倾向关系小调（同一首它写成 `K:Dm`），不影响。
-
-5. **人声线写在小写音名区**（ABC 的 c 到 a，即 C5 到 A5 一带），大写区它会唱成含混的元音；这与真人音域无关，是模型的习惯。
-6. **带 `w:` 歌词行**（每个音符一个字，字数与音符数逐行相等）比只在 lyrics 口给词识别率高；w: 行照带，lyrics 口也照给。
-7. 待做：旋律密度。编译器目前给每个字配长音（附点二分、全音符），模型自写谱每小节四到六个音、单字很少超过一拍；识别率剩下的差距多半在这里。
-
-ABC 表达不了的规格字段（减法事件、残响切断、逐件进退场）只能靠 style 文本，见 `mc-render-compile`。
-
-## 7. 给 YuE2 供谱的实操
-
-### 7.1 接法
-
-```
-[我们的 ABC]  ──→  YuE2GenerateMusic  ──→  音频
-                        ↑
-   （YuE2GenerateABC 被旁路掉）
-```
-
-本 skill 只管左边那一格：把 ARR-SPEC 编译成 ABC 文本。
-右边这条线为什么要接、接了之后规格为何不再只是"提示"、
-用什么载体（官方脚本、ComfyUI 节点）接线，见 `mc-render-compile` §8.2。
-
-### 7.2 方言已经摸清
-
-`YuE2GenerateMusic` 的 abc 输入端吃什么，§6b 已按实测写死：段落用 `%` 注释，和弦用引号里的标准拼写（`"F#m7"`），`V: Vocal` 加可选的 `V: Ins` 两个声部都能跑。仍不确定的东西只剩旋律密度那一刀（§6b 第 7 条）。
-
-### 7.3 上游有官方 skill
-
-YuE2 官方仓库自带 `skills/yue2-music/`（SKILL.md 格式，含"检查音乐不变量"）。
-
-> ★ **不要重写它。** 我们写 ARR-SPEC→ABC 的适配器，模型操作的知识引用它们的。
-> 它的 musical invariants 应该与我们的 20 条自查 **对齐或互补**——
+- **YuE2に実行させる → ABC**
+- **人に渡す → MusicXML**
+- **表情とグルーヴを出す → MIDI**
+- **ギタリストやリハーサルに使う → ChordPro**
+- **必要な形式はすべて出力する**。形式ごとに別々に書かず、**同じ仕様から出力する**
 
 ---
 
-## 8. ★ 发射后的验证回路
+## 6b. YuE2固有のABC仕様：実測でわかった4項目（2026-09-17）
 
-**不要把没验过的乐谱送进合成器。** 三步：
+同じARR-SPECからコンパイルした譜面を3通りの書き方でYuE2の abc 入力に渡すと、結果に大きな差が出た。`L:1/16` の単声部では 2:18（譜面上は 4:00 で、モデルが途中で停止）、セクションコメントを削除するとさらに短くなり 1:58、**`L:1/32` にすると 3:56 まで生成された**。YuE2向けのABCは、モデル自身が書く譜面に合わせる。
 
-| # | 检查 | 怎么做 |
+1. **`L:1/32`**。すべての音価を32分音符単位で数え、4分音符は 8、付点2分音符は 24、全小節休符は `z32` と書く。`L:1/16` を使うと、モデルは譜面を半分の長さとみなして早く終了する。
+   ⚠ ただし、これだけでは足りない。同じ譜面を `L:1/32` に変えると最後まで生成されたが、whisper はほとんど歌詞を認識できなかった（直接生成版 76%、モデルが自作した譜面 65%、この版 2%）。原因は旋律にある。1文字あたりの音価が長すぎ、音数が少なく、モデル自作の譜面より音域が1オクターブ低かった。YuE2向けのボーカル旋律はモデル自作の譜面に合わせ、小文字の音名の範囲（c から a あたり）で1小節あたり4〜6音とし、1文字に1拍を超える音価を割り当てるのは例外とする。実測では、同じ譜面を全体に1オクターブ上げて小文字の音域に移すと、whisper の認識率が 2% から 47% に上がった。さらに w: の歌詞行を加えると 56% になった（直接生成版は 76%）。これが第 5、6 項の根拠。
+2. `w:` の歌詞行を付ける（第 6 項参照）。
+3. **声部ヘッダーは `V: Vocal clef=treble name="Vocal Melody" snm="Vocal"` と書く**。セクションには `% intro`／`% verse`／`% pre-chorus`／`% chorus`／`% bridge`／`% outro` のコメントを使う。モデル自作の譜面では器楽フレーズをもう1つの声部 `V: Ins` に置く。単声部でも最後まで生成できる。
+4. タイトル行 `T:` は空でもよい。入力時は `K:D` のような標準の書き方を使う。モデルは自作時に関係短調を選ぶ傾向がある（同じ曲を `K:Dm` と書いた）が、動作には影響しない。
+
+5. **ボーカル旋律は小文字の音名の範囲で書く**（ABCの c から a、つまり C5 から A5 あたり）。大文字の音域では、母音が曖昧な歌い方になる。これはモデル固有の傾向で、人の声域とは関係がない。
+6. **`w:` の歌詞行を付ける**（1音符に1文字を割り当て、行ごとに文字数と音符数を揃える）と、lyrics 入力にだけ歌詞を渡す場合より認識率が上がる。w: 行を付けたうえで、lyrics 入力にも歌詞を渡す。
+7. 未対応なのは旋律の密度。現在のコンパイラーは文字ごとに長い音（付点2分音符、全音符）を割り当てる。モデル自作の譜面は1小節あたり4〜6音で、1文字が1拍を超えることはまれ。残る認識率の差は主にここにあると考えられる。
+
+ABCで表現できない仕様フィールド（音を引くイベント、残響の打ち切り、楽器ごとの出入り）は style のテキストで指定する。詳しくは `mc-render-compile` を参照。
+
+## 7. YuE2への楽譜の渡し方
+
+### 7.1 接続方法
+
+```
+[こちらで作ったABC]  ──→  YuE2GenerateMusic  ──→  音声
+                              ↑
+       （YuE2GenerateABC はバイパスする）
+```
+
+このスキルは左側の処理を担当し、ARR-SPECをABCテキストにコンパイルする。
+右側の接続が必要な理由、接続後に仕様が合成処理へ直接反映される仕組み、
+接続に使う実行環境（公式スクリプト、ComfyUIノード）については、`mc-render-compile` §8.2 を参照。
+
+### 7.2 確認済みのABC仕様
+
+`YuE2GenerateMusic` の abc 入力で使える書式は、実測に基づき §6b にまとめた。セクションには `%` コメントを使い、コードネームは標準表記を引用符で囲む（`"F#m7"`）。`V: Vocal` だけでも、任意の `V: Ins` を加えた2声部でも動作する。残る不確定要素は旋律の密度（§6b 第 7 項）。
+
+### 7.3 上流の公式スキル
+
+YuE2の公式リポジトリには `skills/yue2-music/` が含まれている（SKILL.md 形式。「音楽上の不変条件の確認」を含む）。
+
+> ★ **公式スキルを書き直さない。** こちらでは ARR-SPEC→ABC のアダプターを作り、モデルの操作方法は公式スキルを参照する。
+> 公式の musical invariants は、こちらの20項目のセルフチェックと**整合するか、互いを補う**形にする。
+
+---
+
+## 8. ★ 出力後の検証手順
+
+**検証してから楽譜をシンセサイザーに渡す。** 手順は3つ。
+
+| # | 確認項目 | 確認方法 |
 |---|---|---|
-| **1** | **语法** | ABC → 用解析器过一遍；MusicXML → schema 校验；MIDI → 读回来看轨数与时长 |
-| **2** | **与规格一致** | ★ **小节总数 == `Σ form[].bars`**；调号拍号速度对得上；**字母和弦反推级数 == `harmony`** |
-| **3** | **听一遍最简渲染** | 用任意音源快速渲染，**只听结构对不对**，不听音色 |
+| **1** | **構文** | ABC → パーサーで読み込む。MusicXML → schema で検証する。MIDI → 読み戻してトラック数と長さを確認する |
+| **2** | **仕様との一致** | ★ **総小節数 == `Σ form[].bars`**。調号、拍子、テンポが合っている。**コードネームから逆算したディグリー == `harmony`** |
+| **3** | **最小構成でレンダリングして試聴** | 任意の音源で手早くレンダリングし、**構成だけを聴いて確認する**。音色は評価しない |
 
-★ **第 2 步的小节总数校验最值钱**——
-发射器最常见的 bug 是段落边界算错，而那个错误在音频里表现为"结构乱了"，
-很容易被误判成后端不听话。
+★ **手順 2 の総小節数の照合が最も重要**。
+出力処理で最も多いバグはセクション境界の計算ミス。音声では「構成が崩れた」ように聞こえるため、バックエンドが仕様に従わなかったと誤認しやすい。
 
-**这三步用眼睛就能查**。
+**この3手順は目視でも確認できる**。
 
-实测过的一条路（2026-09）：本 skill 写法的 ABC（含 `w:` 行、引号和弦、`%` 段落注释、`V:` 头）用 music21 解析零警告，能直接转出 MIDI 与 MusicXML，MIDI 配任意 GM 音色就是第 3 步的最简渲染，不经过生成模型，倒字与旋律密度在这一步就能听到。两个注意：music21 不读 `w:` 行，交给乐手的 MusicXML 要用会读 `w:` 的转换器（abc2xml、abcm2ps 一类）或按"每个音符领一个音节"自行贴回；引号和弦默认不发声，想听和声垫底要自己把它们展开成一条钢琴声部。
+実測済みの手順（2026-09）。このスキルの書式に従ったABC（`w:` 行、引用符付きのコードネーム、`%` のセクションコメント、`V:` ヘッダーを含む）は、music21 で警告なしに解析でき、そのままMIDIとMusicXMLに変換できた。MIDIに任意のGM音色を当てれば、生成モデルを通さずに手順 3 の最小構成でレンダリングできる。この段階で、歌詞の声調と旋律の食い違いや、旋律の密度を耳で確認できる。注意点は2つ。music21 は `w:` 行を読み込まないため、演奏者に渡すMusicXMLには `w:` を読める変換ツール（abc2xml、abcm2ps など）を使うか、1音符に1音節を対応させて手作業で歌詞を戻す。引用符で囲んだコードネームは標準では発音しないため、和声を伴奏として聴くには、コードを音符に展開してピアノの声部を1つ作る。
 
 ---
 
-## 9. 与 ARR-SPEC 的字段对应（四个导出目标）
+## 9. ARR-SPECとのフィールド対応（4つの出力先）
 
-规格单每个字段都有去向（schema §4）。可执行的字段按下表落到四种格式；本 skill 负责其中的发射规则。
+仕様書の各フィールドには出力先がある（schema §4）。実行可能なフィールドは下表のとおり4形式に割り当て、このスキルではその出力規則を扱う。
 
-| ARR-SPEC 字段 | ABC | MusicXML | MIDI | ChordPro | 本 skill |
+| ARR-SPECフィールド | ABC | MusicXML | MIDI | ChordPro | このスキル |
 |---|---|---|---|---|---|
-| `meta.title` | `T:` | work-title | 轨名 | `{title}` | §3.1 |
-| `meta.key` / `mode` | `K:`（`K:Ddor`） | key 的 fifths + mode | 调号 meta | `{key}` | §3.1 |
-| `meta.meter` / `meter_map` | `M:`，行内变拍 | time，逐小节 | 拍号 meta | `{time}` | §3.1 |
+| `meta.title` | `T:` | work-title | トラック名 | `{title}` | §3.1 |
+| `meta.key` / `mode` | `K:`（`K:Ddor`） | key の fifths + mode | 調号の meta | `{key}` | §3.1 |
+| `meta.meter` / `meter_map` | `M:`、行内で拍子を変更 | time、小節ごと | 拍子の meta | `{time}` | §3.1 |
 | `meta.tempo` / `tempo_map` | `Q:` | metronome / sound tempo | set_tempo | `{tempo}` | §3.1 |
-| `form[].id` / `name` | `P:` 或 `%` 注释 | rehearsal 记号 + words | marker | `{start_of_verse}` 等 | §3.2 |
-| `form[].bars` / `start_bar` | 小节线 | measure number | tick | | §3.2；§8 第 2 步 |
-| `form[].harmony_letters` | `"F#m7"` | harmony 的 root / kind / bass，映射见 schema §1.3.1 | 和弦轨或 marker 文本 | `[F#m7]` | §3.3 |
-| `material.motif_abc` / `arrangement_hook.abc` | 原样嵌入 | 实际音符 | 实际音符 | | §3 |
-| `roster[].id` / `midi` | `V:` 名 | part-name + midi-instrument | 轨名 + program change | | §5.1 |
-| `roster[].entry` / `exit`、`form[].events` | 段前 `Z` 多小节休止 | 多小节休止 | 轨内容范围 | | §5.1 |
-| `energy_curve`、`vocal.dynamics_by_section` | `!p!` `!f!` 力度记号 | dynamics（映射见 schema §1.5） | 力度缩放 / cc11 | | §5.2 |
-| `groove.push_pull` | 无 | 无 | tick 偏移（★ 唯一 exact 的路径） | | §5.3 |
-| `vocal.breath_points` | `!breath!` | breath-mark | 无 | | §4 |
-| `mix_intent.sound_stage[].pan` | 无 | midi-instrument 的 pan | cc10 | | §5.1 |
-| `depth_map` | 无 | 无 | cc91 | | §5.2 |
-| `meta.upstream.lyrics.sections[].lines` | `w:` 行 | lyric，syllabic=single，中文一字一音节 | 无 | 歌词行 | §3 |
-| `render.yue.abc` | 本体 | | | | §7 |
-| `render.musicxml` / `render.midi` / `render.chordpro` | | 目标开关 | 目标开关 | 目标开关 | §4 §5 |
+| `form[].id` / `name` | `P:` または `%` コメント | rehearsal マーク + words | marker | `{start_of_verse}` など | §3.2 |
+| `form[].bars` / `start_bar` | 小節線 | measure number | tick | | §3.2、§8 手順 2 |
+| `form[].harmony_letters` | `"F#m7"` | harmony の root / kind / bass。マッピングは schema §1.3.1 参照 | コードトラックまたは marker のテキスト | `[F#m7]` | §3.3 |
+| `material.motif_abc` / `arrangement_hook.abc` | そのまま埋め込む | 実際の音符 | 実際の音符 | | §3 |
+| `roster[].id` / `midi` | `V:` 名 | part-name + midi-instrument | トラック名 + program change | | §5.1 |
+| `roster[].entry` / `exit`、`form[].events` | セクション前に `Z` で複数小節休符 | 複数小節休符 | トラック内の有効範囲 | | §5.1 |
+| `energy_curve`、`vocal.dynamics_by_section` | `!p!` `!f!` の強弱記号 | dynamics（マッピングは schema §1.5 参照） | 強弱のスケーリング / cc11 | | §5.2 |
+| `groove.push_pull` | なし | なし | tick のオフセット（★ 唯一 exact の経路） | | §5.3 |
+| `vocal.breath_points` | `!breath!` | breath-mark | なし | | §4 |
+| `mix_intent.sound_stage[].pan` | なし | midi-instrument の pan | cc10 | | §5.1 |
+| `depth_map` | なし | なし | cc91 | | §5.2 |
+| `meta.upstream.lyrics.sections[].lines` | `w:` 行 | lyric、syllabic=single、中国語は1文字で1音節 | なし | 歌詞行 | §3 |
+| `render.yue.abc` | ABC本体 | | | | §7 |
+| `render.musicxml` / `render.midi` / `render.chordpro` | | 出力の切り替え | 出力の切り替え | 出力の切り替え | §4 §5 |
 
-仅意图的块（`intent`、`material` 的文字、`mix_intent` 与 `vocal` 的大部分）整块作为文本随文件走：ABC 用 `%` 注释，MusicXML 用 miscellaneous，MIDI 用第一小节的 text 事件。四个目标各给谁、带什么，见 schema §4。
-
----
-
-## 10. 发射完必过
-
-- [ ] 目标格式是按 §6 选的，不是习惯性选 MIDI
-- [ ] **小节总数 == `Σ form[].bars`**
-- [ ] 调号、拍号、速度与 `meta` 一致
-- [ ] ★ **字母和弦反推级数，与 `harmony` 逐和弦对得上**
-- [ ] **副歌各遍是展开写的**，没有用反复记号（lint #16）
-- [ ] MIDI 里 **CC7 与 CC11 分工正确**
-- [ ] 若要验证 push_pull，**做了对齐版和偏移版两份**
-- [ ] 送进合成器前**跑过 §8 三步**
-- [ ] 给 YuE2 供谱时，用的是已确认的 ABC 方言子集
+意図だけを記したブロック（`intent`、`material` の文章、`mix_intent` と `vocal` の大半）は、ブロック全体をテキストとしてファイルに含める。ABCは `%` コメント、MusicXMLは miscellaneous、MIDIは1小節目の text イベントを使う。4つの出力先それぞれの読み手と収録内容は、schema §4 を参照。
 
 ---
 
-## 附：来源
+## 10. 出力後の必須チェック
 
-- §8 的三步校验是人工的；其中"小节总数"与"和弦级数反推"两项是纯数据校验，不需要听。
-- ⚠ **未确认**：YuE2 的 ABC 方言（§7.2）
-- 记谱法细则、ABC 语法速查、GM 音色表在 [reference.md](reference.md)。
+- [ ] 習慣でMIDIを選ばず、§6 に従って目的に合う形式を選んだ
+- [ ] **総小節数 == `Σ form[].bars`**
+- [ ] 調号、拍子、テンポが `meta` と一致する
+- [ ] ★ **コードネームから逆算したディグリーが、コードごとに `harmony` と一致する**
+- [ ] 反復記号を使わず、**サビを毎回書き出した**（lint #16）
+- [ ] MIDIで **CC7 と CC11 を正しく使い分けた**
+- [ ] push_pull を検証する場合、**グリッドに揃えた版とずらした版の2つを作った**
+- [ ] シンセサイザーに渡す前に **§8 の3手順を実施した**
+- [ ] YuE2に楽譜を渡す場合、確認済みのABC方言のサブセットを使った
+
+---
+
+## 付録：出典
+
+- §8 の3手順は人が確認する。「総小節数」と「コードのディグリーの逆算」はデータの照合だけで確認でき、試聴は不要。
+- ⚠ **未確認**。YuE2固有のABC仕様（§7.2）
+- 記譜法の詳細、ABC構文早見表、GM音色表は [reference.md](reference.md) を参照。
